@@ -12,7 +12,18 @@
     <h1>Sudoku Logic <span id="difficulty-badge">Medium</span></h1>
 
     <div id="app-container">
+
+        
         <div id="left-panel">
+            <div class="tool-section">
+                <h3>Variant Tools</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button id="tool-pointer" class="btn btn-secondary active" style="font-size: 11px; padding: 10px; border-radius: 8px;" onclick="setTool('pointer')">Pointer (Select)</button>
+                    <button id="tool-thermo" class="btn btn-secondary" style="font-size: 11px; padding: 10px; border-radius: 8px; background: #e2e8f0; color: var(--dark);" onclick="setTool('thermo')">Draw Thermo</button>
+                    <button class="clear-color-btn" style="background: #fee2e2; color: #991b1b; margin-top: 5px;" onclick="clearVariantGraphics()">Clear All SVG</button>
+                </div>
+            </div>
+                
             <div class="tool-section">
                 <h3>Visibility</h3>
                 <label class="switch-label">Highlight Cells Seen <input type="checkbox" id="toggle-seen" checked onchange="updateUI()"></label>
