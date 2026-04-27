@@ -30,7 +30,12 @@
                     <hr class="tool-divider">
                     
                     <button id="tool-eraser" class="variant-tool-btn" onclick="setTool('eraser')">Eraser (Click Variant)</button>
-                    <button id="btn-undo-line" class="variant-action-btn" style="margin-top: 5px;" onclick="undoLastVariantLine()">Undo Last Line</button>
+                    
+                    <div style="display: flex; gap: 8px; margin-top: 5px;">
+                        <button id="btn-undo-variant" class="variant-action-btn" style="flex: 1;" onclick="undoVariant()">Undo Variant</button>
+                        <button id="btn-redo-variant" class="variant-action-btn" style="flex: 1;" onclick="redoVariant()">Redo Variant</button>
+                    </div>
+                    
                     <button id="btn-clear-variants" class="variant-action-btn danger" onclick="clearVariantGraphics()">Clear All Variants</button>
                 </div>
             </div>
