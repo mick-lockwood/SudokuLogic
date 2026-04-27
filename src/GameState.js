@@ -8,7 +8,6 @@ export const State = {
     timerVal: 0, timerInt: null,
     undoStack: [], redoStack: [], selected: [],
     currentDifficulty: 'medium',
-    thermos: [],
     
     // Highlighter Color Palette 
     colors: [
