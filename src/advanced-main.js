@@ -63,7 +63,7 @@ const originalHandleCellSelection = window.handleCellSelection;
 
 window.handleCellSelection = (index, isMulti, isDragging) => {
     // If the tool is any drawing tool (thermo, whisper, etc), route to drawing logic
-    if (['thermo', 'whisper'].includes(window.AdvancedState.activeTool)) {
+    if (['thermo', 'whisper','killer'].includes(window.AdvancedState.activeTool)) {
     handleLineDrawing(index, isDragging);
         
     } else if (window.AdvancedState.activeTool === 'eraser') {
