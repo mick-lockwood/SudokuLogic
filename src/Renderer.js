@@ -5,7 +5,20 @@ export function initHighlighter() {
     const container = document.getElementById('highlighter-tools');
     if (!container) return;
     container.innerHTML = '';
+    
     State.colors.forEach(c => {
+        // If the array item is our special divider keyword, draw the line
+        if (c === 'divider') {
+            const hr = document.createElement('hr');
+            hr.className = 'tool-divider';
+            // Force the divider to stretch across all 3 grid columns
+            hr.style.gridColumn = 'span 3'; 
+            hr.style.margin = '4px 0';
+            container.appendChild(hr);
+            return; // Skip the rest of the loop so it doesn't make a button
+        }
+        
+        // Otherwise, draw the standard color button
         const btn = document.createElement('button');
         btn.className = 'color-btn'; 
         btn.style.backgroundColor = c;
