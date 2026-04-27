@@ -70,4 +70,8 @@ To add a new rule to the engine, follow this 5-step checklist:
 4. **Route the Math (`src/SudokuLogic.js`)**
    * Import your math function at the top.
    * Add the routing `if` statement to both `hasConflict` and `hasConflictGen`.
-5. **Route the
+5. **Route the Drawing & Input (`src/advanced-main.js`)**
+   * Import your drawing function at the top.
+   * Add `'yourvariant'` to the array in `window.handleCellSelection` so the clicker recognizes it.
+   * Add logic to the `pointerup` listener to define how it saves to the state (e.g., requires 2 cells? requires a prompt?).
+   * Add the routing `if` statement to `drawVariantLine`.
