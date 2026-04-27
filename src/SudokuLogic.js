@@ -1,6 +1,7 @@
 import { State } from './GameState.js';
 
 // --- VARIANT MATH HANDLERS ---
+// --- THERMOS ---
 function thermoConflict(variant, arr, idx, val, isFlatArray = false) {
     const pos = variant.cells.indexOf(idx);
     if (pos === -1) return false;
