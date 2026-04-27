@@ -15,16 +15,21 @@ window.setTool = (tool) => {
     
     const ptrBtn = document.getElementById('tool-pointer');
     const thmBtn = document.getElementById('tool-thermo');
+    const wspBtn = document.getElementById('tool-whisper'); // NEW
     const ersBtn = document.getElementById('tool-eraser');
     
-    if(!ptrBtn || !thmBtn || !ersBtn) return;
+    if(!ptrBtn || !thmBtn || !wspBtn || !ersBtn) return;
 
+    // Remove all active classes
     ptrBtn.classList.remove('active-tool-pointer');
     thmBtn.classList.remove('active-tool-thermo');
+    wspBtn.classList.remove('active-tool-whisper'); // NEW
     ersBtn.classList.remove('active-tool-eraser');
 
+    // Add specific active class
     if (tool === 'pointer') ptrBtn.classList.add('active-tool-pointer');
     if (tool === 'thermo') thmBtn.classList.add('active-tool-thermo');
+    if (tool === 'whisper') wspBtn.classList.add('active-tool-whisper'); // NEW
     if (tool === 'eraser') ersBtn.classList.add('active-tool-eraser');
     
     if (tool !== 'pointer') {
@@ -53,8 +58,9 @@ const originalHandleCellSelection = window.handleCellSelection;
 
 window.handleCellSelection = (index, isMulti, isDragging) => {
     // If the tool is any drawing tool (thermo, whisper, etc), route to drawing logic
-    if (['thermo'].includes(window.AdvancedState.activeTool)) {
-        handleLineDrawing(index, isDragging);
+    if (['thermo', 'whisper'].includes(window.AdvancedState.activeTool)) {
+    handleLineDrawing(index, isDragging);
+        
     } else if (window.AdvancedState.activeTool === 'eraser') {
         if (!isDragging) {
             const originalLength = State.variants.length;
@@ -86,7 +92,7 @@ function handleLineDrawing(index, isDragging) {
 }
 
 window.addEventListener('pointerup', () => {
-    if (['thermo'].includes(window.AdvancedState.activeTool) && window.AdvancedState.isDrawing) {
+    if (['thermo', 'whisper'].includes(window.AdvancedState.activeTool) && window.AdvancedState.isDrawing) {
         window.AdvancedState.isDrawing = false;
         
         if (window.AdvancedState.currentLine.length > 1) {
