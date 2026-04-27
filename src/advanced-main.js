@@ -301,7 +301,7 @@ window.setGridSize = (s) => {
 Object.keys(Tooltips).forEach(id => {
     const el = document.getElementById(id);
     if (el) el.title = Tooltips[id];
-}); // <-- CLOSE THE LOOP HERE
+});
 
 // --- INITIALIZE DEFAULT STATE ---
 // Force the UI and internal state to sync on page load
