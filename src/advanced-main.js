@@ -1,16 +1,15 @@
 // src/advanced-main.js
 import './classic-main.js'; 
 import { State } from './GameState.js';
-import { getCellCenter } from './Renderer.js';
+import * as Renderer from './Renderer.js';
 
 window.AdvancedState = {
     activeTool: 'pointer',
     isDrawing: false,
-    currentLine: [], 
-    thermos: []      
+    currentLine: []
 };
 
-// --- NEW TOOL MANAGER ---
+// --- TOOL MANAGER ---
 window.setTool = (tool) => {
     window.AdvancedState.activeTool = tool;
     
@@ -20,17 +19,14 @@ window.setTool = (tool) => {
     
     if(!ptrBtn || !thmBtn || !ersBtn) return;
 
-    // Remove all active classes
     ptrBtn.classList.remove('active-tool-pointer');
     thmBtn.classList.remove('active-tool-thermo');
     ersBtn.classList.remove('active-tool-eraser');
 
-    // Add the specific active class to the clicked button
     if (tool === 'pointer') ptrBtn.classList.add('active-tool-pointer');
     if (tool === 'thermo') thmBtn.classList.add('active-tool-thermo');
     if (tool === 'eraser') ersBtn.classList.add('active-tool-eraser');
     
-    // Clear classic selection to avoid confusion when drawing/erasing
     if (tool !== 'pointer') {
         State.selected = [];
         window.updateUI();
@@ -39,33 +35,35 @@ window.setTool = (tool) => {
 
 window.clearVariantGraphics = () => {
     if (!confirm("Clear all drawn variant lines?")) return;
-    window.AdvancedState.thermos = [];
+    State.variants = [];
     renderSVGLayer();
+    Renderer.updateUI(); 
 };
 
-// --- NEW UNDO LOGIC ---
 window.undoLastVariantLine = () => {
-    if (window.AdvancedState.thermos.length > 0) {
-        window.AdvancedState.thermos.pop();
+    if (State.variants.length > 0) {
+        State.variants.pop();
         renderSVGLayer();
+        Renderer.updateUI();
     }
 };
 
-// --- UPDATED INPUT HIJACKER ---
+// --- INPUT HIJACKER ---
 const originalHandleCellSelection = window.handleCellSelection;
 
 window.handleCellSelection = (index, isMulti, isDragging) => {
-    if (window.AdvancedState.activeTool === 'thermo') {
-        handleThermoDrawing(index, isDragging);
+    // If the tool is any drawing tool (thermo, whisper, etc), route to drawing logic
+    if (['thermo'].includes(window.AdvancedState.activeTool)) {
+        handleLineDrawing(index, isDragging);
     } else if (window.AdvancedState.activeTool === 'eraser') {
-        // ERASER LOGIC: If you click a cell, remove any thermo that passes through it
         if (!isDragging) {
-            const originalLength = window.AdvancedState.thermos.length;
-            window.AdvancedState.thermos = window.AdvancedState.thermos.filter(thermo => !thermo.includes(index));
+            const originalLength = State.variants.length;
+            // Delete any variant object whose cells array includes the clicked index
+            State.variants = State.variants.filter(v => !v.cells.includes(index));
             
-            // Only re-render if we actually deleted something
-            if (window.AdvancedState.thermos.length < originalLength) {
+            if (State.variants.length < originalLength) {
                 renderSVGLayer();
+                Renderer.updateUI();
             }
         }
     } else {
@@ -73,17 +71,13 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
     }
 };
 
-// 4. DRAWING LOGIC
-function handleThermoDrawing(index, isDragging) {
+// Generalized to handle any line drawing
+function handleLineDrawing(index, isDragging) {
     if (!isDragging) {
-        // Start a new line on first click
         window.AdvancedState.isDrawing = true;
         window.AdvancedState.currentLine = [index];
     } else if (window.AdvancedState.isDrawing) {
-        // Dragging into a new cell
         const lastCell = window.AdvancedState.currentLine[window.AdvancedState.currentLine.length - 1];
-        
-        // Only add the cell if it's not the one we are already on, and we haven't crossed it before
         if (lastCell !== index && !window.AdvancedState.currentLine.includes(index)) {
             window.AdvancedState.currentLine.push(index);
         }
@@ -91,66 +85,73 @@ function handleThermoDrawing(index, isDragging) {
     renderSVGLayer();
 }
 
-// Listen for mouse/touch release anywhere on the screen to finish the line
 window.addEventListener('pointerup', () => {
-    if (window.AdvancedState.activeTool === 'thermo' && window.AdvancedState.isDrawing) {
+    if (['thermo'].includes(window.AdvancedState.activeTool) && window.AdvancedState.isDrawing) {
         window.AdvancedState.isDrawing = false;
         
-        // Only save it if it's more than just a single bulb
         if (window.AdvancedState.currentLine.length > 1) {
-            window.AdvancedState.thermos.push([...window.AdvancedState.currentLine]);
+            // Push an OBJECT containing the tool type and the line data
+            State.variants.push({
+                type: window.AdvancedState.activeTool,
+                cells: [...window.AdvancedState.currentLine]
+            });
+            Renderer.updateUI(); 
         }
         window.AdvancedState.currentLine = [];
         renderSVGLayer();
     }
 });
 
-// 5. RENDER THE SVG GRAPHICS
+// --- GENERALIZED SVG RENDERER ---
 function renderSVGLayer() {
     const svg = document.getElementById('svg-layer');
     if (!svg) return;
-    svg.innerHTML = ''; // Clear canvas
-
-    // Draw saved thermos
-    window.AdvancedState.thermos.forEach(drawThermo);
-
-    // Draw the one currently being dragged
+    svg.innerHTML = ''; 
+    
+    State.variants.forEach(drawVariantLine); 
+    
+    // Draw the active line being dragged
     if (window.AdvancedState.currentLine.length > 0) {
-        drawThermo(window.AdvancedState.currentLine);
+        drawVariantLine({
+            type: window.AdvancedState.activeTool,
+            cells: window.AdvancedState.currentLine
+        });
     }
 }
 
-function drawThermo(cellIndices) {
+function drawVariantLine(variant) {
     const svg = document.getElementById('svg-layer');
+    const cellIndices = variant.cells;
     if (cellIndices.length === 0) return;
 
-    const bulbCenter = getCellCenter(cellIndices[0]);
-    const thermoColor = "rgba(160, 174, 192, 0.6)"; // A nice glassy grey
+    const startCenter = Renderer.getCellCenter(cellIndices[0]);
 
-    // Draw the Bulb (Starts at the first clicked cell)
-    const bulb = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    bulb.setAttribute("cx", bulbCenter.x);
-    bulb.setAttribute("cy", bulbCenter.y);
-    bulb.setAttribute("r", "18");
-    bulb.setAttribute("fill", thermoColor);
-    svg.appendChild(bulb);
+    if (variant.type === 'thermo') {
+        const thermoColor = "rgba(160, 174, 192, 0.6)"; 
 
-    // Draw the Stem (Connects the rest of the cells)
-    if (cellIndices.length > 1) {
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        let d = `M ${bulbCenter.x} ${bulbCenter.y} `;
-        
-        for (let i = 1; i < cellIndices.length; i++) {
-            const pt = getCellCenter(cellIndices[i]);
-            d += `L ${pt.x} ${pt.y} `;
+        const bulb = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        bulb.setAttribute("cx", startCenter.x);
+        bulb.setAttribute("cy", startCenter.y);
+        bulb.setAttribute("r", "18");
+        bulb.setAttribute("fill", thermoColor);
+        svg.appendChild(bulb);
+
+        if (cellIndices.length > 1) {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            let d = `M ${startCenter.x} ${startCenter.y} `;
+            
+            for (let i = 1; i < cellIndices.length; i++) {
+                const pt = Renderer.getCellCenter(cellIndices[i]);
+                d += `L ${pt.x} ${pt.y} `;
+            }
+            
+            path.setAttribute("d", d);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", thermoColor);
+            path.setAttribute("stroke-width", "14");
+            path.setAttribute("stroke-linecap", "round");
+            path.setAttribute("stroke-linejoin", "round");
+            svg.appendChild(path);
         }
-        
-        path.setAttribute("d", d);
-        path.setAttribute("fill", "none");
-        path.setAttribute("stroke", thermoColor);
-        path.setAttribute("stroke-width", "14");
-        path.setAttribute("stroke-linecap", "round");
-        path.setAttribute("stroke-linejoin", "round");
-        svg.appendChild(path);
     }
 }
