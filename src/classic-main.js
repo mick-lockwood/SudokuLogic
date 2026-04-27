@@ -355,7 +355,7 @@ window.onload = function() {
             if (backToCreateBtn) backToCreateBtn.style.display = 'none';
 
             // If we are on the advanced page, trigger the SVG renderer
-            if (typeof renderSVGLayer === 'function') renderSVGLayer();
+            if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
             Renderer.updateUI();
             
         } catch(e) {
