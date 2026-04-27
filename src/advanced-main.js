@@ -18,26 +18,17 @@ window.setTool = (tool) => {
     const thmBtn = document.getElementById('tool-thermo');
     const ersBtn = document.getElementById('tool-eraser');
     
-    // Reset all buttons
-    [ptrBtn, thmBtn, ersBtn].forEach(btn => {
-        if(!btn) return;
-        btn.classList.remove('active');
-        btn.style.background = '#e2e8f0'; 
-        btn.style.color = 'var(--dark)';
-    });
+    if(!ptrBtn || !thmBtn || !ersBtn) return;
 
-    // Style the active button
-    const activeBtn = document.getElementById(`tool-${tool}`);
-    if(activeBtn) {
-        activeBtn.classList.add('active');
-        if(tool === 'pointer') {
-             activeBtn.style.background = ''; // Reverts to CSS default
-             activeBtn.style.color = '';
-        } else {
-             activeBtn.style.background = (tool === 'eraser') ? '#e74c3c' : '#3498db';
-             activeBtn.style.color = 'white';
-        }
-    }
+    // Remove all active classes
+    ptrBtn.classList.remove('active-tool-pointer');
+    thmBtn.classList.remove('active-tool-thermo');
+    ersBtn.classList.remove('active-tool-eraser');
+
+    // Add the specific active class to the clicked button
+    if (tool === 'pointer') ptrBtn.classList.add('active-tool-pointer');
+    if (tool === 'thermo') thmBtn.classList.add('active-tool-thermo');
+    if (tool === 'eraser') ersBtn.classList.add('active-tool-eraser');
     
     // Clear classic selection to avoid confusion when drawing/erasing
     if (tool !== 'pointer') {
