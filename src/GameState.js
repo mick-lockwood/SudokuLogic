@@ -12,14 +12,21 @@ export const State = {
     variants: [],
     solution: [],
     showGhost: false,
-    
-    // Highlighter Color Palette 
+
+// Highlighter Color Palette 
+// (Laid out in rows of 3 to match the UI grid)
     colors: [
-        '#f59896', '#9cdcf9', '#dee787', '#fdc689', '#c7bbdc', '#fff799',
-        '#f6adcd', '#e7e7e8', '#c0e2ca', '#f16865', '#64c9f6', '#c4d42a',
-        '#fca74a', '#a693c7', '#fff02f', '#f17fb0', '#bdbdbf', '#8cca9e'
+    // Standard Colors
+    '#f59896', '#9cdcf9', '#dee787', // Row 1: Red/LightBlue/LightGreen
+    '#fdc689', '#c7bbdc', '#fff799', // Row 2: Orange/Lavender/Yellow
+    '#f6adcd', '#e7e7e8', '#c0e2ca', // Row 3: Pink/Grey/SageGreen
+    <hr class="tool-divider">
+    // Vibrant Colors
+    '#f16865', '#64c9f6', '#c4d42a', // Row 4: Vibrant Red/LightBlue/LightGreen
+    '#fca74a', '#a693c7', '#fff02f', // Row 5: Vibrant Orange/Lavender/Yellow
+    '#f17fb0', '#bdbdbf', '#8cca9e'  // Row 6: Vibrant Pink/Grey/SageGreen
     ]
-};
+]
 
 export function initBoardState(sizeParam) {
     State.size = sizeParam;
