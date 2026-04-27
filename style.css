@@ -118,16 +118,6 @@ body.dark-mode #clear-all-btn {
     color: #f8fafc; 
 }
 
-/* Dark Mode: Ambient Glows (Base State) */
-body.dark-mode .clear-color-btn {
-    border-color: rgba(148, 163, 184, 0.4); 
-    box-shadow: 0 0 6px rgba(148, 163, 184, 0.3);
-}
-body.dark-mode #clear-all-btn {
-    border-color: rgba(231, 76, 60, 0.4); 
-    box-shadow: 0 0 6px rgba(231, 76, 60, 0.3);
-}
-
 body.dark-mode .clear-color-btn:hover,
 body.dark-mode #clear-all-btn:hover { 
     background: #475569; 
