@@ -10,10 +10,11 @@ import { drawWhisper } from './variants/Whisper.js';
 import { drawKiller } from './variants/Killer.js';
 
 
-window.AdvancedState = {
+window.AdvancedState = {f
     activeTool: 'pointer',
     isDrawing: false,
-    currentLine: []
+    currentLine: [],
+    variantRedoStack: [] // NEW: Stores undone variants
 };
 
 // --- TOOL MANAGER ---
@@ -48,15 +49,7 @@ window.clearVariantGraphics = () => {
     if (!confirm("Clear all drawn variant lines?")) return;
     State.variants = [];
     renderSVGLayer();
-    Renderer.updateUI(); 
-};
-
-window.undoLastVariantLine = () => {
-    if (State.variants.length > 0) {
-        State.variants.pop();
-        renderSVGLayer();
-        Renderer.updateUI();
-    }
+    Renderer.updateUI();
 };
 
 // --- INPUT HIJACKER ---
@@ -83,15 +76,52 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
     }
 };
 
-// Generalized to handle any line drawing
+// --- UNDO / REDO LOGIC ---
+window.undoVariant = () => {
+    if (State.variants.length > 0) {
+        // Pop from active variants, push to redo stack
+        const undone = State.variants.pop();
+        window.AdvancedState.variantRedoStack.push(undone);
+        renderSVGLayer();
+        Renderer.updateUI();
+    }
+};
+
+window.redoVariant = () => {
+    if (window.AdvancedState.variantRedoStack.length > 0) {
+        // Pop from redo stack, push back to active variants
+        const redone = window.AdvancedState.variantRedoStack.pop();
+        State.variants.push(redone);
+        renderSVGLayer();
+        Renderer.updateUI();
+    }
+};
+
+window.clearVariantGraphics = () => {
+    if (!confirm("Clear all drawn variant lines?")) return;
+    State.variants = [];
+    window.AdvancedState.variantRedoStack = []; // Wipe redo stack
+    renderSVGLayer();
+    Renderer.updateUI(); 
+};
+
+// --- DYNAMIC DRAWING (BACKTRACKING) ---
 function handleLineDrawing(index, isDragging) {
     if (!isDragging) {
         window.AdvancedState.isDrawing = true;
         window.AdvancedState.currentLine = [index];
     } else if (window.AdvancedState.isDrawing) {
-        const lastCell = window.AdvancedState.currentLine[window.AdvancedState.currentLine.length - 1];
-        if (lastCell !== index && !window.AdvancedState.currentLine.includes(index)) {
-            window.AdvancedState.currentLine.push(index);
+        const line = window.AdvancedState.currentLine;
+        const lastCell = line[line.length - 1];
+        const prevCell = line.length > 1 ? line[line.length - 2] : null;
+
+        // If the user drags back over the previous cell, "pop" the mistake off the line
+        if (index === prevCell) {
+            line.pop();
+        } 
+        // Otherwise, if it's a new cell, add it to the line
+        else if (lastCell !== index && !line.includes(index)) {
+            line.push(index);
         }
     }
     renderSVGLayer();
@@ -118,6 +148,8 @@ window.addEventListener('pointerup', () => {
                             cells: [...window.AdvancedState.currentLine],
                             sum: sumVal
                         });
+                        
+                        window.AdvancedState.variantRedoStack = []; 
                     }
                     
                     // Clear the active drawing line only AFTER the prompt is closed
@@ -134,6 +166,9 @@ window.addEventListener('pointerup', () => {
                     type: tool,
                     cells: [...window.AdvancedState.currentLine]
                 });
+                
+                window.AdvancedState.variantRedoStack = []; 
+                
                 Renderer.updateUI(); 
             }
         }
@@ -171,14 +206,31 @@ function drawVariantLine(variant) {
 
 // --- UX ENHANCEMENTS ---
 
-// 1. Keyboard Shortcut to return to Number Input (Escape or 'V')
+// 1. Keyboard Shortcuts (Esc/V, Undo, Redo)
 window.addEventListener('keydown', (e) => {
     if (State.paused || State.isWon) return;
     
-    // If the user presses Escape or 'V', drop the drawing tool
+    // Drop tool (Escape or V)
     if (e.key === 'Escape' || e.key.toLowerCase() === 'v') {
         if (window.AdvancedState.activeTool !== 'pointer') {
             window.setTool('pointer');
+        }
+    }
+
+    // Only intercept Undo/Redo if a VARIANT tool is currently selected
+    if (window.AdvancedState.activeTool !== 'pointer') {
+        
+        // Undo: Ctrl + Z (or Cmd + Z)
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+            e.preventDefault(); // Stop standard grid undo
+            window.undoVariant();
+        }
+        
+        // Redo: Ctrl + Y OR Ctrl + Shift + Z
+        if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') || 
+            ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z')) {
+            e.preventDefault(); // Stop standard grid redo
+            window.redoVariant();
         }
     }
 });
