@@ -28,8 +28,9 @@ window.setGridSize = (s) => {
 
 window.setAppMode = (m) => {
     if (m === State.mode) return;
+    if (State.isPlayOnly && m === 'create') return;
 
-    State.mode = m; 
+    State.mode = m;
     document.getElementById('modeCreate').classList.toggle('active', m === 'create');
     document.getElementById('modeSolve').classList.toggle('active', m === 'solve');
     
@@ -120,6 +121,27 @@ window.showWinOverlay = () => {
 };
 
 window.exitToCreate = () => window.setAppMode('create');
+
+window.exportPuzzleLink = () => {
+    // 1. Package only the essential data (grid size, given numbers, and drawn variants)
+    const puzzleData = {
+        size: State.size,
+        board: State.board.map(c => c.given ? c.val : 0), 
+        variants: State.variants || []
+    };
+    
+    // 2. Encode to a URL-safe Base64 string
+    const encodedData = btoa(JSON.stringify(puzzleData));
+    const shareUrl = `${window.location.origin}${window.location.pathname}?puzzle=${encodedData}`;
+    
+    // 3. Copy to clipboard
+    navigator.clipboard.writeText(shareUrl).then(() => {
+        alert("Puzzle Link Copied to Clipboard!\n\nAnyone who opens this link will play your exact puzzle without any creator tools.");
+    }).catch(err => {
+        console.error("Failed to copy link: ", err);
+        prompt("Copy this link to share:", shareUrl); // Fallback for older browsers
+    });
+};
 
 // --- APP LOGIC & INPUT CONTROLLER ---
 
@@ -296,8 +318,51 @@ window.addEventListener('keydown', (e) => {
 
 // --- BOOTSTRAP ---
 
+// --- BOOTSTRAP ---
 window.onload = function() {
     console.log("App starting with ES6 Modules..."); 
     Renderer.initHighlighter();
-    window.setGridSize(9); 
+    
+    // Check if there is a ?puzzle= parameter in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const puzzleString = urlParams.get('puzzle');
+    
+    if (puzzleString) {
+        try {
+            // 1. Decode the puzzle data
+            const decodedData = JSON.parse(atob(puzzleString));
+            
+            // 2. Initialize the correct grid size
+            window.setGridSize(decodedData.size);
+            
+            // 3. Apply the numbers and variants to the State
+            State.variants = decodedData.variants || [];
+            decodedData.board.forEach((val, i) => {
+                State.board[i].val = val;
+                State.board[i].given = (val !== 0);
+            });
+            
+            // 4. Lock the UI into Play-Only mode
+            State.isPlayOnly = true;
+            window.setAppMode('solve');
+            
+            // Hide the Create/Solve toggle buttons
+            const modeToggleGroup = document.getElementById('modeCreate').parentElement;
+            if (modeToggleGroup) modeToggleGroup.style.display = 'none';
+            
+            // Hide the "Back to Create Mode" button in the win screen
+            const backToCreateBtn = document.querySelector('.btn-secondary[onclick="exitToCreate()"]');
+            if (backToCreateBtn) backToCreateBtn.style.display = 'none';
+
+            // If we are on the advanced page, trigger the SVG renderer
+            if (typeof renderSVGLayer === 'function') renderSVGLayer();
+            Renderer.updateUI();
+            
+        } catch(e) {
+            console.error("Invalid puzzle link detected.", e);
+            window.setGridSize(9);
+        }
+    } else {
+        window.setGridSize(9); 
+    }
 };
