@@ -137,14 +137,14 @@ window.exportPuzzleLink = () => {
     // Grab the full exact URL you are on right now, ignoring any old parameters
     let currentUrl = window.location.href.split('?')[0];
     
-    // If we have variants, ensure the link explicitly points to logic.html
-    if (State.variants && State.variants.length > 0 && !currentUrl.includes('logic.html')) {
+    // If we have variants, ensure the link explicitly points to Sudoku Logic (index.html)
+    if (State.variants && State.variants.length > 0 && !currentUrl.includes('index.html')) {
         if (currentUrl.endsWith('index.html')) {
-            currentUrl = currentUrl.replace('index.html', 'logic.html');
+            currentUrl = currentUrl.replace('index.html', 'index.html');
         } else if (currentUrl.endsWith('/')) {
-            currentUrl += 'logic.html';
+            currentUrl += 'index.html';
         } else {
-            currentUrl += '/logic.html';
+            currentUrl += '/index.html';
         }
     }
     
