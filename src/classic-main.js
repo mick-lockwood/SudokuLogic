@@ -120,7 +120,6 @@ function initAppBoard() {
     resetTimer();
     Renderer.renderGrid();
     Renderer.updateUI();
-    Renderer.drawTestLine(); // Draws the test SVG line
 }
 
 function handleCellSelection(index, isMulti, isDragging) {
