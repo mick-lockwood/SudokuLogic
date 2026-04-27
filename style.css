@@ -343,10 +343,10 @@ body.dark-mode .variant-tool-btn:hover {
     box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
 }
 
-.variant-tool-btn.active-tool-thermo {
-    background: #9b59b6; /* Purple for drawing */
+.variant-tool-btn.active {
+    background: var(--v-color, #3498db); 
     color: white;
-    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.4);
+    box-shadow: 0 2px 8px var(--v-glow, rgba(52, 152, 219, 0.4));
 }
 
 .variant-tool-btn.active-tool-eraser {
