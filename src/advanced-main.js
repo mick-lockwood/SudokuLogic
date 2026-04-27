@@ -15,31 +15,30 @@ window.AdvancedState = {
 window.setTool = (tool) => {
     window.AdvancedState.activeTool = tool;
     
-    const ptrBtn = document.getElementById('tool-pointer');
-    const thmBtn = document.getElementById('tool-thermo');
-    const wspBtn = document.getElementById('tool-whisper'); // NEW
-    const ersBtn = document.getElementById('tool-eraser');
-    
-    if(!ptrBtn || !thmBtn || !wspBtn || !ersBtn) return;
+    // 1. Strip ALL active classes from ALL variant buttons
+    document.querySelectorAll('.variant-tool-btn').forEach(btn => {
+        btn.classList.remove('active-tool-pointer', 'active-tool-variant', 'active-tool-eraser');
+    });
 
-    // Remove all active classes
-    ptrBtn.classList.remove('active-tool-pointer');
-    thmBtn.classList.remove('active-tool-thermo');
-    wspBtn.classList.remove('active-tool-whisper'); // NEW
-    ersBtn.classList.remove('active-tool-eraser');
-
-    // Add specific active class
-    if (tool === 'pointer') ptrBtn.classList.add('active-tool-pointer');
-    if (tool === 'thermo') thmBtn.classList.add('active-tool-thermo');
-    if (tool === 'whisper') wspBtn.classList.add('active-tool-whisper'); // NEW
-    if (tool === 'eraser') ersBtn.classList.add('active-tool-eraser');
+    // 2. Find the clicked button and apply the correct category class
+    const activeBtn = document.getElementById(`tool-${tool}`);
+    if (activeBtn) {
+        if (tool === 'pointer') {
+            activeBtn.classList.add('active-tool-pointer');
+        } else if (tool === 'eraser') {
+            activeBtn.classList.add('active-tool-eraser');
+        } else {
+            // Catch-all: Thermos, Whispers, and any future variants become purple
+            activeBtn.classList.add('active-tool-variant');
+        }
+    }
     
+    // 3. Clear the classic grid selection if we switch to drawing/erasing
     if (tool !== 'pointer') {
         State.selected = [];
         window.updateUI();
     }
 };
-
 window.clearVariantGraphics = () => {
     if (!confirm("Clear all drawn variant lines?")) return;
     State.variants = [];
