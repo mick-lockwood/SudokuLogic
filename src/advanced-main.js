@@ -196,7 +196,7 @@ window.addEventListener('pointerup', () => {
 });
 
 // --- GENERALIZED SVG RENDERER ---
-function renderSVGLayer() {
+window.renderSVGLayer = function renderSVGLayer() {
     const svg = document.getElementById('svg-layer');
     if (!svg) return;
     svg.innerHTML = ''; 
