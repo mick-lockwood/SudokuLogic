@@ -97,17 +97,37 @@ function handleLineDrawing(index, isDragging) {
 }
 
 window.addEventListener('pointerup', () => {
-    if (['thermo', 'whisper'].includes(window.AdvancedState.activeTool) && window.AdvancedState.isDrawing) {
+    const tool = window.AdvancedState.activeTool;
+    
+    if (['thermo', 'whisper', 'killer'].includes(tool) && window.AdvancedState.isDrawing) {
         window.AdvancedState.isDrawing = false;
         
-        if (window.AdvancedState.currentLine.length > 1) {
-            // Push an OBJECT containing the tool type and the line data
-            State.variants.push({
-                type: window.AdvancedState.activeTool,
-                cells: [...window.AdvancedState.currentLine]
-            });
-            Renderer.updateUI(); 
+        if (window.AdvancedState.currentLine.length > 0) {
+            
+            if (tool === 'killer') {
+                // For a killer cage, prompt the user for the total sum
+                const sumInput = prompt("Enter the target sum for this cage:");
+                const sumVal = parseInt(sumInput);
+                
+                // Only save the cage if they typed a valid number greater than 0
+                if (!isNaN(sumVal) && sumVal > 0) {
+                    State.variants.push({
+                        type: tool,
+                        cells: [...window.AdvancedState.currentLine],
+                        sum: sumVal
+                    });
+                    Renderer.updateUI(); 
+                }
+            } else if (window.AdvancedState.currentLine.length > 1) {
+                // Thermos and Whispers just get saved normally
+                State.variants.push({
+                    type: tool,
+                    cells: [...window.AdvancedState.currentLine]
+                });
+                Renderer.updateUI(); 
+            }
         }
+        
         window.AdvancedState.currentLine = [];
         renderSVGLayer();
     }
@@ -136,6 +156,7 @@ function drawVariantLine(variant) {
 
     if (variant.type === 'thermo') drawThermo(variant, svg);
     if (variant.type === 'whisper') drawWhisper(variant, svg);
+    if (variant.type === 'killer') drawKiller(variant, svg);
 }
 
 // --- UX ENHANCEMENTS ---
