@@ -1,5 +1,29 @@
 import { State } from './GameState.js';
 
+// --- VARIANT MATH HANDLERS ---
+function thermoConflict(variant, arr, idx, val, isFlatArray = false) {
+    const pos = variant.cells.indexOf(idx);
+    if (pos === -1) return false;
+
+    // A. Implicit Bounds Checking
+    const minAllowed = pos + 1;
+    const maxAllowed = State.size - (variant.cells.length - 1 - pos);
+    if (val < minAllowed || val > maxAllowed) return true;
+
+    // B. Sequential Checks
+    if (pos > 0) {
+        const prevCell = variant.cells[pos - 1];
+        const prevVal = isFlatArray ? arr[prevCell] : arr[prevCell].val;
+        if (prevVal !== 0 && val <= prevVal) return true;
+    }
+    if (pos < variant.cells.length - 1) {
+        const nextCell = variant.cells[pos + 1];
+        const nextVal = isFlatArray ? arr[nextCell] : arr[nextCell].val;
+        if (nextVal !== 0 && val >= nextVal) return true;
+    }
+    return false;
+}
+
 export function hasConflict(arr, idx, val) {
     if (val === 0) return false;
     const r = Math.floor(idx / State.size), c = idx % State.size;
