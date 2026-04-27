@@ -18,9 +18,12 @@
             <div class="tool-section">
                 <h3>Variant Tools</h3>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button id="tool-pointer" class="btn btn-secondary active" style="font-size: 11px; padding: 10px; border-radius: 8px;" onclick="setTool('pointer')">Pointer (Select)</button>
+                    <button id="tool-pointer" class="btn btn-secondary active" style="font-size: 11px; padding: 10px; border-radius: 8px;" onclick="setTool('pointer')">Number Input</button>
                     <button id="tool-thermo" class="btn btn-secondary" style="font-size: 11px; padding: 10px; border-radius: 8px; background: #e2e8f0; color: var(--dark);" onclick="setTool('thermo')">Draw Thermo</button>
-                    <button class="clear-color-btn" style="background: #fee2e2; color: #991b1b; margin-top: 5px;" onclick="clearVariantGraphics()">Clear All SVG</button>
+                    <button id="tool-eraser" class="btn btn-secondary" style="font-size: 11px; padding: 10px; border-radius: 8px; background: #e2e8f0; color: var(--dark);" onclick="setTool('eraser')">Eraser (Click Variant)</button>
+                    
+                    <button class="clear-color-btn" style="margin-top: 5px;" onclick="undoLastVariantLine()">Undo Last Line</button>
+                    <button class="clear-color-btn" style="background: #fee2e2; color: #991b1b;" onclick="clearVariantGraphics()">Clear All Variants</button>
                 </div>
             </div>
                 
