@@ -3,11 +3,11 @@
 export const Tooltips = {
     // Core Tools
     'tool-pointer': 'Select cells and input numbers. Shortcut: Esc or V',
-    'tool-eraser': 'Click any drawn variant line to delete it.',
+    'tool-eraser': 'Click any drawn variant graphic to delete it.',
     
     // Variant Tools
-    'tool-thermo': 'Numbers must strictly increase from the bulb to the tip.',
-    'tool-whisper': 'Adjacent numbers along the line must have a difference of 5 or more.',
+    'tool-thermo': 'Numbers must strictly increase from the bulb to the tip. Click and drag on cells to draw. Line starts with the bulb.',
+    'tool-whisper': 'Adjacent numbers along the line must have a difference of 5 or more. Click and drag on cells to draw.',
     
     // Actions (Optional, but good to centralize!)
     'btn-undo-line': 'Undo the last drawn variant line.',
