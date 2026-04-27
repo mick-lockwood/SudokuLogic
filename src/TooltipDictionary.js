@@ -27,6 +27,16 @@ They must exactly sum to the number in the corner.\n
 Click and drag on cells to draw cage.\n
 Enter target cage sum.`,
     
+    'tool-kropki-white': 
+`Adjacent cells must have consecutive values.\n
+Example: 3 and 4.\n
+Click and drag between cells to place.`,
+    
+    'tool-kropki-black': 
+`One cell must be double the value of the other.\n
+Example: 3 and 6.\n
+Click and drag between cells to place.`,
+    
     // Actions    
     'btn-undo-variant': 
 `Undo the last drawn variant.\n
