@@ -3,34 +3,44 @@ import './classic-main.js';
 import { State } from './GameState.js';
 import { getCellCenter } from './Renderer.js';
 
-// 1. STATE FOR VARIANTS
 window.AdvancedState = {
     activeTool: 'pointer',
     isDrawing: false,
-    currentLine: [], // Cells currently being dragged over
-    thermos: []      // Completed thermos (array of arrays)
+    currentLine: [], 
+    thermos: []      
 };
 
-// 2. UI TOOL TOGGLE
+// --- NEW TOOL MANAGER ---
 window.setTool = (tool) => {
     window.AdvancedState.activeTool = tool;
     
-    // Update button styling
     const ptrBtn = document.getElementById('tool-pointer');
     const thmBtn = document.getElementById('tool-thermo');
+    const ersBtn = document.getElementById('tool-eraser');
     
-    if (tool === 'pointer') {
-        ptrBtn.classList.add('active');
-        ptrBtn.style.background = ''; ptrBtn.style.color = '';
-        thmBtn.classList.remove('active');
-        thmBtn.style.background = '#e2e8f0'; thmBtn.style.color = 'var(--dark)';
-    } else if (tool === 'thermo') {
-        thmBtn.classList.add('active');
-        thmBtn.style.background = '#3498db'; thmBtn.style.color = 'white';
-        ptrBtn.classList.remove('active');
-        ptrBtn.style.background = '#e2e8f0'; ptrBtn.style.color = 'var(--dark)';
-        
-        // Clear classic selection to avoid confusion
+    // Reset all buttons
+    [ptrBtn, thmBtn, ersBtn].forEach(btn => {
+        if(!btn) return;
+        btn.classList.remove('active');
+        btn.style.background = '#e2e8f0'; 
+        btn.style.color = 'var(--dark)';
+    });
+
+    // Style the active button
+    const activeBtn = document.getElementById(`tool-${tool}`);
+    if(activeBtn) {
+        activeBtn.classList.add('active');
+        if(tool === 'pointer') {
+             activeBtn.style.background = ''; // Reverts to CSS default
+             activeBtn.style.color = '';
+        } else {
+             activeBtn.style.background = (tool === 'eraser') ? '#e74c3c' : '#3498db';
+             activeBtn.style.color = 'white';
+        }
+    }
+    
+    // Clear classic selection to avoid confusion when drawing/erasing
+    if (tool !== 'pointer') {
         State.selected = [];
         window.updateUI();
     }
@@ -42,15 +52,32 @@ window.clearVariantGraphics = () => {
     renderSVGLayer();
 };
 
-// 3. HIJACK THE CLASSIC INPUT
-// We store the original function, then overwrite it so we can intercept clicks.
+// --- NEW UNDO LOGIC ---
+window.undoLastVariantLine = () => {
+    if (window.AdvancedState.thermos.length > 0) {
+        window.AdvancedState.thermos.pop();
+        renderSVGLayer();
+    }
+};
+
+// --- UPDATED INPUT HIJACKER ---
 const originalHandleCellSelection = window.handleCellSelection;
 
 window.handleCellSelection = (index, isMulti, isDragging) => {
     if (window.AdvancedState.activeTool === 'thermo') {
         handleThermoDrawing(index, isDragging);
+    } else if (window.AdvancedState.activeTool === 'eraser') {
+        // ERASER LOGIC: If you click a cell, remove any thermo that passes through it
+        if (!isDragging) {
+            const originalLength = window.AdvancedState.thermos.length;
+            window.AdvancedState.thermos = window.AdvancedState.thermos.filter(thermo => !thermo.includes(index));
+            
+            // Only re-render if we actually deleted something
+            if (window.AdvancedState.thermos.length < originalLength) {
+                renderSVGLayer();
+            }
+        }
     } else {
-        // If holding the pointer, run the normal Sudoku selection logic
         originalHandleCellSelection(index, isMulti, isDragging);
     }
 };
