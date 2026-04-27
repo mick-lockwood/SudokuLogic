@@ -336,19 +336,21 @@ body.dark-mode .variant-tool-btn:hover {
     box-shadow: none;
 }
 
-/* Selected States */
+/* Number Input State (Blue) */
 .variant-tool-btn.active-tool-pointer {
     background: #3498db;
     color: white;
     box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
 }
 
-.variant-tool-btn.active {
-    background: var(--v-color, #3498db); 
+/* ALL Variant Drawing Tools (Purple) */
+.variant-tool-btn.active-tool-variant {
+    background: #9b59b6; 
     color: white;
-    box-shadow: 0 2px 8px var(--v-glow, rgba(52, 152, 219, 0.4));
+    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.4);
 }
 
+/* Eraser State (Red) */
 .variant-tool-btn.active-tool-eraser {
     background: #e74c3c; /* Red for erasing */
     color: white;
