@@ -2,8 +2,12 @@
 import './classic-main.js'; 
 import { State } from './GameState.js';
 import * as Renderer from './Renderer.js';
+import { Tooltips } from './TooltipDictionary.js';
+
+// import variant rules
 import { drawThermo } from './variants/Thermo.js';
 import { drawWhisper } from './variants/Whisper.js';
+
 
 window.AdvancedState = {
     activeTool: 'pointer',
@@ -164,3 +168,10 @@ window.setAppMode = (m) => {
     // Always default back to the Number Input tool when switching modes
     window.setTool('pointer');
 };
+
+// --- INITIALIZE TOOLTIPS ---
+// Loops through the dictionary and applies the text to the matching HTML elements
+Object.keys(Tooltips).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.title = Tooltips[id];
+});
