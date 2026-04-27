@@ -1,4 +1,6 @@
-# Sudoku Logic V1
+# Sudoku Creator V1
+
+Goal = # Sudoku Logic
 
 A feature-rich, vanilla JavaScript Sudoku engine designed for both puzzle creation and solving. This tool allows users to generate unique puzzles with varying difficulties or manually build and validate their own Sudoku layouts.
 

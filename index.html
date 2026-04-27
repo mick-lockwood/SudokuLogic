@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sudoku Creator V1</title>
+    <title>Sudoku Logic V1</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="https://fav.farm/🧩">
 </head>
 <body>
 
-    <h1>Sudoku Creator <span id="difficulty-badge">Medium</span></h1>
+    <h1>Sudoku Logic <span id="difficulty-badge">Medium</span></h1>
 
     <div id="app-container">
         <div id="left-panel">
@@ -58,6 +58,9 @@
 
             <div id="grid-wrapper">
                 <div id="grid" class="grid"></div>
+                
+                <svg id="svg-layer"></svg>
+                
                 <div id="pause-overlay" class="overlay">
                     <h2>Game Paused</h2>
                     <button class="btn btn-primary" style="margin-top:15px;" onclick="togglePause()">Resume</button>
@@ -99,6 +102,6 @@
     </div> 
     <canvas id="confetti"></canvas>
 
-    <script src="script.js"></script>
+    <script type="module" src="./src/main.js"></script>
 </body>
 </html>
