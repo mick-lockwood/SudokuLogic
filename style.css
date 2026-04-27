@@ -183,17 +183,17 @@ body.dark-mode .toggle-group button.active {
     color: white; 
 }
 
-/* --- UPDATED PILL BUTTONS --- */
+/* --- STANDARD BUTTONS --- */
 .btn { 
     padding: 12px 24px; 
     cursor: pointer; 
-    border-radius: 50px; /* Forces a perfect pill shape */
+    border-radius: 8px;
     border: none; 
     font-weight: 700; 
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
-.btn-primary { background: #3498db; color: #ffffff; }
-    
+}
+
 /* Hover State - Slight lift and shadow */
 .btn:hover {
     transform: translateY(-2px);
