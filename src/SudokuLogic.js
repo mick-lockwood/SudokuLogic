@@ -3,6 +3,7 @@ import { State } from './GameState.js';
 import { thermoConflict } from './variants/Thermo.js';
 import { whisperConflict } from './variants/Whisper.js';
 import { killerConflict } from './variants/Killer.js';
+import { kropkiConflict } from './variants/Kropki.js';
 
 export function hasConflict(arr, idx, val) {
     if (val === 0) return false;
@@ -22,6 +23,7 @@ export function hasConflict(arr, idx, val) {
             if (v.type === 'thermo' && thermoConflict(v, arr, idx, val, false)) return true;
             if (v.type === 'whisper' && whisperConflict(v, arr, idx, val, false)) return true;
             if (v.type === 'killer' && killerConflict(v, arr, idx, val, false)) return true;
+            if (v.type.startsWith('kropki') && kropkiConflict(v, arr, idx, val, false)) return true;
         }
     }
     return false;
@@ -47,6 +49,7 @@ export function hasConflictGen(arr, idx, val) {
             if (v.type === 'thermo' && thermoConflict(v, arr, idx, val, true)) return true;
             if (v.type === 'whisper' && whisperConflict(v, arr, idx, val, true)) return true;
             if (v.type === 'killer' && killerConflict(v, arr, idx, val, true)) return true;
+            if (v.type.startsWith('kropki') && kropkiConflict(v, arr, idx, val, true)) return true;
         }
     }
     return false;
