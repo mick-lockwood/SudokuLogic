@@ -8,6 +8,7 @@ import { Tooltips } from './TooltipDictionary.js';
 import { drawThermo } from './variants/Thermo.js';
 import { drawWhisper } from './variants/Whisper.js';
 import { drawKiller } from './variants/Killer.js';
+import { drawKropki } from './variants/Kropki.js';
 
 
 window.AdvancedState = {
@@ -58,7 +59,7 @@ const originalHandleCellSelection = window.handleCellSelection;
 
 window.handleCellSelection = (index, isMulti, isDragging) => {
     // If the tool is any drawing tool (thermo, whisper, etc), route to drawing logic
-    if (['thermo', 'whisper','killer'].includes(window.AdvancedState.activeTool)) {
+    if (['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(window.AdvancedState.activeTool)) {
     handleLineDrawing(index, isDragging);
         
     } else if (window.AdvancedState.activeTool === 'eraser') {
@@ -141,7 +142,7 @@ function handleLineDrawing(index, isDragging) {
 window.addEventListener('pointerup', () => {
     const tool = window.AdvancedState.activeTool;
     
-    if (['thermo', 'whisper', 'killer'].includes(tool) && window.AdvancedState.isDrawing) {
+    if (['thermo', 'whisper', 'killer', 'kropki-white', 'kropki-black'].includes(tool) && window.AdvancedState.isDrawing) {
         window.AdvancedState.isDrawing = false;
         
         if (window.AdvancedState.currentLine.length > 0) {
@@ -152,28 +153,39 @@ window.addEventListener('pointerup', () => {
                     const sumVal = parseInt(sumInput);
                     
                     if (!isNaN(sumVal) && sumVal > 0) {
-                        window.saveVariantState(); // Take snapshot BEFORE adding the new shape
+                        window.saveVariantState(); 
                         State.variants.push({
                             type: tool,
                             cells: [...window.AdvancedState.currentLine],
                             sum: sumVal
                         });
                     }
-                    
                     window.AdvancedState.currentLine = [];
                     Renderer.updateUI(); 
                     renderSVGLayer();
                 }, 10);
-                
                 return; 
                 
+            } else if (tool.startsWith('kropki') && window.AdvancedState.currentLine.length > 1) {
+                // KROPKI LOGIC: Create a separate dot for every pair of adjacent cells you dragged across
+                window.saveVariantState(); 
+                const line = window.AdvancedState.currentLine;
+                
+                for (let i = 0; i < line.length - 1; i++) {
+                    State.variants.push({
+                        type: tool,
+                        cells: [line[i], line[i + 1]]
+                    });
+                }
+                Renderer.updateUI(); 
+                
             } else if (window.AdvancedState.currentLine.length > 1) {
-                window.saveVariantState(); // Take snapshot BEFORE adding the new shape
+                // THERMO & WHISPER LOGIC
+                window.saveVariantState(); 
                 State.variants.push({
                     type: tool,
                     cells: [...window.AdvancedState.currentLine]
                 });
-                
                 Renderer.updateUI(); 
             }
         }
@@ -207,6 +219,7 @@ function drawVariantLine(variant) {
     if (variant.type === 'thermo') drawThermo(variant, svg);
     if (variant.type === 'whisper') drawWhisper(variant, svg);
     if (variant.type === 'killer') drawKiller(variant, svg);
+    if (variant.type.startsWith('kropki')) drawKropki(variant, svg);
 }
 
 // --- UX ENHANCEMENTS ---
