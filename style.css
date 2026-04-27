@@ -102,6 +102,16 @@ body.dark-mode .side-panel h3 {
     box-shadow: 0 4px 8px rgba(0,0,0,0.08); 
 }
 
+/* Dark Mode: Ambient Glows (Base State) */
+body.dark-mode .clear-color-btn {
+    border-color: rgba(148, 163, 184, 0.4); 
+    box-shadow: 0 0 6px rgba(148, 163, 184, 0.3);
+}
+body.dark-mode #clear-all-btn {
+    border-color: rgba(231, 76, 60, 0.4); 
+    box-shadow: 0 0 6px rgba(231, 76, 60, 0.3);
+}
+
 .clear-color-btn:active { 
     transform: translateY(1px); 
     box-shadow: none; 
