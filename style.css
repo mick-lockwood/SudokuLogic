@@ -343,9 +343,62 @@ body.dark-mode #export-btn:hover {
 }
     
 .numpad-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
-.n-btn { width: 48px; height: 54px; border-radius: 12px; border: 1px solid #e2e8f0; background: var(--card-bg); color: var(--text-main); font-weight: 800; cursor: pointer; line-height: 1.2; }
-body.dark-mode .n-btn { border-color: #334155; }
-.n-btn.pencil-active { background: var(--pencil-active) !important; color: #000000 !important; border-color: #d4ac0d; }
+
+/* --- NUMPAD BUTTONS --- */
+.n-btn { 
+    width: 48px; 
+    height: 54px; 
+    border-radius: 12px; 
+    border: 2px solid #e2e8f0; /* Beefed up border for glow transitions */
+    background: var(--card-bg); 
+    color: var(--text-main); 
+    font-weight: 800; 
+    cursor: pointer; 
+    line-height: 1.2; 
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Numpad Hover & Click Animations (Ignores disabled buttons) */
+.n-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.n-btn:not(:disabled):active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+/* Dark Mode Numpad Base */
+body.dark-mode .n-btn { 
+    border-color: rgba(148, 163, 184, 0.2); 
+    box-shadow: 0 0 6px rgba(148, 163, 184, 0.1); /* Subtle ambient glow */
+}
+
+/* Dark Mode Numpad Hover (Standard Blue Glow) */
+body.dark-mode .n-btn:not(:disabled):hover { 
+    border-color: #74b9ff; 
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.6); 
+}
+
+/* Dark Mode Erase Button Hover (Red Glow Override) */
+body.dark-mode .n-btn[style*="var(--danger)"]:not(:disabled):hover {
+    border-color: #f1948a; 
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
+}
+
+/* Active Pencil Button Styling & Glow */
+.n-btn.pencil-active { 
+    background: var(--pencil-active) !important; 
+    color: #000000 !important; 
+    border-color: #d4ac0d; 
+}
+
+body.dark-mode .n-btn.pencil-active {
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+    border-color: #f1c40f;
+}
 
 .overlay { position: absolute; inset: 0; background: var(--card-bg); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; border-radius: 8px; }
 
@@ -536,23 +589,36 @@ body.dark-mode .variant-action-btn { background: #334155; color: white; }
 
 body.dark-mode .variant-action-btn:hover { background: #475569; }
 
-/* Danger Action Button */
+/* Danger Action Button (Clear All Variants) */
 .variant-action-btn.danger {
     background: #fee2e2;
     color: #991b1b;
-}
-
-body.dark-mode .variant-action-btn.danger {
-    background: #7f1d1d;
-    color: #fca5a5;
+    border: 2px solid transparent; /* Required for dark mode glows */
 }
 
 .variant-action-btn.danger:hover {
     background: #fecaca;
 }
 
+/* Dark Mode: Slate Backgrounds */
+body.dark-mode .variant-action-btn.danger {
+    background: #334155; 
+    color: #f8fafc; 
+}
+
 body.dark-mode .variant-action-btn.danger:hover {
-    background: #991b1b;
+    background: #475569; 
+}
+
+/* Dark Mode: Red Ambient & Hover Glows */
+body.dark-mode .variant-action-btn.danger {
+    border-color: rgba(231, 76, 60, 0.4); 
+    box-shadow: 0 0 6px rgba(231, 76, 60, 0.3);
+}
+
+body.dark-mode .variant-action-btn.danger:hover {
+    border-color: #f1948a; 
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
 }
 
 /* --- UI DIVIDERS --- */
