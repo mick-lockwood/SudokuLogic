@@ -218,13 +218,32 @@ body.dark-mode .btn-primary:hover {
 .gen-action-btn {
     padding: 12px;
     font-size: 11px;
-    background: #e2e8f0; /* Matches variant tools */
-    color: var(--text-main);
 }
 
-.gen-action-btn:hover { background: #cbd5e1; }
-body.dark-mode .gen-action-btn { background: #334155; color: #f8fafc; }
-body.dark-mode .gen-action-btn:hover { background: #475569; }
+/* Light Mode: Solid Colors */
+#gen-btn { background: #3498db; color: white; }
+#ghost-btn { background: #94a3b8; color: white; }
+#export-btn { background: var(--success); color: white; }
+
+/* Light Mode: Hover Highlights */
+#gen-btn:hover { background: #2980b9; }
+#ghost-btn:hover { background: #7f8fa6; }
+#export-btn:hover { background: #27ae60; }
+
+/* Dark Mode: Override colors with slate background */
+body.dark-mode #gen-btn, 
+body.dark-mode #ghost-btn, 
+body.dark-mode #export-btn { 
+    background: #334155; 
+    color: #f8fafc; 
+}
+
+/* Dark Mode: Slate hover state */
+body.dark-mode #gen-btn:hover, 
+body.dark-mode #ghost-btn:hover, 
+body.dark-mode #export-btn:hover { 
+    background: #475569; 
+}
 
 /* 1. Permanent Ambient Glows (Base State) */
 body.dark-mode #gen-btn { 
