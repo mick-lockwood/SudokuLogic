@@ -111,9 +111,12 @@ body.dark-mode .side-panel h3 {
 #clear-all-btn { background: #fee2e2; color: #991b1b; }
 #clear-all-btn:hover { background: #fecaca; }
 
-/* Dark Mode: Slate Backgrounds */
-body.dark-mode .clear-color-btn { background: #334155; color: #f8fafc; }
-body.dark-mode .clear-color-btn:hover { background: #475569; }
+/* Dark Mode: Slate Backgrounds (Using IDs to force the override) */
+body.dark-mode .clear-color-btn,
+body.dark-mode #clear-all-btn { 
+    background: #334155; 
+    color: #f8fafc; 
+}
 
 /* Dark Mode: Ambient Glows (Base State) */
 body.dark-mode .clear-color-btn {
@@ -125,15 +128,11 @@ body.dark-mode #clear-all-btn {
     box-shadow: 0 0 6px rgba(231, 76, 60, 0.3);
 }
 
-/* Dark Mode: Intensified Glows (Hover State) */
-body.dark-mode .clear-color-btn:hover {
-    border-color: #cbd5e1; 
-    box-shadow: 0 0 15px rgba(148, 163, 184, 0.8);
+body.dark-mode .clear-color-btn:hover,
+body.dark-mode #clear-all-btn:hover { 
+    background: #475569; 
 }
-body.dark-mode #clear-all-btn:hover {
-    border-color: #f1948a; 
-    box-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
-}
+
 body.dark-mode .switch-label { color: #f8fafc; }
 
 #grid-wrapper { 
