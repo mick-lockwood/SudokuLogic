@@ -124,8 +124,12 @@ window.showWinOverlay = () => {
 window.exitToCreate = () => window.setAppMode('create');
 
 window.exportPuzzleLink = () => {
-    // 1. Package only the essential data (grid size, given numbers, and drawn variants)
+    // 1. Package only the essential data
+    const titleEl = document.getElementById('puzzle-title');
+    const puzzleTitle = titleEl ? titleEl.innerText.trim() : "Sudoku Logic";
+
     const puzzleData = {
+        title: puzzleTitle, // <--- NEW: Saves the custom name
         size: State.size,
         board: State.board.map(c => c.given ? c.val : 0), 
         variants: State.variants || []
@@ -329,8 +333,6 @@ window.addEventListener('keydown', (e) => {
 });
 
 // --- BOOTSTRAP ---
-
-// --- BOOTSTRAP ---
 window.onload = function() {
     console.log("App starting with ES6 Modules..."); 
     Renderer.initHighlighter();
@@ -346,6 +348,20 @@ window.onload = function() {
             
             // 2. Initialize the correct grid size
             window.setGridSize(decodedData.size);
+            
+            // --- NEW: Apply and Lock the Custom Title ---
+            if (decodedData.title) {
+                const titleEl = document.getElementById('puzzle-title');
+                if (titleEl) {
+                    titleEl.innerText = decodedData.title;
+                    titleEl.removeAttribute('contenteditable'); // Lock it for the player
+                    titleEl.style.cursor = 'default';
+                    titleEl.style.borderBottom = 'none';
+                    titleEl.title = ""; 
+                }
+                document.title = decodedData.title; // Updates the actual browser tab!
+            }
+            // -------------------------------------------
             
             // 3. Apply the numbers and variants to the State
             State.variants = decodedData.variants || [];
@@ -378,3 +394,24 @@ window.onload = function() {
         window.setGridSize(9); 
     }
 };
+
+// --- TITLE INPUT HANDLER ---
+// Prevents the enter key from creating a line break in the puzzle title
+setTimeout(() => {
+    const titleEl = document.getElementById('puzzle-title');
+    if (titleEl) {
+        titleEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Stop the line break
+                titleEl.blur();     // Deselect the text
+            }
+        });
+        
+        // Failsafe: if they delete the whole title, give it a default name
+        titleEl.addEventListener('blur', () => {
+            if (titleEl.innerText.trim() === '') {
+                titleEl.innerText = 'Custom Puzzle';
+            }
+        });
+    }
+}, 100);
