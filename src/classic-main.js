@@ -28,10 +28,7 @@ window.setGridSize = (s) => {
 
 window.setAppMode = (m) => {
     if (m === State.mode) return;
-    if (State.mode === 'solve' && m === 'create' && !State.isWon) {
-        if (!confirm("Switching to Create Mode will reset the current puzzle. Continue?")) return;
-    }
-    
+
     State.mode = m; 
     document.getElementById('modeCreate').classList.toggle('active', m === 'create');
     document.getElementById('modeSolve').classList.toggle('active', m === 'solve');
@@ -43,9 +40,17 @@ window.setAppMode = (m) => {
     document.getElementById('pause-btn').style.display = isCreate ? 'none' : 'block';
     document.getElementById('clean-pencils-link').style.display = isCreate ? 'none' : 'inline';
     
-    resetTimer(); 
-    if (m === 'solve') startTimer(); 
-    else initAppBoard();
+    if (m === 'solve') {
+        startTimer(); 
+    } else {
+        // --- NEW CLEANUP FOR CREATE MODE ---
+        State.isWon = false; // Unlock inputs
+        document.getElementById('win-overlay').style.display = 'none'; // Hide the win menu
+        Renderer.stopConfetti(); // Stop any active celebration
+        
+        if (State.timerInt) clearInterval(State.timerInt);
+        resetTimer();
+    }
 
     Renderer.updateUI();
 };
