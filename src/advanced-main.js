@@ -174,4 +174,9 @@ window.setAppMode = (m) => {
 Object.keys(Tooltips).forEach(id => {
     const el = document.getElementById(id);
     if (el) el.title = Tooltips[id];
+    
+    // --- INITIALIZE DEFAULT STATE ---
+// Force the UI and internal state to sync on page load
+window.setTool('pointer');
+    
 });
