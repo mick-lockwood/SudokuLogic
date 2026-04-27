@@ -64,6 +64,12 @@ window.generateWithDiff = (s, d) => {
     generateNew();
 };
 
+window.toggleGhost = () => {
+    if (State.mode !== 'create') return;
+    State.showGhost = !State.showGhost;
+    Renderer.updateUI();
+};
+
 window.handleClearBoard = () => {
     if (!confirm("Reset entire board?")) return;
     saveState();
@@ -200,6 +206,7 @@ function generateNew() {
         return false;
     };
     fill(0);
+    State.solution = [...flat];
 
     const diff = document.getElementById('diff').value;
     const totalCells = State.size * State.size;
