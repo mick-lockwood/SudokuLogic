@@ -38,21 +38,20 @@
                     <button id="pause-btn" class="btn" style="display:none; padding: 10px 15px;" onclick="togglePause()">Pause</button>
                 </div>
 
-                <div class="row" id="gen-controls">
-                    <select id="diff" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                <div id="gen-controls" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
+                    
+                    <select id="diff" style="padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; text-align: center; font-weight: 800; cursor: pointer;">
                         <option value="easy">Easy</option>
                         <option value="medium" selected>Medium</option>
                         <option value="hard">Hard</option>
                     </select>
-                    <button class="btn btn-primary" onclick="generateNew()">Generate Unique Puzzle</button>
-                </div>
-
-               <div id="status-label" style="font-size: 13px; font-weight: 800; text-transform: uppercase; min-height: 1.5em;">Enter Digits...</div>
-                
-                <div style="display: flex; gap: 20px; font-size: 12px;">
-                    <a href="#" style="color: var(--danger); text-decoration: none; font-weight: 600;" onclick="handleClearBoard()">Reset Puzzle</a>
-                    <a href="#" class="util-link" onclick="clearUserInputs()">Clear User Inputs</a>
-                    <a href="#" id="clean-pencils-link" class="util-link" style="display:none;" onclick="cleanAllPencils()">Clear Pencils Only</a>
+                    
+                    <button class="btn btn-primary" style="padding: 12px; font-size: 11px;" onclick="generateNew()">Generate Puzzle</button>
+                    
+                    <button id="ghost-btn" class="btn" style="background: #94a3b8; color: white; padding: 12px; font-size: 11px;" onclick="toggleGhost()">Ghost Solution</button>
+                    
+                    <button id="export-btn" class="btn" style="background: var(--success); color: white; padding: 12px; font-size: 11px;" onclick="exportPuzzleLink()">Share Link</button>
+                    
                 </div>
             </div>
 
