@@ -13,7 +13,7 @@ export const State = {
     solution: [],
     showGhost: false,
 
-// Highlighter Color Palette 
+    // Highlighter Color Palette 
     // (Laid out in rows of 3 to match the UI grid)
     colors: [
         // Standard Colors
@@ -28,6 +28,7 @@ export const State = {
         '#fca74a', '#a693c7', '#fff02f', // Row 5: Vibrant Orange/Lavender/Yellow
         '#f17fb0', '#bdbdbf', '#8cca9e'  // Row 6: Vibrant Pink/Grey/SageGreen
     ]
+}:
 
 export function initBoardState(sizeParam) {
     State.size = sizeParam;
