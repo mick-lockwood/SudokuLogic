@@ -298,3 +298,100 @@ body.dark-mode .win-grid-label {
 body.dark-mode #return-win-btn {
     color: var(--text-main);
 }
+
+/* --- VARIANT TOOL BUTTONS --- */
+.variant-tool-btn {
+    font-size: 11px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background: #e2e8f0;
+    color: var(--text-main);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    width: 100%;
+}
+
+body.dark-mode .variant-tool-btn {
+    background: #334155;
+    color: #f8fafc;
+}
+
+/* Hover State - Slight lift and shadow */
+.variant-tool-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    background: #cbd5e1;
+}
+
+body.dark-mode .variant-tool-btn:hover {
+    background: #475569;
+}
+
+/* Click State - Pushes into the page */
+.variant-tool-btn:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+/* Selected States */
+.variant-tool-btn.active-tool-pointer {
+    background: #3498db;
+    color: white;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+}
+
+.variant-tool-btn.active-tool-thermo {
+    background: #9b59b6; /* Purple for drawing */
+    color: white;
+    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.4);
+}
+
+.variant-tool-btn.active-tool-eraser {
+    background: #e74c3c; /* Red for erasing */
+    color: white;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+}
+
+/* Action Buttons (Undo/Clear) */
+.variant-action-btn {
+    padding: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f1f5f9;
+    color: var(--text-main);
+}
+
+body.dark-mode .variant-action-btn { background: #334155; color: white; }
+
+.variant-action-btn:hover { 
+    background: #e2e8f0; 
+    transform: scale(0.98); 
+}
+
+body.dark-mode .variant-action-btn:hover { background: #475569; }
+
+/* Danger Action Button */
+.variant-action-btn.danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+body.dark-mode .variant-action-btn.danger {
+    background: #7f1d1d;
+    color: #fca5a5;
+}
+
+.variant-action-btn.danger:hover {
+    background: #fecaca;
+}
+
+body.dark-mode .variant-action-btn.danger:hover {
+    background: #991b1b;
+}
