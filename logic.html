@@ -19,9 +19,14 @@
                 <h3>Variant Tools</h3>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <button id="tool-pointer" class="variant-tool-btn active-tool-pointer" onclick="setTool('pointer')">Number Input</button>
-                    <button id="tool-thermo" class="variant-tool-btn" onclick="setTool('thermo')">Draw Thermo</button>
-                    <button id="tool-eraser" class="variant-tool-btn" onclick="setTool('eraser')">Eraser (Click Variant)</button>
+
+                    <hr class="tool-divider">
                     
+                    <button id="tool-thermo" class="variant-tool-btn" onclick="setTool('thermo')">Draw Thermo</button>
+
+                    <hr class="tool-divider">
+                    
+                    <button id="tool-eraser" class="variant-tool-btn" onclick="setTool('eraser')">Eraser (Click Variant)</button>
                     <button class="variant-action-btn" style="margin-top: 5px;" onclick="undoLastVariantLine()">Undo Last Line</button>
                     <button class="variant-action-btn danger" onclick="clearVariantGraphics()">Clear All Variants</button>
                 </div>
