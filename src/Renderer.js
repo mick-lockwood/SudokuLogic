@@ -61,7 +61,7 @@ export function updateUI() {
             el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-style: italic;">${State.solution[i]}</span>`;
         }
             
-        } else if (data.notes.length > 0) {
+        else if (data.notes.length > 0) {
             const pGrid = document.createElement('div');
             pGrid.className = 'pencil-grid';
             pGrid.style.zIndex = '20'; // Ensure the grid container is pulled up
