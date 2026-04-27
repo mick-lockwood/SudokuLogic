@@ -410,3 +410,19 @@ body.dark-mode .variant-action-btn.danger:hover {
 body.dark-mode .tool-divider {
     background: #334155;
 }
+
+/* --- DARK MODE ACTIVE BUTTON GLOW ENHANCEMENTS --- */
+body.dark-mode .variant-tool-btn.active-tool-pointer {
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
+    border-color: #74b9ff; /* Light blue border */
+}
+
+body.dark-mode .variant-tool-btn.active-tool-variant {
+    box-shadow: 0 0 15px rgba(155, 89, 182, 0.8);
+    border-color: #c39bd3; /* Light purple border */
+}
+
+body.dark-mode .variant-tool-btn.active-tool-eraser {
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
+    border-color: #f1948a; /* Light red border */
+}
