@@ -64,7 +64,7 @@ To add a new rule to the engine, follow this 5-step checklist:
    * Export a math function: `export function yourVariantConflict(variant, arr, idx, val, isFlatArray = false)`
    * Export an SVG function: `export function drawYourVariant(variant, svgElement)`
 2. **Add the Tooltip (`src/TooltipDictionary.js`)**
-   * Add the ID and instructions: `'tool-yourvariant': 'Rule description here.'`
+   * Add the ID and instructions: `'tool-yourvariant': '`Rule description here.`'`
 3. **Add the UI Button (`index.html`)**
    * Insert into the Variant Tools panel: `<button id="tool-yourvariant" class="variant-tool-btn" onclick="setTool('yourvariant')">Your Variant</button>`
 4. **Route the Math (`src/SudokuLogic.js`)**
