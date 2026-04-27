@@ -188,7 +188,7 @@ body.dark-mode .toggle-group button.active {
     padding: 12px 24px; 
     cursor: pointer; 
     border-radius: 8px;
-    border: none; 
+    border: 2px solid transparent; /* NEW: Added to support dark mode edge glows */
     font-weight: 700; 
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
@@ -208,17 +208,20 @@ body.dark-mode .toggle-group button.active {
 
 .btn-primary { background: #3498db; color: #ffffff; }
 
-/* Dark Mode Button Glows */
+/* Dark Mode Button Glows (Matching Variant Tools) */
 body.dark-mode .btn-primary:hover {
-    box-shadow: 0 0 15px rgba(52, 152, 219, 0.6);
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
+    border-color: #74b9ff; /* Light blue border */
 }
 
 body.dark-mode #ghost-btn:hover {
-    box-shadow: 0 0 15px rgba(148, 163, 184, 0.6);
+    box-shadow: 0 0 15px rgba(148, 163, 184, 0.8);
+    border-color: #cbd5e1; /* Light slate border */
 }
 
 body.dark-mode #export-btn:hover {
-    box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.8);
+    border-color: #8ce09f; /* Light green border */
 }
     
 .numpad-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
