@@ -133,3 +133,34 @@ function drawVariantLine(variant) {
     if (variant.type === 'thermo') drawThermo(variant, svg);
     if (variant.type === 'whisper') drawWhisper(variant, svg);
 }
+
+// --- UX ENHANCEMENTS ---
+
+// 1. Keyboard Shortcut to return to Number Input (Escape or 'V')
+window.addEventListener('keydown', (e) => {
+    if (State.paused || State.isWon) return;
+    
+    // If the user presses Escape or 'V', drop the drawing tool
+    if (e.key === 'Escape' || e.key.toLowerCase() === 'v') {
+        if (window.AdvancedState.activeTool !== 'pointer') {
+            window.setTool('pointer');
+        }
+    }
+});
+
+// 2. Intercept Mode Switching to hide tools and reset to pointer
+const originalSetAppMode = window.setAppMode;
+
+window.setAppMode = (m) => {
+    // Run the classic mode switching logic first
+    originalSetAppMode(m);
+    
+    // Hide or show the Variant Tools panel based on the mode
+    const variantPanel = document.getElementById('variant-tools-panel');
+    if (variantPanel) {
+        variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
+    }
+    
+    // Always default back to the Number Input tool when switching modes
+    window.setTool('pointer');
+};
