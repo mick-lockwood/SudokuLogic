@@ -25,7 +25,7 @@ Click and drag on cells to draw.`,
 `Digits in a cage must not repeat.
 They must exactly sum to the number in the corner.\n
 Click and drag on cells to draw cage.\n
-Enter required cage sum.`,
+Enter target cage sum.`,
     
     // Actions (Optional, but good to centralize!)
     'btn-undo-line':
