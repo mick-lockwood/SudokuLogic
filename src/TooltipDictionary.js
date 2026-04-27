@@ -20,6 +20,12 @@ Line starts with the bulb when drawing.`,
 `Adjacent numbers along the line must
 have a difference of 5 or more.\n
 Click and drag on cells to draw.`,
+
+    'tool-killer': 
+`Digits in a cage must not repeat.
+They must exactly sum to the number in the corner.\n
+Click and drag on cells to draw cage.\n
+Enter required cage sum.`,
     
     // Actions (Optional, but good to centralize!)
     'btn-undo-line':
