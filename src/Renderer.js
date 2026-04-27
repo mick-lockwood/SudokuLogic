@@ -50,12 +50,14 @@ export function updateUI() {
         el.style.background = `linear-gradient(${tint}, ${tint}), ${highlightBase}`;
 
         if (data.val !== 0) {
-            el.textContent = data.val;
+            // Wrap the digit in a span and pull it above the SVG layer (z-index 20)
+            el.innerHTML = `<span style="position: relative; z-index: 20;">${data.val}</span>`;
             el.classList.add(data.given ? 'given' : 'user');
             if (hasConflict(State.board, i, data.val)) el.classList.add('error');
         } else if (data.notes.length > 0) {
             const pGrid = document.createElement('div');
             pGrid.className = 'pencil-grid';
+            pGrid.style.zIndex = '20'; // Pull pencil marks above the SVG layer
             for(let n = 1; n <= 9; n++) {
                 const nDiv = document.createElement('div'); nDiv.className = 'pencil-num';
                 if (data.notes.includes(n)) {
