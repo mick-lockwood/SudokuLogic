@@ -1,7 +1,6 @@
 import { State } from './GameState.js';
 
 // --- VARIANT MATH HANDLERS ---
-// --- THERMOS ---
 function thermoConflict(variant, arr, idx, val, isFlatArray = false) {
     const pos = variant.cells.indexOf(idx);
     if (pos === -1) return false;
@@ -25,15 +24,25 @@ function thermoConflict(variant, arr, idx, val, isFlatArray = false) {
     return false;
 }
 
+// --- CORE SUDOKU CONSTRAINTS ---
 export function hasConflict(arr, idx, val) {
     if (val === 0) return false;
     const r = Math.floor(idx / State.size), c = idx % State.size;
     const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
     
+    // 1. Standard Rules
     for (let i = 0; i < State.size * State.size; i++) {
         if (i === idx || arr[i].val !== val) continue;
         const tr = Math.floor(i / State.size), tc = i % State.size;
         if (tr === r || tc === c || (tr >= br && tr < br + State.bH && tc >= bc && tc < bc + State.bW)) return true;
+    }
+
+    // 2. Variant Rules
+    if (State.variants && State.variants.length > 0) {
+        for (let v of State.variants) {
+            if (v.type === 'thermo' && thermoConflict(v, arr, idx, val, false)) return true;
+            // Future variants go here (e.g., if v.type === 'whisper'...)
+        }
     }
     return false;
 }
@@ -42,6 +51,7 @@ export function hasConflictGen(arr, idx, val) {
     const r = Math.floor(idx / State.size), c = idx % State.size;
     const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
 
+    // 1. Standard Rules
     for (let i = 0; i < State.size; i++) {
         if (arr[r * State.size + i] === val) return true;
         if (arr[i * State.size + c] === val) return true;
@@ -49,6 +59,13 @@ export function hasConflictGen(arr, idx, val) {
         let boxRow = br + Math.floor(i / State.bW);
         let boxCol = bc + (i % State.bW);
         if (arr[boxRow * State.size + boxCol] === val) return true;
+    }
+
+    // 2. Variant Rules for Generator
+    if (State.variants && State.variants.length > 0) {
+        for (let v of State.variants) {
+            if (v.type === 'thermo' && thermoConflict(v, arr, idx, val, true)) return true;
+        }
     }
     return false;
 }
