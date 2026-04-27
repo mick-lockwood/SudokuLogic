@@ -4,6 +4,7 @@ export const State = {
     size: 9, bW: 3, bH: 3,
     mode: 'create', 
     pencil: false, paused: false, isWon: false, darkMode: false,
+    isPlayOnly: false,
     board: [], 
     timerVal: 0, timerInt: null,
     undoStack: [], redoStack: [], selected: [],
@@ -24,6 +25,7 @@ export function initBoardState(sizeParam) {
     State.size = sizeParam;
     State.bW = 3;
     State.bH = (sizeParam === 6) ? 2 : 3;
+    State.isPlayOnly = false;
     State.board = Array.from({ length: State.size * State.size }, () => ({ val: 0, given: false, notes: [], color: null }));
     State.undoStack = []; 
     State.redoStack = [];
