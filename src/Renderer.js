@@ -238,24 +238,3 @@ export function getCellCenter(index) {
         y: (cellRect.top - svgRect.top) + (cellRect.height / 2)
     };
 }
-
-export function drawTestLine() {
-    const svg = document.getElementById('svg-layer');
-    if(!svg) return;
-    svg.innerHTML = ''; 
-
-    const start = getCellCenter(0);
-    const end = getCellCenter(12);
-
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", start.x);
-    line.setAttribute("y1", start.y);
-    line.setAttribute("x2", end.x);
-    line.setAttribute("y2", end.y);
-    line.setAttribute("stroke", "var(--danger)"); 
-    line.setAttribute("stroke-width", "8");
-    line.setAttribute("stroke-linecap", "round");
-    line.setAttribute("opacity", "0.5");
-
-    svg.appendChild(line);
-}
