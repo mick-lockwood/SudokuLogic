@@ -208,20 +208,50 @@ body.dark-mode .toggle-group button.active {
 
 .btn-primary { background: #3498db; color: #ffffff; }
 
-/* Dark Mode Button Glows (Matching Variant Tools) */
+/* General Primary Button Glow (For Pause/Win Menus) */
 body.dark-mode .btn-primary:hover {
     box-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
-    border-color: #74b9ff; /* Light blue border */
+    border-color: #74b9ff;
 }
 
-body.dark-mode #ghost-btn:hover {
-    box-shadow: 0 0 15px rgba(148, 163, 184, 0.8);
-    border-color: #cbd5e1; /* Light slate border */
+/* --- GENERATOR CONTROL BUTTONS --- */
+.gen-action-btn {
+    padding: 12px;
+    font-size: 11px;
+    background: #e2e8f0; /* Matches variant tools */
+    color: var(--text-main);
 }
 
-body.dark-mode #export-btn:hover {
-    box-shadow: 0 0 15px rgba(46, 204, 113, 0.8);
-    border-color: #8ce09f; /* Light green border */
+.gen-action-btn:hover { background: #cbd5e1; }
+body.dark-mode .gen-action-btn { background: #334155; color: #f8fafc; }
+body.dark-mode .gen-action-btn:hover { background: #475569; }
+
+/* 1. Permanent Ambient Glows (Base State) */
+body.dark-mode #gen-btn { 
+    border-color: rgba(52, 152, 219, 0.4); 
+    box-shadow: 0 0 6px rgba(52, 152, 219, 0.3); 
+}
+body.dark-mode #ghost-btn { 
+    border-color: rgba(148, 163, 184, 0.4); 
+    box-shadow: 0 0 6px rgba(148, 163, 184, 0.3); 
+}
+body.dark-mode #export-btn { 
+    border-color: rgba(46, 204, 113, 0.4); 
+    box-shadow: 0 0 6px rgba(46, 204, 113, 0.3); 
+}
+
+/* 2. Intensified Glows (Hover State) */
+body.dark-mode #gen-btn:hover { 
+    border-color: #74b9ff; 
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.8); 
+}
+body.dark-mode #ghost-btn:hover { 
+    border-color: #cbd5e1; 
+    box-shadow: 0 0 15px rgba(148, 163, 184, 0.8); 
+}
+body.dark-mode #export-btn:hover { 
+    border-color: #8ce09f; 
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.8); 
 }
     
 .numpad-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
