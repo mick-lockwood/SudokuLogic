@@ -17,8 +17,10 @@ Click and drag on cells to draw.\n
 Line starts with the bulb when drawing.`,
     
     'tool-whisper':
-`Adjacent numbers along the line must
-have a difference of 5 or more.\n
+`9x9 puzzle: Adjacent numbers along the line
+must have a difference of 5 or more\n
+6x6 puzzle: Adjacent numbers along the line
+must have a difference of 3 or more\n
 Click and drag on cells to draw.`,
 
     'tool-killer': 
