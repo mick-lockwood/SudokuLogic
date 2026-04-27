@@ -139,8 +139,8 @@ window.exportPuzzleLink = () => {
     
     // If we have variants, ensure the link explicitly points to Sudoku Logic (index.html)
     if (State.variants && State.variants.length > 0 && !currentUrl.includes('index.html')) {
-        if (currentUrl.endsWith('index.html')) {
-            currentUrl = currentUrl.replace('index.html', 'index.html');
+        if (currentUrl.endsWith('classic.html')) {
+            currentUrl = currentUrl.replace('classic.html', 'index.html');
         } else if (currentUrl.endsWith('/')) {
             currentUrl += 'index.html';
         } else {
