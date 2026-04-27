@@ -183,8 +183,44 @@ body.dark-mode .toggle-group button.active {
     color: white; 
 }
 
-.btn { padding: 12px 24px; cursor: pointer; border-radius: 10px; border: none; font-weight: 700; transition: 0.2s; }
+/* --- UPDATED PILL BUTTONS --- */
+.btn { 
+    padding: 12px 24px; 
+    cursor: pointer; 
+    border-radius: 50px; /* Forces a perfect pill shape */
+    border: none; 
+    font-weight: 700; 
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
 .btn-primary { background: #3498db; color: #ffffff; }
+    
+/* Hover State - Slight lift and shadow */
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Click State - Pushes into the page */
+.btn:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+.btn-primary { background: #3498db; color: #ffffff; }
+
+/* Dark Mode Button Glows */
+body.dark-mode .btn-primary:hover {
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.6);
+}
+
+body.dark-mode #ghost-btn:hover {
+    box-shadow: 0 0 15px rgba(148, 163, 184, 0.6);
+}
+
+body.dark-mode #export-btn:hover {
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+}
+    
 .numpad-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
 .n-btn { width: 48px; height: 54px; border-radius: 12px; border: 1px solid #e2e8f0; background: var(--card-bg); color: var(--text-main); font-weight: 800; cursor: pointer; line-height: 1.2; }
 body.dark-mode .n-btn { border-color: #334155; }
