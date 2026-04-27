@@ -75,11 +75,9 @@
                         <option value="hard">Hard</option>
                     </select>
                     
-                    <button class="btn btn-primary" style="padding: 12px; font-size: 11px;" onclick="generateNew()">Generate Puzzle</button>
-                    
-                    <button id="ghost-btn" class="btn" style="background: #94a3b8; color: white; padding: 12px; font-size: 11px;" onclick="toggleGhost()">Ghost Solution</button>
-                    
-                    <button id="export-btn" class="btn" style="background: var(--success); color: white; padding: 12px; font-size: 11px;" onclick="exportPuzzleLink()">Share Link</button>
+                    <button id="gen-btn" class="btn gen-action-btn" onclick="generateNew()">Generate Puzzle</button>
+                    <button id="ghost-btn" class="btn gen-action-btn" onclick="toggleGhost()">Ghost Solution</button>
+                    <button id="export-btn" class="btn gen-action-btn" onclick="exportPuzzleLink()">Share Link</button>
                     
                 </div>
 
