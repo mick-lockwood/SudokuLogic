@@ -42,7 +42,7 @@ A feature-rich, vanilla JavaScript Sudoku engine designed for both puzzle creati
 ## 📥 Installation & Usage
 No installation is required. This project runs entirely in the browser.
 
-[[https://mick-lockwood.github.io/SudokuLogic/](https://mick-lockwood.github.io/SudokuCreator/)]
+[https://mick-lockwood.github.io/SudokuLogic/]
 
 or
 
