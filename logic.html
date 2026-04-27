@@ -19,18 +19,18 @@
                 <h3>Variant Tools</h3>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     
-                    <button id="tool-pointer" class="variant-tool-btn active-tool-pointer" onclick="setTool('pointer')">Number Input</button>
-
+                    <button id="tool-pointer" class="variant-tool-btn active" onclick="setTool('pointer')">Number Input (Esc/V)</button>
+                    
                     <hr class="tool-divider">
                     
                     <button id="tool-thermo" class="variant-tool-btn" onclick="setTool('thermo')">Thermo Line</button>
                     <button id="tool-whisper" class="variant-tool-btn" onclick="setTool('whisper')">German Whisper Line</button>
-
+                    
                     <hr class="tool-divider">
                     
                     <button id="tool-eraser" class="variant-tool-btn" onclick="setTool('eraser')">Eraser (Click Variant)</button>
-                    <button class="variant-action-btn" style="margin-top: 5px;" onclick="undoLastVariantLine()">Undo Last Line</button>
-                    <button class="variant-action-btn danger" onclick="clearVariantGraphics()">Clear All Variants</button>
+                    <button id="btn-undo-line" class="variant-action-btn" style="margin-top: 5px;" onclick="undoLastVariantLine()">Undo Last Line</button>
+                    <button id="btn-clear-variants" class="variant-action-btn danger" onclick="clearVariantGraphics()">Clear All Variants</button>
                 </div>
             </div>
                 
