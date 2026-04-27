@@ -270,6 +270,32 @@ window.setAppMode = (m) => {
     window.setTool('pointer');
 };
 
+// --- GRID SIZE INTERCEPTOR ---
+const originalSetGridSize = window.setGridSize;
+
+window.setGridSize = (s) => {
+    // 1. Check if there is currently any data that would be lost
+    const hasNumbers = State.board.some(c => c.val !== 0);
+    const hasVariants = State.variants.length > 0;
+
+    if (hasNumbers || hasVariants) {
+        if (!confirm("Changing grid size will clear your current board and variant rules. Continue?")) {
+            return; // Abort if the user clicks 'Cancel'
+        }
+    }
+
+    // 2. Clear variants data before the swap
+    State.variants = [];
+    window.AdvancedState.variantUndoStack = [];
+    window.AdvancedState.variantRedoStack = [];
+
+    // 3. Run the original classic grid swap logic
+    originalSetGridSize(s);
+    
+    // 4. Force the SVG layer to clear its visuals
+    renderSVGLayer();
+};
+
 // --- INITIALIZE TOOLTIPS ---
 // Loops through the dictionary and applies the text to the matching HTML elements
 Object.keys(Tooltips).forEach(id => {
