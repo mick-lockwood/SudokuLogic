@@ -10,11 +10,11 @@ import { drawWhisper } from './variants/Whisper.js';
 import { drawKiller } from './variants/Killer.js';
 
 
-window.AdvancedState = {f
+window.AdvancedState = {
     activeTool: 'pointer',
     isDrawing: false,
     currentLine: [],
-    variantRedoStack: [] // NEW: Stores undone variants
+    variantRedoStack: []
 };
 
 // --- TOOL MANAGER ---
@@ -257,9 +257,8 @@ window.setAppMode = (m) => {
 Object.keys(Tooltips).forEach(id => {
     const el = document.getElementById(id);
     if (el) el.title = Tooltips[id];
-    
-    // --- INITIALIZE DEFAULT STATE ---
+}); // <-- CLOSE THE LOOP HERE
+
+// --- INITIALIZE DEFAULT STATE ---
 // Force the UI and internal state to sync on page load
 window.setTool('pointer');
-    
-});
