@@ -395,3 +395,16 @@ body.dark-mode .variant-action-btn.danger {
 body.dark-mode .variant-action-btn.danger:hover {
     background: #991b1b;
 }
+
+/* --- UI DIVIDERS --- */
+.tool-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 4px 0; /* Gives a little breathing room inside the flex gap */
+    width: 100%;
+    border: none;
+}
+
+body.dark-mode .tool-divider {
+    background: #334155;
+}
