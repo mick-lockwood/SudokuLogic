@@ -57,11 +57,15 @@ export function updateUI() {
         } else if (data.notes.length > 0) {
             const pGrid = document.createElement('div');
             pGrid.className = 'pencil-grid';
-            pGrid.style.zIndex = '20'; // Pull pencil marks above the SVG layer
+            pGrid.style.zIndex = '20'; // Ensure the grid container is pulled up
+            
             for(let n = 1; n <= 9; n++) {
-                const nDiv = document.createElement('div'); nDiv.className = 'pencil-num';
+                const nDiv = document.createElement('div'); 
+                nDiv.className = 'pencil-num';
+                
                 if (data.notes.includes(n)) {
-                    nDiv.textContent = n;
+                    // Wrap the pencil digit in the same relative span to pierce the SVG glass
+                    nDiv.innerHTML = `<span style="position: relative; z-index: 20;">${n}</span>`;
                     if (hasConflict(State.board, i, n)) nDiv.classList.add('error');
                 }
                 pGrid.appendChild(nDiv);
