@@ -62,9 +62,77 @@ body.dark-mode .side-panel h3 {
 
 .switch-label { display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 800; cursor: pointer; color: #64748b; }
 .color-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.color-btn { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #f1f5f9; cursor: pointer; transition: 0.2s; }
-.clear-color-btn { padding: 8px; font-size: 10px; font-weight: 700; background: #f1f5f9; border: none; border-radius: 6px; cursor: pointer; }
-body.dark-mode .clear-color-btn { background: #334155; color: white; }
+/* --- HIGHLIGHTER COLOR SWATCHES --- */
+.color-btn { 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 8px; 
+    border: 2px solid #f1f5f9; 
+    cursor: pointer; 
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+.color-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.color-btn:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+/* --- HIGHLIGHTER & THEME CLEAR BUTTONS --- */
+.clear-color-btn { 
+    padding: 10px; 
+    font-size: 11px; 
+    font-weight: 700; 
+    background: #e2e8f0; /* Default Grey for Light Mode */
+    color: var(--text-main);
+    border: 2px solid transparent; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clear-color-btn:hover { 
+    background: #cbd5e1; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08); 
+}
+
+.clear-color-btn:active { 
+    transform: translateY(1px); 
+    box-shadow: none; 
+}
+
+/* Light Mode: Specific color for Clear All */
+#clear-all-btn { background: #fee2e2; color: #991b1b; }
+#clear-all-btn:hover { background: #fecaca; }
+
+/* Dark Mode: Slate Backgrounds */
+body.dark-mode .clear-color-btn { background: #334155; color: #f8fafc; }
+body.dark-mode .clear-color-btn:hover { background: #475569; }
+
+/* Dark Mode: Ambient Glows (Base State) */
+body.dark-mode .clear-color-btn {
+    border-color: rgba(148, 163, 184, 0.4); 
+    box-shadow: 0 0 6px rgba(148, 163, 184, 0.3);
+}
+body.dark-mode #clear-all-btn {
+    border-color: rgba(231, 76, 60, 0.4); 
+    box-shadow: 0 0 6px rgba(231, 76, 60, 0.3);
+}
+
+/* Dark Mode: Intensified Glows (Hover State) */
+body.dark-mode .clear-color-btn:hover {
+    border-color: #cbd5e1; 
+    box-shadow: 0 0 15px rgba(148, 163, 184, 0.8);
+}
+body.dark-mode #clear-all-btn:hover {
+    border-color: #f1948a; 
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
+}
 body.dark-mode .switch-label { color: #f8fafc; }
 
 #grid-wrapper { 
