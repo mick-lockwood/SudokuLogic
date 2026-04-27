@@ -132,9 +132,9 @@ function drawVariantLine(variant) {
 
     const startCenter = Renderer.getCellCenter(cellIndices[0]);
 
+    // Thermo Drawing Logic
     if (variant.type === 'thermo') {
         const thermoColor = "rgba(160, 174, 192, 0.6)"; 
-
         const bulb = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         bulb.setAttribute("cx", startCenter.x);
         bulb.setAttribute("cy", startCenter.y);
@@ -145,11 +145,7 @@ function drawVariantLine(variant) {
         if (cellIndices.length > 1) {
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             let d = `M ${startCenter.x} ${startCenter.y} `;
-            
-            for (let i = 1; i < cellIndices.length; i++) {
-                const pt = Renderer.getCellCenter(cellIndices[i]);
-                d += `L ${pt.x} ${pt.y} `;
-            }
+            for (let i = 1; i < cellIndices.length; i++) d += `L ${Renderer.getCellCenter(cellIndices[i]).x} ${Renderer.getCellCenter(cellIndices[i]).y} `;
             
             path.setAttribute("d", d);
             path.setAttribute("fill", "none");
@@ -159,5 +155,25 @@ function drawVariantLine(variant) {
             path.setAttribute("stroke-linejoin", "round");
             svg.appendChild(path);
         }
+    }
+
+    // Whisper Drawing Logic
+    if (variant.type === 'whisper' && cellIndices.length > 1) {
+        const whisperColor = "rgba(46, 204, 113, 0.6)"; // Green
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        let d = `M ${startCenter.x} ${startCenter.y} `;
+        
+        for (let i = 1; i < cellIndices.length; i++) {
+            const pt = Renderer.getCellCenter(cellIndices[i]);
+            d += `L ${pt.x} ${pt.y} `;
+        }
+        
+        path.setAttribute("d", d);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", whisperColor);
+        path.setAttribute("stroke-width", "8"); // Slightly thinner than thermos
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("stroke-linejoin", "round");
+        svg.appendChild(path);
     }
 }
