@@ -11,13 +11,13 @@ export const Tooltips = {
     
     // Variant Tools
     'tool-thermo':
-        `Numbers must strictly increase\n
+        `Numbers must strictly increase
         from the bulb to the tip.\n
         Click and drag on cells to draw.\n
         Line starts with the bulb when drawing.`,
     
     'tool-whisper':
-        `Adjacent numbers along the line must\n
+        `Adjacent numbers along the line must
         have a difference of 5 or more.\n
         Click and drag on cells to draw.`,
     
