@@ -1,53 +1,8 @@
+// src/SudokuLogic.js
 import { State } from './GameState.js';
+import { thermoConflict } from './variants/Thermo.js';
+import { whisperConflict } from './variants/Whisper.js';
 
-// --- VARIANT MATH HANDLERS ---
-// --- THERMOS ---
-function thermoConflict(variant, arr, idx, val, isFlatArray = false) {
-    const pos = variant.cells.indexOf(idx);
-    if (pos === -1) return false;
-
-    // A. Implicit Bounds Checking
-    const minAllowed = pos + 1;
-    const maxAllowed = State.size - (variant.cells.length - 1 - pos);
-    if (val < minAllowed || val > maxAllowed) return true;
-
-    // B. Sequential Checks
-    if (pos > 0) {
-        const prevCell = variant.cells[pos - 1];
-        const prevVal = isFlatArray ? arr[prevCell] : arr[prevCell].val;
-        if (prevVal !== 0 && val <= prevVal) return true;
-    }
-    if (pos < variant.cells.length - 1) {
-        const nextCell = variant.cells[pos + 1];
-        const nextVal = isFlatArray ? arr[nextCell] : arr[nextCell].val;
-        if (nextVal !== 0 && val >= nextVal) return true;
-    }
-    return false;
-}
-
-// --- GERMAN WHISPER ---
-function whisperConflict(variant, arr, idx, val, isFlatArray = false) {
-    const pos = variant.cells.indexOf(idx);
-    if (pos === -1) return false;
-
-    // Check previous cell in the line
-    if (pos > 0) {
-        const prevCell = variant.cells[pos - 1];
-        const prevVal = isFlatArray ? arr[prevCell] : arr[prevCell].val;
-        // The absolute difference must be at least 5
-        if (prevVal !== 0 && Math.abs(val - prevVal) < 5) return true;
-    }
-    
-    // Check next cell in the line
-    if (pos < variant.cells.length - 1) {
-        const nextCell = variant.cells[pos + 1];
-        const nextVal = isFlatArray ? arr[nextCell] : arr[nextCell].val;
-        if (nextVal !== 0 && Math.abs(val - nextVal) < 5) return true;
-    }
-    return false;
-}
-
-// --- CORE SUDOKU CONSTRAINTS ---
 export function hasConflict(arr, idx, val) {
     if (val === 0) return false;
     const r = Math.floor(idx / State.size), c = idx % State.size;
@@ -60,12 +15,11 @@ export function hasConflict(arr, idx, val) {
         if (tr === r || tc === c || (tr >= br && tr < br + State.bH && tc >= bc && tc < bc + State.bW)) return true;
     }
 
-    // 2. Variant Rules
+    // 2. Variant Rules Loop
     if (State.variants && State.variants.length > 0) {
         for (let v of State.variants) {
             if (v.type === 'thermo' && thermoConflict(v, arr, idx, val, false)) return true;
             if (v.type === 'whisper' && whisperConflict(v, arr, idx, val, false)) return true;
-            // Future variants go here (e.g., if v.type === 'whisper'...)
         }
     }
     return false;
@@ -85,10 +39,11 @@ export function hasConflictGen(arr, idx, val) {
         if (arr[boxRow * State.size + boxCol] === val) return true;
     }
 
-    // 2. Variant Rules for Generator
+    // 2. Variant Rules Loop
     if (State.variants && State.variants.length > 0) {
         for (let v of State.variants) {
             if (v.type === 'thermo' && thermoConflict(v, arr, idx, val, true)) return true;
+            if (v.type === 'whisper' && whisperConflict(v, arr, idx, val, true)) return true;
         }
     }
     return false;
