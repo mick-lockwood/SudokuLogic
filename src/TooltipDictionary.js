@@ -27,11 +27,16 @@ They must exactly sum to the number in the corner.\n
 Click and drag on cells to draw cage.\n
 Enter target cage sum.`,
     
-    // Actions (Optional, but good to centralize!)
-    'btn-undo-line':
-`Undo the last drawn variant line.`,
+    // Actions    
+    'btn-undo-variant': 
+`Undo the last drawn variant.\n
+Shortcut: Ctrl+Z (While variant tool active)`,
     
-    'btn-clear-variants':
+    'btn-redo-variant': 
+`Redo the last undone variant.\n
+Shortcut: Ctrl+Y (While variant tool active)`,
+    
+    'btn-clear-variants': 
 `Instantly clear all variant lines from the board.`
     
 };
