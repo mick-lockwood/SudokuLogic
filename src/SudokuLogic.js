@@ -1,6 +1,7 @@
 import { State } from './GameState.js';
 
 // --- VARIANT MATH HANDLERS ---
+// --- THERMOS ---
 function thermoConflict(variant, arr, idx, val, isFlatArray = false) {
     const pos = variant.cells.indexOf(idx);
     if (pos === -1) return false;
@@ -24,6 +25,28 @@ function thermoConflict(variant, arr, idx, val, isFlatArray = false) {
     return false;
 }
 
+// --- GERMAN WHISPER ---
+function whisperConflict(variant, arr, idx, val, isFlatArray = false) {
+    const pos = variant.cells.indexOf(idx);
+    if (pos === -1) return false;
+
+    // Check previous cell in the line
+    if (pos > 0) {
+        const prevCell = variant.cells[pos - 1];
+        const prevVal = isFlatArray ? arr[prevCell] : arr[prevCell].val;
+        // The absolute difference must be at least 5
+        if (prevVal !== 0 && Math.abs(val - prevVal) < 5) return true;
+    }
+    
+    // Check next cell in the line
+    if (pos < variant.cells.length - 1) {
+        const nextCell = variant.cells[pos + 1];
+        const nextVal = isFlatArray ? arr[nextCell] : arr[nextCell].val;
+        if (nextVal !== 0 && Math.abs(val - nextVal) < 5) return true;
+    }
+    return false;
+}
+
 // --- CORE SUDOKU CONSTRAINTS ---
 export function hasConflict(arr, idx, val) {
     if (val === 0) return false;
@@ -41,6 +64,7 @@ export function hasConflict(arr, idx, val) {
     if (State.variants && State.variants.length > 0) {
         for (let v of State.variants) {
             if (v.type === 'thermo' && thermoConflict(v, arr, idx, val, false)) return true;
+            if (v.type === 'whisper' && whisperConflict(v, arr, idx, val, false)) return true;
             // Future variants go here (e.g., if v.type === 'whisper'...)
         }
     }
