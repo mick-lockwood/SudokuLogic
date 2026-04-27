@@ -9,6 +9,8 @@ export const State = {
     undoStack: [], redoStack: [], selected: [],
     currentDifficulty: 'medium',
     variants: [],
+    solution: [],
+    showGhost: false,
     
     // Highlighter Color Palette 
     colors: [
@@ -28,6 +30,8 @@ export function initBoardState(sizeParam) {
     State.selected = []; 
     State.isWon = false; 
     State.paused = false;
+    State.solution = [];
+    State.showGhost = false;
 }
 
 export function saveState(isUndoAction = false) {
