@@ -40,6 +40,7 @@ window.setAppMode = (m) => {
     document.getElementById('timer').style.display = isCreate ? 'none' : 'block';
     document.getElementById('pause-btn').style.display = isCreate ? 'none' : 'block';
     document.getElementById('clean-pencils-link').style.display = isCreate ? 'none' : 'inline';
+    document.getElementById('status-label').style.display = isCreate ? 'block' : 'none';
     
     if (m === 'solve') {
         startTimer(); 
