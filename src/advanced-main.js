@@ -14,6 +14,7 @@ window.AdvancedState = {
     activeTool: 'pointer',
     isDrawing: false,
     currentLine: [],
+    variantUndoStack: [],
     variantRedoStack: []
 };
 
@@ -63,10 +64,13 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
     } else if (window.AdvancedState.activeTool === 'eraser') {
         if (!isDragging) {
             const originalLength = State.variants.length;
-            // Delete any variant object whose cells array includes the clicked index
-            State.variants = State.variants.filter(v => !v.cells.includes(index));
+            // Calculate the new array without modifying the actual state yet
+            const newVariants = State.variants.filter(v => !v.cells.includes(index));
             
-            if (State.variants.length < originalLength) {
+            if (newVariants.length < originalLength) {
+                // Save a snapshot of the old state, THEN apply the new erased state
+                window.saveVariantState(); 
+                State.variants = newVariants;
                 renderSVGLayer();
                 Renderer.updateUI();
             }
@@ -77,11 +81,18 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
 };
 
 // --- UNDO / REDO LOGIC ---
+
+window.saveVariantState = () => {
+    // Clear the redo stack and save a stringified snapshot of the current variants
+    window.AdvancedState.variantRedoStack = [];
+    window.AdvancedState.variantUndoStack.push(JSON.stringify(State.variants));
+};
+
 window.undoVariant = () => {
-    if (State.variants.length > 0) {
-        // Pop from active variants, push to redo stack
-        const undone = State.variants.pop();
-        window.AdvancedState.variantRedoStack.push(undone);
+    if (window.AdvancedState.variantUndoStack.length > 0) {
+        // Push the current state to the redo stack, then load the last undo snapshot
+        window.AdvancedState.variantRedoStack.push(JSON.stringify(State.variants));
+        State.variants = JSON.parse(window.AdvancedState.variantUndoStack.pop());
         renderSVGLayer();
         Renderer.updateUI();
     }
@@ -89,9 +100,9 @@ window.undoVariant = () => {
 
 window.redoVariant = () => {
     if (window.AdvancedState.variantRedoStack.length > 0) {
-        // Pop from redo stack, push back to active variants
-        const redone = window.AdvancedState.variantRedoStack.pop();
-        State.variants.push(redone);
+        // Push the current state to the undo stack, then load the last redo snapshot
+        window.AdvancedState.variantUndoStack.push(JSON.stringify(State.variants));
+        State.variants = JSON.parse(window.AdvancedState.variantRedoStack.pop());
         renderSVGLayer();
         Renderer.updateUI();
     }
@@ -99,8 +110,8 @@ window.redoVariant = () => {
 
 window.clearVariantGraphics = () => {
     if (!confirm("Clear all drawn variant lines?")) return;
+    window.saveVariantState(); // Take a snapshot before wiping!
     State.variants = [];
-    window.AdvancedState.variantRedoStack = []; // Wipe redo stack
     renderSVGLayer();
     Renderer.updateUI(); 
 };
@@ -136,38 +147,32 @@ window.addEventListener('pointerup', () => {
         if (window.AdvancedState.currentLine.length > 0) {
             
             if (tool === 'killer') {
-                // Use a tiny timeout to allow the SVG layer to finish drawing visually
-                // BEFORE the browser prompt freezes the screen
                 setTimeout(() => {
                     const sumInput = prompt("Enter the target sum for this cage:");
                     const sumVal = parseInt(sumInput);
                     
                     if (!isNaN(sumVal) && sumVal > 0) {
+                        window.saveVariantState(); // Take snapshot BEFORE adding the new shape
                         State.variants.push({
                             type: tool,
                             cells: [...window.AdvancedState.currentLine],
                             sum: sumVal
                         });
-                        
-                        window.AdvancedState.variantRedoStack = []; 
                     }
                     
-                    // Clear the active drawing line only AFTER the prompt is closed
                     window.AdvancedState.currentLine = [];
                     Renderer.updateUI(); 
                     renderSVGLayer();
                 }, 10);
                 
-                return; // Stop here so we don't clear the line prematurely
+                return; 
                 
             } else if (window.AdvancedState.currentLine.length > 1) {
-                // Thermos and Whispers just get saved normally
+                window.saveVariantState(); // Take snapshot BEFORE adding the new shape
                 State.variants.push({
                     type: tool,
                     cells: [...window.AdvancedState.currentLine]
                 });
-                
-                window.AdvancedState.variantRedoStack = []; 
                 
                 Renderer.updateUI(); 
             }
