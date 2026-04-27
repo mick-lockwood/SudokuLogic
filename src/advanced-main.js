@@ -7,6 +7,7 @@ import { Tooltips } from './TooltipDictionary.js';
 // import variant rules
 import { drawThermo } from './variants/Thermo.js';
 import { drawWhisper } from './variants/Whisper.js';
+import { drawKiller } from './variants/Killer.js';
 
 
 window.AdvancedState = {
@@ -105,19 +106,28 @@ window.addEventListener('pointerup', () => {
         if (window.AdvancedState.currentLine.length > 0) {
             
             if (tool === 'killer') {
-                // For a killer cage, prompt the user for the total sum
-                const sumInput = prompt("Enter the target sum for this cage:");
-                const sumVal = parseInt(sumInput);
-                
-                // Only save the cage if they typed a valid number greater than 0
-                if (!isNaN(sumVal) && sumVal > 0) {
-                    State.variants.push({
-                        type: tool,
-                        cells: [...window.AdvancedState.currentLine],
-                        sum: sumVal
-                    });
+                // Use a tiny timeout to allow the SVG layer to finish drawing visually
+                // BEFORE the browser prompt freezes the screen
+                setTimeout(() => {
+                    const sumInput = prompt("Enter the target sum for this cage:");
+                    const sumVal = parseInt(sumInput);
+                    
+                    if (!isNaN(sumVal) && sumVal > 0) {
+                        State.variants.push({
+                            type: tool,
+                            cells: [...window.AdvancedState.currentLine],
+                            sum: sumVal
+                        });
+                    }
+                    
+                    // Clear the active drawing line only AFTER the prompt is closed
+                    window.AdvancedState.currentLine = [];
                     Renderer.updateUI(); 
-                }
+                    renderSVGLayer();
+                }, 10);
+                
+                return; // Stop here so we don't clear the line prematurely
+                
             } else if (window.AdvancedState.currentLine.length > 1) {
                 // Thermos and Whispers just get saved normally
                 State.variants.push({
