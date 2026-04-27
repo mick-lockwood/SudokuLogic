@@ -133,23 +133,17 @@ window.exportPuzzleLink = () => {
     // 2. Encode to a URL-safe Base64 string
     const encodedData = btoa(JSON.stringify(puzzleData));
     
-    // --- NEW SMART URL GENERATOR ---
+    // --- UPDATED SMART URL GENERATOR ---
     // Grab the full exact URL you are on right now, ignoring any old parameters
     let currentUrl = window.location.href.split('?')[0];
     
-    // If we have variants, ensure the link explicitly points to Sudoku Logic (index.html)
-    if (State.variants && State.variants.length > 0 && !currentUrl.includes('index.html')) {
-        if (currentUrl.endsWith('classic.html')) {
-            currentUrl = currentUrl.replace('classic.html', 'index.html');
-        } else if (currentUrl.endsWith('/')) {
-            currentUrl += 'index.html';
-        } else {
-            currentUrl += '/index.html';
-        }
+    // If the puzzle has variants but the URL says 'classic', force it to the advanced engine
+    if (State.variants && State.variants.length > 0 && currentUrl.includes('classic.html')) {
+        currentUrl = currentUrl.replace('classic.html', 'index.html');
     }
     
     const shareUrl = `${currentUrl}?puzzle=${encodedData}`;
-    // -------------------------------
+    // -----------------------------------
     
     // 3. Copy to clipboard
     navigator.clipboard.writeText(shareUrl).then(() => {
