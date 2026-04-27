@@ -1,75 +1,35 @@
-// src/advanced-main.js
-import { State, initBoardState } from './GameState.js';
-import * as Renderer from './Renderer.js';
-import * as ClassicMain from './classic-main.js'; // Inherits all standard buttons
+// 1. IMPORT THE CORE ENGINE
+// This single line loads the entire classic game. It attaches all the 
+// standard Sudoku functions (updateUI, handleInput, timers, etc.) to the window.
+import './classic-main.js'; 
 
-// Add advanced variant features here
-window.enableThermoMode = () => {
-    console.log("Thermo drawing mode activated!");
-    // Logic to draw SVG lines goes here
+// We also import the State and Renderer so we can manipulate them with our new tools
+import { State } from './GameState.js';
+import * as Renderer from './Renderer.js';
+
+// 2. ADVANCED GAME STATE
+// We create a separate state object just for the variant logic, keeping the 
+// classic State clean and untouched.
+window.AdvancedState = {
+    activeTool: 'pointer', // Tracks what tool the user is currently holding ('pointer', 'thermo', etc.)
+    currentLine: [],       // Temporarily stores cell indices while the user is actively dragging a line
+    thermos: []            // Stores the arrays of completed thermometers
 };
 
-// Checks conflicts for the active gameplay board
-export function hasConflict(arr, idx, val) {
-    if (val === 0) return false;
-    const r = Math.floor(idx / State.size), c = idx % State.size;
-    const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
+// 3. ADVANCED UI HOOKS
+window.toggleThermoTool = () => {
+    // Switch between the standard pointer and the thermo drawing tool
+    if (window.AdvancedState.activeTool === 'thermo') {
+        window.AdvancedState.activeTool = 'pointer';
+        console.log("Tool: Pointer (Standard Selection)");
+    } else {
+        window.AdvancedState.activeTool = 'thermo';
+        console.log("Tool: Thermo Drawer");
+    }
     
-    for (let i = 0; i < State.size * State.size; i++) {
-        if (i === idx || arr[i].val !== val) continue;
-        const tr = Math.floor(i / State.size), tc = i % State.size;
-        if (tr === r || tc === c || (tr >= br && tr < br + State.bH && tc >= bc && tc < bc + State.bW)) return true;
-    }
-    return false;
-}
+    // NOTE: Once you add a Thermo button to logic.html, you would toggle its active CSS class here
+};
 
-// Faster, stripped-down conflict check for the generator's flat array
-export function hasConflictGen(arr, idx, val) {
-    const r = Math.floor(idx / State.size), c = idx % State.size;
-    const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
-
-    for (let i = 0; i < State.size; i++) {
-        if (arr[r * State.size + i] === val) return true;
-        if (arr[i * State.size + c] === val) return true;
-        
-        let boxRow = br + Math.floor(i / State.bW);
-        let boxCol = bc + (i % State.bW);
-        if (arr[boxRow * State.size + boxCol] === val) return true;
-    }
-    return false;
-}
-
-// Counts how many times a number is safely placed on the board
-export function getCount(num) { 
-    return State.board.filter((c, i) => c.val === num && !hasConflict(State.board, i, num)).length; 
-}
-
-// Auto-deletes pencil marks in the same row, col, and box after a move
-export function cleanPencilsAfterMove(idx, val) {
-    const r = Math.floor(idx / State.size), c = idx % State.size;
-    const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
-
-    State.board.forEach((cell, i) => {
-        const tr = Math.floor(i / State.size), tc = i % State.size;
-        if (tr === r || tc === c || (tr >= br && tr < br + State.bH && tc >= bc && tc < bc + State.bW)) {
-            const noteIdx = cell.notes.indexOf(val);
-            if (noteIdx > -1) cell.notes.splice(noteIdx, 1);
-        }
-    });
-}
-
-// Recursive backtracking solver to check for unique solutions
-export function countSolutions(boardArray, count = 0) {
-    let pos = boardArray.indexOf(0);
-    if (pos === -1) return count + 1;
-
-    for (let n = 1; n <= State.size; n++) { 
-        if (!hasConflictGen(boardArray, pos, n)) {
-            boardArray[pos] = n;
-            count = countSolutions(boardArray, count);
-            boardArray[pos] = 0;
-            if (count > 1) return count; 
-        }
-    }
-    return count;
-}
+// 4. SVG EVENT OVERRIDES (Coming next!)
+// This is where we will eventually intercept the pointer down/enter events 
+// to draw SVG paths if the activeTool is 'thermo'.
