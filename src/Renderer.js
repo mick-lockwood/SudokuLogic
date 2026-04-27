@@ -54,6 +54,13 @@ export function updateUI() {
             el.innerHTML = `<span style="position: relative; z-index: 20;">${data.val}</span>`;
             el.classList.add(data.given ? 'given' : 'user');
             if (hasConflict(State.board, i, data.val)) el.classList.add('error');
+        }
+            
+        else if (State.mode === 'create' && State.showGhost && State.solution && State.solution[i]) {
+            const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(30, 41, 59, 0.2)";
+            el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-style: italic;">${State.solution[i]}</span>`;
+        }
+            
         } else if (data.notes.length > 0) {
             const pGrid = document.createElement('div');
             pGrid.className = 'pencil-grid';
