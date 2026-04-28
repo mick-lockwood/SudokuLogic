@@ -80,19 +80,19 @@
                     <button id="pause-btn" class="btn" style="display:none; padding: 10px 15px;" onclick="togglePause()">Pause</button>
                 </div>
                     
-                <div id="gen-controls">
-                    
-                    <div class="gen-toggle-pill">
-                        <select id="difficulty-select">
+                -<div id="gen-controls" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; max-width: calc(var(--cell-size) * 9); margin: 15px auto 0 auto;">
+    
+                    <div class="toggle-group" style="grid-column: span 2; display: flex; padding: 4px; gap: 4px;">
+                        <select id="diff" style="flex: 1; background: transparent; border: none; text-align: center; text-align-last: center; font-weight: 800; cursor: pointer; color: var(--text-main); font-size: 12px; outline: none;">
                             <option value="easy">Easy</option>
                             <option value="medium" selected>Medium</option>
                             <option value="hard">Hard</option>
                         </select>
-                        <button id="btn-generate" onclick="generatePuzzle()">Generate Puzzle</button>
+                        <button id="gen-btn" class="btn gen-action-btn active" style="flex: 1; margin: 0; padding: 8px 5px;" onclick="generateNew()">Generate Puzzle</button>
                     </div>
-            
-                    <button id="toggle-ghost" class="action-btn" onclick="toggleGhost()">Ghost Solution</button>
-                    <button id="btn-share" class="action-btn" onclick="exportPuzzleLink()">Share Link</button>
+                
+                    <button id="ghost-btn" class="btn gen-action-btn" style="width: 100%; margin: 0; padding: 8px 5px;" onclick="toggleGhost()">Ghost Solution</button>
+                    <button id="export-btn" class="btn gen-action-btn" style="width: 100%; margin: 0; padding: 8px 5px;" onclick="exportPuzzleLink()">Share Link</button>
                     
                 </div>
             
