@@ -739,6 +739,13 @@ body.dark-mode .variant-tool-btn.active-tool-eraser {
 }
 
 @media (max-width: 950px) {
+    
+    /* Forces the overlay to physically exist so it catches clicks! */
+    #mobile-overlay {
+        display: block;
+        pointer-events: none;
+    }
+    
     /* 1. Prevent Overlapping: Let the body breathe natively */
     html, body {
         min-height: 100dvh;
