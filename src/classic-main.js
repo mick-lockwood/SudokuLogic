@@ -153,8 +153,8 @@ window.exportPuzzleLink = () => {
         size: State.size,
         board: State.board.map(c => c.given ? c.val : 0), 
         variants: State.variants || [],
-        antiKnight: State.antiKnight,
-        antiKing: State.antiKing
+        antiKnight: State.antiKnight || false,
+        antiKing: State.antiKing || false
     };
     
     // 2. Encode to a URL-safe Base64 string
@@ -390,10 +390,14 @@ window.onload = function() {
             // 3. Apply the numbers and variants to the State
             State.variants = decodedData.variants || [];
             State.antiKnight = decodedData.antiKnight || false;
+            State.antiKing = decodedData.antiKing || false;
             
             // Visually check the toggle box if the rule is active
             const akToggle = document.getElementById('toggle-anti-knight');
             if (akToggle) akToggle.checked = State.antiKnight;
+
+            const aKingToggle = document.getElementById('toggle-anti-king');
+            if (aKingToggle) aKingToggle.checked = State.antiKing;
             
             decodedData.board.forEach((val, i) => {
                 State.board[i].val = val;
