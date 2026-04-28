@@ -83,7 +83,8 @@ window.togglePause = () => {
     if (!State.paused) startTimer(); else clearInterval(State.timerInt);
 };
 
-window.generateNew = generateNew;
+window.generateNew = function() {
+    
 window.generateWithDiff = (s, d) => {
     window.setGridSize(s);
     document.getElementById('diff').value = d;
