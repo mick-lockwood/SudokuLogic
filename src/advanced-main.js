@@ -65,25 +65,17 @@ window.clearVariantGraphics = () => {
 const originalHandleCellSelection = window.handleCellSelection;
 
 window.handleCellSelection = (index, isMulti, isDragging) => {
-    // If the tool is any drawing tool (thermo, whisper, etc), route to drawing logic
-    if (['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(window.AdvancedState.activeTool)) {
-    handleLineDrawing(index, isDragging);
-        
-    } else if (window.AdvancedState.activeTool === 'eraser') {
-        if (!isDragging) {
-            const originalLength = State.variants.length;
-            // Calculate the new array without modifying the actual state yet
-            const newVariants = State.variants.filter(v => !v.cells.includes(index));
-            
-            if (newVariants.length < originalLength) {
-                // Save a snapshot of the old state, THEN apply the new erased state
-                window.saveVariantState(); 
-                State.variants = newVariants;
-                renderSVGLayer();
-                Renderer.updateUI();
-            }
-        }
-    } else {
+    // NEW: If this is an outer clue cell (a string ID), skip drawing logic
+    const isClueCell = typeof index === 'string';
+
+    if (!isClueCell && ['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(window.AdvancedState.activeTool)) {
+        handleLineDrawing(index, isDragging);
+    } 
+    else if (!isClueCell && window.AdvancedState.activeTool === 'eraser') {
+        // ... your existing eraser logic ...
+    } 
+    else {
+        // This will now handle both regular cell selection AND our new clue selection
         originalHandleCellSelection(index, isMulti, isDragging);
     }
 };
