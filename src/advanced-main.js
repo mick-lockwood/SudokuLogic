@@ -72,7 +72,18 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
         handleLineDrawing(index, isDragging);
     } 
     else if (!isClueCell && window.AdvancedState.activeTool === 'eraser') {
-        // ... your existing eraser logic ...
+        // RESTORED ERASER LOGIC
+        if (!isDragging) {
+            const originalLength = State.variants.length;
+            const newVariants = State.variants.filter(v => !v.cells.includes(index));
+            
+            if (newVariants.length < originalLength) {
+                window.saveVariantState(); 
+                State.variants = newVariants;
+                renderSVGLayer();
+                Renderer.updateUI();
+            }
+        }
     } 
     else {
         // This will now handle both regular cell selection AND our new clue selection
