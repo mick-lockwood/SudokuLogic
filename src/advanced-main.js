@@ -122,14 +122,16 @@ window.toggleAntiKnight = () => {
     State.antiKnight = document.getElementById('toggle-anti-knight').checked;
     console.log("Anti-Knight Rule is now:", State.antiKnight);
     
-    // Update the title when the switch is flipped!
-    if (typeof window.updateDynamicTitle === 'function') {
-        window.updateDynamicTitle();
-    }
+    if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
+    if (typeof window.updateUI === 'function') window.updateUI();
+};
+
+window.toggleAntiKing = () => {
+    State.antiKing = document.getElementById('toggle-anti-king').checked;
+    console.log("Anti-King Rule is now:", State.antiKing);
     
-    if (typeof window.updateUI === 'function') {
-        window.updateUI(); 
-    }
+    if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
+    if (typeof window.updateUI === 'function') window.updateUI(); 
 };
 
 // --- DYNAMIC DRAWING (BACKTRACKING) ---
@@ -358,6 +360,7 @@ window.updateDynamicTitle = () => {
     
     // 2. Check global rules
     if (State.antiKnight) activeTypes.add('Anti-Knight');
+    if (State.antiKing) activeTypes.add('Anti-King');
     
     // 3. Update the HTML
     const titleEl = document.getElementById('puzzle-title');
