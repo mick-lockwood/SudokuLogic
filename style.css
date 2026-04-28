@@ -370,10 +370,25 @@ body.dark-mode .btn-primary:hover {
     margin: 15px auto 0 auto !important;
 }
 
-/* Let all action buttons use their native styles, just force them to fill the grid */
-#gen-controls .action-btn {
-    width: 100%;
-    margin: 0 !important;
+/* Ensure the gen-controls wrapper respects the 9x9 board width */
+#gen-controls {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    max-width: calc(var(--cell-size) * 9) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Matching the "active" look for the button inside the pill */
+#gen-controls .toggle-group button.active {
+    background: #ffffff;
+    color: #1e293b;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+body.dark-mode #gen-controls .toggle-group button.active {
+    background: #334155;
+    color: #f8fafc;
 }
 
 /* --- THE TOGGLE PILL WRAPPER --- */
