@@ -49,7 +49,7 @@ Shortcut: Ctrl+Z (While variant tool active)`,
 Shortcut: Ctrl+Y (While variant tool active)`,
     
     'btn-clear-variants': 
-`Instantly clear all variant lines from the board.`
+`Instantly clear all variant lines from the board.`,
 
     'toggle-anti-knight': 
 `Cells that are a chess knight's move 
