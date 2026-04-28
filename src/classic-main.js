@@ -50,7 +50,7 @@ window.setAppMode = (m) => {
     document.getElementById('modeSolve').classList.toggle('active', m === 'solve');
     
     const isCreate = (m === 'create');
-    document.getElementById('gen-controls').style.display = isCreate ? 'flex' : 'none';
+    document.getElementById('gen-controls').style.display = isCreate ? 'grid' : 'none';
     document.getElementById('size-selector').style.display = isCreate ? 'flex' : 'none';
     document.getElementById('timer').style.display = isCreate ? 'none' : 'block';
     document.getElementById('pause-btn').style.display = isCreate ? 'none' : 'block';
