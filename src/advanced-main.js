@@ -322,7 +322,15 @@ window.setGridSize = (s) => {
 // Loops through the dictionary and applies the text to the matching HTML elements
 Object.keys(Tooltips).forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.title = Tooltips[id];
+    if (el) {
+        // If the element is wrapped in a <label>, apply the tooltip to the whole row!
+        const parentLabel = el.closest('label');
+        if (parentLabel) {
+            parentLabel.title = Tooltips[id];
+        } else {
+            el.title = Tooltips[id];
+        }
+    }
 });
 
 // --- INITIALIZE DEFAULT STATE ---
