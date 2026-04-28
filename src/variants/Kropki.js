@@ -34,6 +34,7 @@ export function drawKropki(variant, svgElement) {
     const midY = (pt1.y + pt2.y) / 2;
 
     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.classList.add('kropki-dot');
     circle.setAttribute("cx", midX);
     circle.setAttribute("cy", midY);
     circle.setAttribute("r", "8"); // Size of the dot
