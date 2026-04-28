@@ -362,11 +362,10 @@ body.dark-mode .btn-primary:hover {
 
 /* --- GENERATOR CONTROL LAYOUT (Static 1-Line Fit) --- */
 #gen-controls {
-    grid-template-columns: repeat(4, 78px) !important; /* 4 strict columns */
-    justify-content: center;
-    width: fit-content !important;
-    margin: 0 auto;
-    gap: 6px !important;
+    /* Fluidly splits the items into 1 row spanning the full width of the wrapper */
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important; 
+    width: 100% !important;
+    gap: 8px !important;
 }
 
 #gen-controls select, #gen-controls .btn {
