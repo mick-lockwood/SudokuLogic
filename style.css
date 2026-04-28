@@ -792,7 +792,7 @@ body.mobile-menu-open #mobile-overlay {
     #gen-controls { gap: 5px; }
 
     /* 3. Re-apply the Square Cell Lock */
-    :root { --cell-size: calc((100vw - 40px) / 9.2); }
+    :root { --cell-size: calc((100vw - 20px) / 11.2); }
     .cell {
         min-width: 0 !important;
         min-height: 0 !important;
