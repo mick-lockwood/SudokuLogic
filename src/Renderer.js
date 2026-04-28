@@ -118,12 +118,11 @@ export function renderGrid() {
         const div = document.createElement('div');
         div.className = 'cell'; 
         div.id = `cell-${i}`;
-        div.style.border = `1px solid ${gridLine}`;
         
         const r = Math.floor(i / State.size), c = i % State.size;
         
-        if ((c + 1) % State.bW === 0 && c < State.size - 1) div.style.borderRight = `3px solid ${gridLine}`;
-        if ((r + 1) % State.bH === 0 && r < State.size - 1) div.style.borderBottom = `3px solid ${gridLine}`;
+        if ((c + 1) % State.bW === 0 && c < State.size - 1) div.classList.add('block-right');
+        if ((r + 1) % State.bH === 0 && r < State.size - 1) div.classList.add('block-bottom');
   
         div.addEventListener('pointerdown', (e) => {
             if (State.paused || State.isWon) return;
