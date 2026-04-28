@@ -439,28 +439,29 @@ setTimeout(() => {
 }, 100);
 
 // --- MOBILE DRAWER SWIPE-TO-CLOSE ---
-setTimeout(() => {
-    let touchStartY = 0;
-    
-    const attachSwipe = (panel) => {
-        if (!panel) return;
-        
-        // Record where the finger started
-        panel.addEventListener('touchstart', (e) => {
-            touchStartY = e.changedTouches[0].screenY;
-        }, { passive: true });
-        
-        // Check where the finger ended
-        panel.addEventListener('touchend', (e) => {
-            const touchEndY = e.changedTouches[0].screenY;
-            
-            // If swiped down more than 60px AND the drawer isn't scrolled down
-            if (touchEndY - touchStartY > 60 && panel.scrollTop <= 5) {
-                window.closeMobileMenu();
-            }
-        }, { passive: true });
-    };
+let touchStartY = 0;
 
-    attachSwipe(document.getElementById('left-panel'));
-    attachSwipe(document.querySelector('.side-panel'));
-}, 200);
+window.addEventListener('touchstart', (e) => {
+    // Only track touches if a menu is actually open
+    if (!document.body.classList.contains('mobile-menu-open')) return;
+    touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+window.addEventListener('touchend', (e) => {
+    if (!document.body.classList.contains('mobile-menu-open')) return;
+    
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    // If they swiped down by more than 50 pixels
+    if (touchEndY - touchStartY > 50) {
+        
+        // Figure out which panel is currently active
+        const isColorsTab = document.body.getAttribute('data-mobile-tab') === 'colors';
+        const activePanel = isColorsTab ? document.querySelector('.side-panel') : document.getElementById('left-panel');
+        
+        // Only close it if they are scrolled all the way to the top of the menu
+        if (activePanel && activePanel.scrollTop <= 10) {
+            window.closeMobileMenu();
+        }
+    }
+}, { passive: true });
