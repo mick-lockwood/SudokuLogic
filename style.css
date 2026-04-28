@@ -363,26 +363,24 @@ body.dark-mode .btn-primary:hover {
 /* --- GENERATOR CONTROLS (4 Equal Columns, 9x9 Width) --- */
 #gen-controls {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* Exactly 4 equal columns */
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     width: 100%;
-    max-width: calc(var(--cell-size) * 9); /* Locked to the 9x9 board width */
+    max-width: calc(var(--cell-size) * 9); 
     margin: 15px auto 0 auto !important;
 }
 
-/* Ensure the Ghost and Share buttons fill their single columns perfectly */
-#gen-controls > .action-btn {
+/* Let all action buttons use their native styles, just force them to fill the grid */
+#gen-controls .action-btn {
     width: 100%;
-    margin: 0;
-    padding: 8px 4px;
-    font-size: 12px;
+    margin: 0 !important;
 }
 
 /* --- THE TOGGLE PILL WRAPPER --- */
 .gen-toggle-pill {
-    grid-column: span 2; /* Forces this wrapper to take exactly half the layout (2 of 4 columns) */
+    grid-column: span 2; 
     display: flex;
-    background: #f1f5f9; /* Same as your standard toggle background */
+    background: #f1f5f9; 
     border-radius: 8px;
     padding: 4px;
     gap: 4px;
@@ -392,7 +390,7 @@ body.dark-mode .gen-toggle-pill {
     background: #1e293b;
 }
 
-/* Style the Dropdown inside the pill (Inactive Side) */
+/* Keep the Dropdown text clean and centered */
 .gen-toggle-pill select {
     flex: 1;
     background: transparent;
@@ -400,10 +398,9 @@ body.dark-mode .gen-toggle-pill {
     outline: none;
     color: var(--text-main);
     font-weight: bold;
-    font-size: 12px;
     cursor: pointer;
     text-align: center;
-    text-align-last: center; /* Centers the Easy/Med/Hard text */
+    text-align-last: center; 
 }
 
 /* Style the Generate Button inside the pill (Active Side) */
