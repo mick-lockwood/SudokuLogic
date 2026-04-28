@@ -733,18 +733,21 @@ body.dark-mode .variant-tool-btn.active-tool-eraser {
    MOBILE & TABLET RESPONSIVENESS
 ========================================= */
 #mobile-overlay {
-    display: none; position: fixed; inset: 0;
+    position: fixed; inset: 0;
     background: rgba(0,0,0,0.6); z-index: 999; 
-    backdrop-filter: blur(3px); opacity: 0; transition: opacity 0.3s;
+    backdrop-filter: blur(3px); opacity: 0; transition: opacity 0.3s, visibility 0.3s;
+    pointer-events: none; /* Ignore clicks when closed */
+    visibility: hidden;   /* Hide completely when closed */
+}
+
+/* Force it to show and catch clicks when a menu opens */
+body.mobile-menu-open #mobile-overlay { 
+    opacity: 1; 
+    pointer-events: auto; 
+    visibility: visible;
 }
 
 @media (max-width: 950px) {
-    
-    /* Forces the overlay to physically exist so it catches clicks! */
-    #mobile-overlay {
-        display: block;
-        pointer-events: none;
-    }
     
     /* 1. Prevent Overlapping: Let the body breathe natively */
     html, body {
