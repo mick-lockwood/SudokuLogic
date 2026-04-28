@@ -98,6 +98,11 @@ export function drawKiller(variant, svgElement) {
         text.setAttribute("font-size", "8");
         text.setAttribute("font-weight", "800");
         text.setAttribute("fill", strokeColor);
+        text.setAttribute('paint-order', 'stroke');
+        text.setAttribute('stroke', State.darkMode ? '#1e293b' : '#ffffff');
+        text.setAttribute('stroke-width', '3px');
+        text.setAttribute('stroke-linejoin', 'round');
+        
         text.textContent = variant.sum;
         svgElement.appendChild(text);
     }
