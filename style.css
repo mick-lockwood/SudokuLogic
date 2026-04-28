@@ -359,19 +359,10 @@ body.dark-mode .btn-primary:hover {
     border-color: #74b9ff;
 }
 
-/* --- GENERATOR CONTROLS (4 Equal Columns, 9x9 Width) --- */
-#gen-controls {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    width: 100%;
-    max-width: calc(var(--cell-size) * 9); 
-    margin: 15px auto 0 auto !important;
-}
+/* --- GENERATOR CONTROLS --- */
 
-/* Ensure the gen-controls wrapper respects the 9x9 board width */
+/* Ensure the gen-controls wrapper respects the 9x9 board width, but ALLOWS JS to hide it! */
 #gen-controls {
-    display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
     max-width: calc(var(--cell-size) * 9) !important;
     margin-left: auto !important;
@@ -380,16 +371,16 @@ body.dark-mode .btn-primary:hover {
 
 /* Matching the "active" look for the button inside the pill */
 #gen-controls .toggle-group button.active {
-    background: #ffffff;
-    color: #1e293b;
+    background: #3498db !important; /* CLASSIC BLUE */
+    color: #ffffff !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    pointer-events: auto !important;
+    pointer-events: auto !important; /* CRITICAL: Restores clickability! */
     transform: none !important;
 }
 
 body.dark-mode #gen-controls .toggle-group button.active {
-    background: #334155;
-    color: #f8fafc;
+    background: #3498db !important;
+    color: #ffffff !important;
 }
 
 /* --- THE TOGGLE PILL WRAPPER --- */
