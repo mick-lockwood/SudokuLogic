@@ -27,6 +27,9 @@ body {
     padding: 40px 20px; color: var(--text-main); transition: background 0.3s;
 }
 
+/* NUCLEAR ZOOM LOCK: Prevents double-tap zooming on all interactive elements */
+button, select, input, a { touch-action: manipulation !important; }
+
 h1 { margin-bottom: 20px; font-size: 2.5rem; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
 
 /* --- EDITABLE PUZZLE TITLE --- */
@@ -688,127 +691,91 @@ body.dark-mode .variant-tool-btn.active-tool-eraser {
     border-color: #f1948a; /* Light red border */
 }
 
+/* Hide Toolbar on Desktop */
+#mobile-toolbar { display: none; }
+
 /* =========================================
    MOBILE & TABLET RESPONSIVENESS
 ========================================= */
 #mobile-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 999; backdrop-filter: blur(3px);
-    opacity: 0; transition: opacity 0.3s;
-}
-
-#mobile-menu-btn {
-    display: none; position: fixed;
-    bottom: 20px; right: 20px;
-    z-index: 1001; padding: 15px 24px;
-    border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    font-size: 14px;
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); z-index: 999; 
+    backdrop-filter: blur(3px); opacity: 0; transition: opacity 0.3s;
 }
 
 @media (max-width: 950px) {
-    /* 1. Aggressively Compress Vertical Space (No Scrolling Required!) */
-    body { padding: 10px; }
-    h1 { font-size: 1.5rem; margin-bottom: 10px; }
-    .main-card { padding: 12px; gap: 12px; margin-bottom: 10px; max-width: 100%; width: 100%; }
-    .row { flex-wrap: wrap; } /* Allows top buttons to wrap if needed */
+    /* 1. NO SCROLLING ALLOWED */
+    html, body {
+        height: 100vh;
+        height: 100dvh; /* Adapts to iOS bottom browser bar */
+        overflow: hidden !important; /* Mechanically disables scrolling */
+        padding: 0; margin: 0;
+    }
+
+    #app-container {
+        height: 100%; display: flex; flex-direction: column;
+        padding: 5px 10px 65px 10px; /* 65px bottom padding clears the toolbar */
+    }
+
+    /* 2. Extreme Vertical Compression */
+    h1 { font-size: 1.2rem; margin: 5px 0; text-align: center; }
+    .main-card { 
+        padding: 0; margin: 0; box-shadow: none; background: transparent; 
+        flex: 1; display: flex; flex-direction: column; justify-content: space-evenly;
+    }
     
-    /* 2. Fix Grid Sizing (Perfect fit without squishing) */
+    #gen-controls { gap: 5px; }
     :root { --cell-size: calc((100vw - 40px) / 9.2); }
-    
-    /* NEW: Force perfect squares and remove desktop minimums */
-    .cell {
-        min-width: 0 !important;
-        min-height: 0 !important;
-        aspect-ratio: 1 / 1; 
-    }
-    
-    /* 3. Stack the Game Column */
-    #app-container { flex-direction: column; align-items: center; width: 100%; }
-    .game-column { width: 100%; }
-    
-    /* 4. Fix Gen-Controls Bug (Stacks them without forcing display:flex) */
-    #gen-controls { grid-template-columns: 1fr !important; }
-    
-    /* 5. Mobile Numpad Restructure (3x3 Numbers Right, Tools Left) */
-    #numpad { 
-        display: flex !important; 
-        flex-direction: row-reverse; /* Flips numbers to right, tools to left */
-        justify-content: center; 
-        gap: 15px; 
-        margin-top: 15px !important; 
-        width: 100%;
-        padding: 0 10px;
-    }
-    
-    .numpad-row { 
-        display: grid !important; 
-        gap: 8px; 
-        margin-bottom: 0 !important;
-    }
 
-    /* Target the Numbers Row (Row 1) */
-    #numpad .numpad-row:nth-child(1) {
-        grid-template-columns: repeat(3, 1fr);
-        flex: 1.5; /* Gives the numbers a bit more width */
-        max-width: 220px;
+    /* 3. The New Bottom Toolbar */
+    #mobile-toolbar {
+        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+        background: var(--card-bg); padding: 10px; gap: 10px;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.05); z-index: 998;
+        border-top: 1px solid var(--grid-line);
     }
+    
+    .toolbar-btn {
+        flex: 1; padding: 12px 0; border-radius: 8px;
+        background: #e2e8f0; color: var(--text-main); 
+        font-weight: 800; border: none; font-size: 12px;
+        transition: transform 0.1s;
+    }
+    .toolbar-btn:active { transform: scale(0.95); }
+    body.dark-mode .toolbar-btn { background: #334155; color: #f8fafc; }
 
-    /* Target the Tools Row (Row 2) */
-    #numpad .numpad-row:nth-child(2) {
-        grid-template-columns: repeat(2, 1fr);
-        flex: 1;
-        max-width: 140px;
-    }
-
-    /* Override Desktop Button Sizes for Mobile Grid */
-    .n-btn { 
-        width: 100% !important; 
-        height: 55px; 
-        font-size: 18px; 
-    }
-    
-    /* Keep Tool Button Text Small so it fits */
-    #numpad .numpad-row:nth-child(2) .n-btn {
-        font-size: 10px;
-        padding: 2px;
-    }
-    
-    /* 6. Show Mobile UI */
-    #mobile-menu-btn { display: block; }
-    #mobile-overlay { display: block; pointer-events: none; }
-    
-    /* 7. Seamless Hidden Side Drawer (No Gaps!) */
+    /* 4. The "Bottom Sheet" Drawer Effect */
     #left-panel, .side-panel {
-        position: fixed; background: var(--bg-color); z-index: 1000;
-        left: -320px; width: 300px; margin: 0; border-radius: 0;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 5px 0 25px rgba(0,0,0,0.2);
+        position: fixed; left: 0; right: 0; top: auto; bottom: -100%;
+        width: 100%; max-height: 60vh; background: var(--card-bg);
+        border-radius: 24px 24px 0 0; z-index: 1000; 
+        padding: 25px 20px 40px 20px; margin: 0; overflow-y: auto;
+        transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 -10px 25px rgba(0,0,0,0.3);
     }
 
-    /* Top half of drawer: Variant Tools */
-    #left-panel {
-        top: 0;
-        height: 60vh; /* Takes up exactly top 60% */
-        overflow-y: auto;
-        border-bottom: 2px solid var(--grid-line);
-    }
+    /* Drawer Logic: Slides up based on which button was pressed */
+    body[data-mobile-tab="variants"] #left-panel { bottom: 0; }
+    body[data-mobile-tab="variants"] #variant-tools-panel { display: flex; }
+    body[data-mobile-tab="variants"] .tool-section:not(#variant-tools-panel) { display: none; }
     
-    /* Bottom half of drawer: Highlighter */
-    .side-panel {
-        top: 60vh; /* Starts exactly where the top half ends */
-        height: 40vh; /* Takes up exactly bottom 40% */
-        overflow-y: auto;
-    }
+    body[data-mobile-tab="settings"] #left-panel { bottom: 0; }
+    body[data-mobile-tab="settings"] #variant-tools-panel { display: none; }
+    body[data-mobile-tab="settings"] .tool-section:not(#variant-tools-panel) { display: flex; }
+    
+    body[data-mobile-tab="colors"] .side-panel { bottom: 0; }
 
-    /* 8. Trigger Drawer Open */
-    body.mobile-menu-open #left-panel,
-    body.mobile-menu-open .side-panel {
-        transform: translateX(320px);
-    }
+    body.mobile-menu-open #mobile-overlay { opacity: 1; pointer-events: auto; }
 
-    body.mobile-menu-open #mobile-overlay {
-        opacity: 1; pointer-events: auto;
+    /* 5. 3x3 + 2x2 Numpad layout */
+    #numpad { 
+        display: flex !important; flex-direction: row-reverse; 
+        justify-content: center; gap: 15px; margin-top: 5px !important; 
     }
+    .numpad-row { display: grid !important; gap: 8px; margin-bottom: 0 !important; }
+    #numpad .numpad-row:nth-child(1) { grid-template-columns: repeat(3, 1fr); flex: 1.5; max-width: 220px; }
+    #numpad .numpad-row:nth-child(2) { grid-template-columns: repeat(2, 1fr); flex: 1; max-width: 140px; }
+    
+    .n-btn { width: 100% !important; height: 48px; font-size: 16px; }
+    #numpad .numpad-row:nth-child(2) .n-btn { font-size: 10px; padding: 2px; }
 }
