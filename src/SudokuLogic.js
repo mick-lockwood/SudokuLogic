@@ -17,6 +17,22 @@ export function hasConflict(arr, idx, val) {
         if (tr === r || tc === c || (tr >= br && tr < br + State.bH && tc >= bc && tc < bc + State.bW)) return true;
     }
 
+    // --- NEW: Global Anti-Knight Rule ---
+    if (State.antiKnight) {
+        const knightMoves = [
+            [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+            [1, -2], [1, 2], [2, -1], [2, 1]
+        ];
+        for (let [dr, dc] of knightMoves) {
+            const kr = r + dr, kc = c + dc;
+            if (kr >= 0 && kr < State.size && kc >= 0 && kc < State.size) {
+                const kIdx = kr * State.size + kc;
+                if (kIdx !== idx && arr[kIdx].val === val) return true;
+            }
+        }
+    }
+    // ------------------------------------
+
     // 2. Variant Rules Loop
     if (State.variants && State.variants.length > 0) {
         for (let v of State.variants) {
@@ -42,6 +58,21 @@ export function hasConflictGen(arr, idx, val) {
         let boxCol = bc + (i % State.bW);
         if (arr[boxRow * State.size + boxCol] === val) return true;
     }
+
+    // --- NEW: Global Anti-Knight Rule (Generator Version) ---
+    if (State.antiKnight) {
+        const knightMoves = [
+            [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+            [1, -2], [1, 2], [2, -1], [2, 1]
+        ];
+        for (let [dr, dc] of knightMoves) {
+            const kr = r + dr, kc = c + dc;
+            if (kr >= 0 && kr < State.size && kc >= 0 && kc < State.size) {
+                if (arr[kr * State.size + kc] === val) return true;
+            }
+        }
+    }
+    // --------------------------------------------------------
 
     // 2. Variant Rules Loop
     if (State.variants && State.variants.length > 0) {
