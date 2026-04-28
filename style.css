@@ -360,22 +360,53 @@ body.dark-mode .btn-primary:hover {
     border-color: #74b9ff;
 }
 
-/* --- GENERATOR CONTROL LAYOUT (Static 1-Line Fit) --- */
+/* --- GENERATOR CONTROLS (Below Board, 9x9 Width) --- */
 #gen-controls {
-    /* Fluidly splits the items into 1 row spanning the full width of the wrapper */
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important; 
-    width: 100% !important;
-    gap: 8px !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 100%;
+    /* Force the width to perfectly match 9 standard cells: */
+    max-width: calc(var(--cell-size) * 9); 
+    margin: 15px auto 0 auto !important; /* Centers it horizontally below the grid */
+    gap: 8px;
 }
 
-#gen-controls select, #gen-controls .btn {
-    padding: 8px 2px !important;
-    font-size: 10px !important;
-    width: 100%;
-    line-height: 1.2;
-    white-space: normal;
+/* The little background wrapper for Dropdown + Generate */
+.gen-action-wrapper {
+    display: flex;
+    flex: 2; /* Gives this wrapper more room */
+    background: #f1f5f9; /* The subtle toggle-button background */
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+}
+
+body.dark-mode .gen-action-wrapper {
+    background: #1e293b;
+}
+
+/* Center the text and strip the borders from the dropdown so it looks clean */
+.gen-action-wrapper select {
+    flex: 1;
+    background: transparent;
+    border: none;
     text-align: center;
     text-align-last: center;
+    color: var(--text-main);
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.gen-action-wrapper .action-btn {
+    flex: 1;
+    margin: 0; /* Ensures the button sits flush inside the wrapper */
+}
+
+/* Ensure the Ghost and Share buttons take up the remaining space */
+#gen-controls > .action-btn {
+    flex: 1;
 }
 
 /* --- GENERATOR CONTROL BUTTONS --- */
