@@ -96,6 +96,18 @@ export function updateUI() {
     
     if (State.mode === 'create') validateStatus();
     renderNumpad();
+
+    // --- RENDER PERIMETER CLUES ---
+    for (let r = -1; r <= State.size; r++) {
+        for (let c = -1; c <= State.size; c++) {
+            const id = `clue-${r}-${c}`;
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerText = State.clues?.[id] || "";
+                el.classList.toggle('selected', State.selected.includes(id));
+            }
+        }
+    }
 }
 
 export function renderGrid() {
@@ -129,9 +141,14 @@ export function renderGrid() {
             } else if (isOuter) {
                 // 2. The Sandbox Clue Cells
                 div.className = 'clue-cell';
-                div.id = `clue-${r}-${c}`;
+                const clueId = `clue-${r}-${c}`;
+                div.id = clueId;
                 
-                // (We will attach click listeners to these when we build the clue logic!)
+                div.addEventListener('pointerdown', (e) => {
+                    if (State.paused || State.isWon) return;
+                    // Route to our selection handler using the String ID
+                    window.handleCellSelection(clueId, e.ctrlKey || e.metaKey, false);
+                });
                 
             } else {
                 // 3. The Standard Sudoku Cells
