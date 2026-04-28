@@ -58,6 +58,6 @@ apart cannot contain the same digit.`,
     'toggle-anti-king':
 `Cells that touch diagonally 
 (a chess king's move) 
-cannot contain the same digit.`
+cannot contain the same digit.`,
     
 };
