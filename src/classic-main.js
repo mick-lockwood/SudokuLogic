@@ -20,8 +20,13 @@ window.toggleDarkMode = () => {
 };
 
 window.openMobileMenu = (tab) => {
-    document.body.setAttribute('data-mobile-tab', tab);
-    document.body.classList.add('mobile-menu-open');
+    // If the menu is already open AND they clicked the same button, close it.
+    if (document.body.getAttribute('data-mobile-tab') === tab && document.body.classList.contains('mobile-menu-open')) {
+        window.closeMobileMenu();
+    } else {
+        document.body.setAttribute('data-mobile-tab', tab);
+        document.body.classList.add('mobile-menu-open');
+    }
 };
 
 window.closeMobileMenu = () => {
@@ -52,10 +57,15 @@ window.setAppMode = (m) => {
     document.getElementById('clean-pencils-link').style.display = isCreate ? 'none' : 'inline';
     document.getElementById('status-label').style.display = isCreate ? 'block' : 'none';
     
+    // --- Hide the mobile variants toolbar button in solve mode ---
+    const mobileVariantsBtn = document.getElementById('toolbar-variants-btn');
+    if (mobileVariantsBtn) mobileVariantsBtn.style.display = isCreate ? 'block' : 'none';
+    
     if (m === 'solve') {
         startTimer(); 
     } else {
-        // --- NEW CLEANUP FOR CREATE MODE ---
+        
+        // --- CLEANUP FOR CREATE MODE ---
         State.isWon = false; // Unlock inputs
         document.getElementById('win-overlay').style.display = 'none'; // Hide the win menu
         Renderer.stopConfetti(); // Stop any active celebration
@@ -139,7 +149,7 @@ window.exportPuzzleLink = () => {
     const puzzleTitle = titleEl ? titleEl.innerText.trim() : "Sudoku Logic";
 
     const puzzleData = {
-        title: puzzleTitle, // <--- NEW: Saves the custom name
+        title: puzzleTitle, // <--- Saves the custom name
         size: State.size,
         board: State.board.map(c => c.given ? c.val : 0), 
         variants: State.variants || []
@@ -359,7 +369,7 @@ window.onload = function() {
             // 2. Initialize the correct grid size
             window.setGridSize(decodedData.size);
             
-            // --- NEW: Apply and Lock the Custom Title ---
+            // --- Apply and Lock the Custom Title ---
             if (decodedData.title) {
                 const titleEl = document.getElementById('puzzle-title');
                 if (titleEl) {
