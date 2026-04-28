@@ -29,6 +29,7 @@ export function initHighlighter() {
 
 export function updateUI() {
     const primaryActive = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
+    const isBoardCell = primaryActive !== null && typeof primaryActive === 'number';
     const selVal = primaryActive !== null ? State.board[primaryActive].val : 0;
     const selR = primaryActive !== null ? Math.floor(primaryActive / State.size) : -1;
     const selC = primaryActive !== null ? primaryActive % State.size : -1;
