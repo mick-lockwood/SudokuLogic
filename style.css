@@ -172,31 +172,24 @@ body.dark-mode .switch-label { color: #f8fafc; }
 
 #grid-wrapper { 
     padding: 5px;
-    background: var(--grid-line); /* This ensures the 'frame' matches the theme */
     border-radius: 8px;
     position: relative;
-    display: flex;         /* Add this to collapse extra space */
+    display: flex;
     flex-direction: column;
     align-items: center;
-    touch-action: none; /* Prevents the browser from scrolling the page when dragging */
+    touch-action: none; 
 }
 
 #svg-layer {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; /* Crucial: Lets clicks pass through to the HTML grid underneath */
-    z-index: 10; /* Keeps lines above the cell backgrounds, but below the win/pause overlays */
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; 
+    z-index: 10; 
 }
 
 .grid { 
     display: grid; 
-    background-color: var(--grid-line); 
-    gap: 1px; /* The thickness of the internal grid lines */
-    border: 2px solid var(--grid-line);
-    width: fit-content;    /* Ensures the grid doesn't stretch the wrapper */
 }
 
 .cell {
@@ -212,9 +205,34 @@ body.dark-mode .switch-label { color: #f8fafc; }
     touch-action: none; /* strictly disables all browser gestures on the board */
 }
 
-/* --- GRID LINES (Controlled via CSS for clean scaling) --- */
-.block-right { border-right: 2px solid var(--grid-line); }
-.block-bottom { border-bottom: 2px solid var(--grid-line); }
+/* --- PERIMETER CLUE CELLS --- */
+.clue-cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-main);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    border-radius: 6px;
+}
+
+.clue-cell:hover {
+    background: rgba(100, 116, 139, 0.1);
+}
+
+.clue-corner {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    pointer-events: none;
+}
+
+body.dark-mode .clue-cell { color: #f8fafc; }
+body.dark-mode .clue-cell:hover { background: rgba(248, 250, 252, 0.1); }
 
 /* --- KROPKI DOTS --- */
 .kropki-dot { transition: all 0.2s; }
@@ -834,11 +852,6 @@ body.mobile-menu-open #mobile-overlay {
     
     .n-btn { width: 100% !important; height: 48px; font-size: 16px; }
     #numpad .numpad-row:nth-child(2) .n-btn { font-size: 10px; padding: 2px; }
-
-    /* 7. Thinner Mobile Grid Lines */
-    .grid { border-width: 1px !important; }
-    .block-right { border-right: 1px solid var(--grid-line) !important; }
-    .block-bottom { border-bottom: 1px solid var(--grid-line) !important; }
 
     /* 8. Smaller Mobile Pencil Marks */
     .pencil-num, body.dark-mode .pencil-num { font-size: 9.5px !important; }
