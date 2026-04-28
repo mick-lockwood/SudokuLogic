@@ -93,9 +93,9 @@ export function drawKiller(variant, svgElement) {
         const y = cellRect.top - svgRect.top;
         
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", x + 5);
-        text.setAttribute("y", y + 13);
-        text.setAttribute("font-size", "11");
+        text.setAttribute("x", x + 7;
+        text.setAttribute("y", y + 15);
+        text.setAttribute("font-size", "8");
         text.setAttribute("font-weight", "800");
         text.setAttribute("fill", strokeColor);
         text.textContent = variant.sum;
