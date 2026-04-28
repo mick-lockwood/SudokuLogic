@@ -253,8 +253,10 @@ function generateNew() {
     let flat = Array(State.size * State.size).fill(0);
     
     State.currentDifficulty = document.getElementById('diff').value;
-    document.getElementById('difficulty-badge').textContent = State.currentDifficulty;
-    document.getElementById('difficulty-badge').style.display = 'inline-block';
+    const diffBadge = document.getElementById('difficulty-badge');
+    diffBadge.textContent = State.currentDifficulty;
+    diffBadge.className = `diff-${State.currentDifficulty}`; // Applies diff-easy, diff-medium, or diff-hard
+    diffBadge.style.display = 'inline-block';
         
     const fill = (idx) => {
         if (idx === State.size * State.size) return true;
