@@ -206,6 +206,13 @@ body.dark-mode .switch-label { color: #f8fafc; }
     display: flex; align-items: center; justify-content: center;
     font-size: 24px; font-weight: 700; cursor: pointer; user-select: none; position: relative;
     color: var(--text-main); transition: background 0.1s;
+    touch-action: none; /* strictly disables all browser gestures on the board */
+}
+
+/* Disables double-tap-to-zoom on all interactive buttons */
+.n-btn, .btn, .variant-tool-btn, .clear-color-btn, .color-btn {
+    touch-action: manipulation; 
+}
 }
 
 /* Cell Number Colors for Normal & Dark Mode */
@@ -724,10 +731,49 @@ body.dark-mode .variant-tool-btn.active-tool-eraser {
     /* 4. Fix Gen-Controls Bug (Stacks them without forcing display:flex) */
     #gen-controls { grid-template-columns: 1fr !important; }
     
-    /* 5. Squeeze Numpad to fit underneath the board */
-    #numpad { margin-top: 15px !important; }
-    .numpad-row { flex-wrap: wrap; gap: 5px; margin-bottom: 5px; justify-content: center; }
-    .n-btn { width: clamp(35px, 10vw, 48px); height: 48px; font-size: 14px; }
+    /* 5. Mobile Numpad Restructure (3x3 Numbers Right, Tools Left) */
+    #numpad { 
+        display: flex !important; 
+        flex-direction: row-reverse; /* Flips numbers to right, tools to left */
+        justify-content: center; 
+        gap: 15px; 
+        margin-top: 15px !important; 
+        width: 100%;
+        padding: 0 10px;
+    }
+    
+    .numpad-row { 
+        display: grid !important; 
+        gap: 8px; 
+        margin-bottom: 0 !important;
+    }
+
+    /* Target the Numbers Row (Row 1) */
+    #numpad .numpad-row:nth-child(1) {
+        grid-template-columns: repeat(3, 1fr);
+        flex: 1.5; /* Gives the numbers a bit more width */
+        max-width: 220px;
+    }
+
+    /* Target the Tools Row (Row 2) */
+    #numpad .numpad-row:nth-child(2) {
+        grid-template-columns: repeat(2, 1fr);
+        flex: 1;
+        max-width: 140px;
+    }
+
+    /* Override Desktop Button Sizes for Mobile Grid */
+    .n-btn { 
+        width: 100% !important; 
+        height: 55px; 
+        font-size: 18px; 
+    }
+    
+    /* Keep Tool Button Text Small so it fits */
+    #numpad .numpad-row:nth-child(2) .n-btn {
+        font-size: 10px;
+        padding: 2px;
+    }
     
     /* 6. Show Mobile UI */
     #mobile-menu-btn { display: block; }
