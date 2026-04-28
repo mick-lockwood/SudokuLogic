@@ -12,6 +12,7 @@ export const State = {
     variants: [],
     solution: [],
     showGhost: false,
+    antiKnight: false,
 
     // Highlighter Color Palette 
     // (Laid out in rows of 3 to match the UI grid)
@@ -43,6 +44,8 @@ export function initBoardState(sizeParam) {
     State.paused = false;
     State.solution = [];
     State.showGhost = false;
+    State.antiKnight = false;
+    
 }
 
 export function saveState(isUndoAction = false) {
