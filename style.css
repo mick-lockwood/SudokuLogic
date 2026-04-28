@@ -219,10 +219,10 @@ body.dark-mode .switch-label { color: #f8fafc; }
 /* --- KROPKI DOTS --- */
 .kropki-dot { transition: all 0.2s; }
 
-/* Dark Mode: Add a contrasting slate border to black Kropki dots */
+/* Dark Mode: Add a contrasting border to black Kropki dots matching the grid line */
 body.dark-mode .kropki-dot[fill="black"],
 body.dark-mode .kropki-dot[fill="#000000"] {
-    stroke: #cbd5e1 !important; 
+    stroke: var(--grid-line) !important; 
     stroke-width: 2px !important;
 }
 
