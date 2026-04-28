@@ -50,5 +50,14 @@ Shortcut: Ctrl+Y (While variant tool active)`,
     
     'btn-clear-variants': 
 `Instantly clear all variant lines from the board.`
+
+    'toggle-anti-knight': 
+`Cells that are a chess knight's move 
+apart cannot contain the same digit.`,
+    
+    'toggle-anti-king':
+`Cells that touch diagonally 
+(a chess king's move) 
+cannot contain the same digit.`
     
 };
