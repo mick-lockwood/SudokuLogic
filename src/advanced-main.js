@@ -10,6 +10,13 @@ import { drawWhisper } from './variants/Whisper.js';
 import { drawKiller } from './variants/Killer.js';
 import { drawKropki } from './variants/Kropki.js';
 
+// --- AUTO-RESIZE SVGS ---
+// Forces the variant lines to redraw and snap to the correct cells if the screen rotates or resizes
+window.addEventListener('resize', () => {
+    if (typeof window.renderSVGLayer === 'function') {
+        window.renderSVGLayer();
+    }
+});
 
 window.AdvancedState = {
     activeTool: 'pointer',
