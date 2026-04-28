@@ -19,8 +19,14 @@ window.toggleDarkMode = () => {
     Renderer.updateUI();
 };
 
-window.toggleMobileMenu = () => {
-    document.body.classList.toggle('mobile-menu-open');
+window.openMobileMenu = (tab) => {
+    document.body.setAttribute('data-mobile-tab', tab);
+    document.body.classList.add('mobile-menu-open');
+};
+
+window.closeMobileMenu = () => {
+    document.body.removeAttribute('data-mobile-tab');
+    document.body.classList.remove('mobile-menu-open');
 };
 
 window.setGridSize = (s) => {
