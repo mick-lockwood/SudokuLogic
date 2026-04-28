@@ -19,6 +19,10 @@ window.toggleDarkMode = () => {
     Renderer.updateUI();
 };
 
+window.toggleMobileMenu = () => {
+    document.body.classList.toggle('mobile-menu-open');
+};
+
 window.setGridSize = (s) => {
     initBoardState(s);
     document.getElementById('size6').className = (s === 6) ? 'active' : '';
