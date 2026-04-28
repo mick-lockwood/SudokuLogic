@@ -120,9 +120,12 @@ window.clearVariantGraphics = () => {
 // --- GLOBAL RULE TOGGLES ---
 window.toggleAntiKnight = () => {
     State.antiKnight = document.getElementById('toggle-anti-knight').checked;
-    
-    // Log to the browser console so we know the switch is working
     console.log("Anti-Knight Rule is now:", State.antiKnight);
+    
+    // Update the title when the switch is flipped!
+    if (typeof window.updateDynamicTitle === 'function') {
+        window.updateDynamicTitle();
+    }
     
     if (typeof window.updateUI === 'function') {
         window.updateUI(); 
@@ -222,6 +225,11 @@ window.renderSVGLayer = function renderSVGLayer() {
             cells: window.AdvancedState.currentLine
         });
     }
+    
+    // Update the title every time the SVG layer redraws! ---
+    if (typeof window.updateDynamicTitle === 'function') {
+        window.updateDynamicTitle();
+    }
 }
 
 function drawVariantLine(variant) {
@@ -318,3 +326,47 @@ Object.keys(Tooltips).forEach(id => {
 // --- INITIALIZE DEFAULT STATE ---
 // Force the UI and internal state to sync on page load
 window.setTool('pointer');
+
+// --- AUTO-TITLE GENERATOR ---
+window.isCustomTitle = false;
+
+// Listen for manual user edits to lock the title
+setTimeout(() => {
+    const titleEl = document.getElementById('puzzle-title');
+    if (titleEl) {
+        titleEl.addEventListener('input', () => {
+            window.isCustomTitle = true;
+        });
+    }
+}, 200);
+
+window.updateDynamicTitle = () => {
+    // Don't overwrite if the user typed something manually or if playing a loaded puzzle
+    if (window.isCustomTitle || State.isPlayOnly) return;
+
+    const activeTypes = new Set();
+    
+    // 1. Check drawn variants
+    if (State.variants) {
+        State.variants.forEach(v => {
+            if (v.type === 'thermo') activeTypes.add('Thermo');
+            if (v.type === 'whisper') activeTypes.add('German Whisper');
+            if (v.type === 'killer') activeTypes.add('Killer');
+            if (v.type.startsWith('kropki')) activeTypes.add('Kropki');
+        });
+    }
+    
+    // 2. Check global rules
+    if (State.antiKnight) activeTypes.add('Anti-Knight');
+    
+    // 3. Update the HTML
+    const titleEl = document.getElementById('puzzle-title');
+    if (titleEl) {
+        if (activeTypes.size > 0) {
+            // Joins the unique names together (e.g., "German Whisper Anti-Knight Sudoku")
+            titleEl.innerText = Array.from(activeTypes).join(' ') + ' Sudoku';
+        } else {
+            titleEl.innerText = 'Sudoku Logic'; // Reverts to default if everything is erased
+        }
+    }
+};
