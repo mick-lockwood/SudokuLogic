@@ -84,6 +84,8 @@ window.togglePause = () => {
 };
 
 window.generateNew = function() {
+    generateNew(); // This calls the internal function defined at the bottom of your file
+};
     
 window.generateWithDiff = (s, d) => {
     window.setGridSize(s);
