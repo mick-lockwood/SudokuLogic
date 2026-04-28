@@ -117,6 +117,18 @@ window.clearVariantGraphics = () => {
     Renderer.updateUI(); 
 };
 
+// --- GLOBAL RULE TOGGLES ---
+window.toggleAntiKnight = () => {
+    State.antiKnight = document.getElementById('toggle-anti-knight').checked;
+    
+    // Log to the browser console so we know the switch is working
+    console.log("Anti-Knight Rule is now:", State.antiKnight);
+    
+    if (typeof window.updateUI === 'function') {
+        window.updateUI(); 
+    }
+};
+
 // --- DYNAMIC DRAWING (BACKTRACKING) ---
 function handleLineDrawing(index, isDragging) {
     if (!isDragging) {
