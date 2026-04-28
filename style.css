@@ -383,6 +383,8 @@ body.dark-mode .btn-primary:hover {
     background: #ffffff;
     color: #1e293b;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    pointer-events: auto !important;
+    transform: none !important;
 }
 
 body.dark-mode #gen-controls .toggle-group button.active {
