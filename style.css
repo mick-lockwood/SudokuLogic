@@ -252,7 +252,6 @@ body.dark-mode .kropki-dot[fill="#000000"] {
 .n-btn, .btn, .variant-tool-btn, .clear-color-btn, .color-btn {
     touch-action: manipulation; 
 }
-}
 
 /* Cell Number Colors for Normal & Dark Mode */
 .cell.given { color: #64748b; }
