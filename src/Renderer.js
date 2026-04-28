@@ -103,43 +103,79 @@ export function renderGrid() {
     container.innerHTML = '';
     container.style.display = 'grid';
     container.style.width = 'fit-content'; 
-    container.style.gridTemplateColumns = `repeat(${State.size}, var(--cell-size))`;
+    container.style.gap = '0px';     // NEW: We remove the gap so the clues float cleanly
+    container.style.border = 'none'; // NEW: We handle the thick border dynamically
+    container.style.gridTemplateColumns = `repeat(${State.size + 2}, var(--cell-size))`; // N+2 Grid!
     
     const gridLine = State.darkMode ? "#ffffff" : "#1e293b";
     const wrapper = document.getElementById('grid-wrapper');
     
-    wrapper.style.background = gridLine;
+    wrapper.style.background = 'transparent'; // Let the page background show through the clues
     wrapper.style.width = 'fit-content'; 
     wrapper.style.margin = '0 auto';     
-    
-    container.style.background = gridLine;
+    container.style.background = 'transparent';
 
-    State.board.forEach((cell, i) => {
-        const div = document.createElement('div');
-        div.className = 'cell'; 
-        div.id = `cell-${i}`;
-        
-        const r = Math.floor(i / State.size), c = i % State.size;
-        
-        if ((c + 1) % State.bW === 0 && c < State.size - 1) div.classList.add('block-right');
-        if ((r + 1) % State.bH === 0 && r < State.size - 1) div.classList.add('block-bottom');
-  
-        div.addEventListener('pointerdown', (e) => {
-            if (State.paused || State.isWon) return;
-            e.target.releasePointerCapture(e.pointerId); 
-            window.handleCellSelection(i, e.ctrlKey || e.metaKey, false);
-        });
+    // Loop from -1 to State.size to build the outer perimeter
+    for (let r = -1; r <= State.size; r++) {
+        for (let c = -1; c <= State.size; c++) {
+            const isOuter = (r === -1 || r === State.size || c === -1 || c === State.size);
+            const isCorner = isOuter && (r === -1 || r === State.size) && (c === -1 || c === State.size);
 
-        div.addEventListener('pointerenter', (e) => {
-            if (State.paused || State.isWon) return;
-            if (e.buttons === 1) { 
-                window.handleCellSelection(i, true, true); 
+            const div = document.createElement('div');
+            
+            if (isCorner) {
+                // 1. Dead Corners (Invisible)
+                div.className = 'clue-corner';
+            } else if (isOuter) {
+                // 2. The Sandbox Clue Cells
+                div.className = 'clue-cell';
+                div.id = `clue-${r}-${c}`;
+                
+                // (We will attach click listeners to these when we build the clue logic!)
+                
+            } else {
+                // 3. The Standard Sudoku Cells
+                const i = r * State.size + c;
+                div.className = 'cell'; 
+                div.id = `cell-${i}`;
+                
+                // --- DYNAMIC INNER BORDERS ---
+                div.style.borderRight = `1px solid ${gridLine}`;
+                div.style.borderBottom = `1px solid ${gridLine}`;
+                
+                // Outer Thick Borders
+                if (r === 0) div.style.borderTop = `2px solid ${gridLine}`;
+                if (c === 0) div.style.borderLeft = `2px solid ${gridLine}`;
+                if (c === State.size - 1) div.style.borderRight = `2px solid ${gridLine}`;
+                if (r === State.size - 1) div.style.borderBottom = `2px solid ${gridLine}`;
+                
+                // Inner Block Borders (The 3x3 boundaries)
+                if ((c + 1) % State.bW === 0 && c < State.size - 1) {
+                    div.style.borderRight = `2px solid ${gridLine}`;
+                }
+                if ((r + 1) % State.bH === 0 && r < State.size - 1) {
+                    div.style.borderBottom = `2px solid ${gridLine}`;
+                }
+                // ------------------------------
+          
+                div.addEventListener('pointerdown', (e) => {
+                    if (State.paused || State.isWon) return;
+                    e.target.releasePointerCapture(e.pointerId); 
+                    window.handleCellSelection(i, e.ctrlKey || e.metaKey, false);
+                });
+
+                div.addEventListener('pointerenter', (e) => {
+                    if (State.paused || State.isWon) return;
+                    if (e.buttons === 1) { 
+                        window.handleCellSelection(i, true, true); 
+                    }
+                });
+
+                div.addEventListener('contextmenu', (e) => e.preventDefault());
             }
-        });
-
-        div.addEventListener('contextmenu', (e) => e.preventDefault());
-        container.appendChild(div);
-    });
+            container.appendChild(div);
+        }
+    }
 }
 
 export function renderNumpad() {
