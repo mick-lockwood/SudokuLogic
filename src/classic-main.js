@@ -437,3 +437,30 @@ setTimeout(() => {
         });
     }
 }, 100);
+
+// --- MOBILE DRAWER SWIPE-TO-CLOSE ---
+setTimeout(() => {
+    let touchStartY = 0;
+    
+    const attachSwipe = (panel) => {
+        if (!panel) return;
+        
+        // Record where the finger started
+        panel.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+        
+        // Check where the finger ended
+        panel.addEventListener('touchend', (e) => {
+            const touchEndY = e.changedTouches[0].screenY;
+            
+            // If swiped down more than 60px AND the drawer isn't scrolled down
+            if (touchEndY - touchStartY > 60 && panel.scrollTop <= 5) {
+                window.closeMobileMenu();
+            }
+        }, { passive: true });
+    };
+
+    attachSwipe(document.getElementById('left-panel'));
+    attachSwipe(document.querySelector('.side-panel'));
+}, 200);
