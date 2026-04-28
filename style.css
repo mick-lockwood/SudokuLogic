@@ -704,30 +704,37 @@ body.dark-mode .variant-tool-btn.active-tool-eraser {
 }
 
 @media (max-width: 950px) {
-    /* 1. NO SCROLLING ALLOWED */
+    /* 1. Prevent Overlapping: Let the body breathe natively */
     html, body {
-        height: 100vh;
-        height: 100dvh; /* Adapts to iOS bottom browser bar */
-        overflow: hidden !important; /* Mechanically disables scrolling */
+        min-height: 100dvh;
+        overflow-x: hidden;
         padding: 0; margin: 0;
     }
 
     #app-container {
-        height: 100%; display: flex; flex-direction: column;
-        padding: 5px 10px 65px 10px; /* 65px bottom padding clears the toolbar */
+        display: flex; flex-direction: column; align-items: center;
+        padding: 10px 10px 80px 10px; /* 80px bottom padding clears the toolbar safely */
+        width: 100%;
     }
 
     /* 2. Extreme Vertical Compression */
     h1 { font-size: 1.2rem; margin: 5px 0; text-align: center; }
     .main-card { 
         padding: 0; margin: 0; box-shadow: none; background: transparent; 
-        flex: 1; display: flex; flex-direction: column; justify-content: space-evenly;
+        max-width: 100%; width: 100%;
     }
     
     #gen-controls { gap: 5px; }
-    :root { --cell-size: calc((100vw - 40px) / 9.2); }
 
-    /* 3. The New Bottom Toolbar */
+    /* 3. Re-apply the Square Cell Lock */
+    :root { --cell-size: calc((100vw - 40px) / 9.2); }
+    .cell {
+        min-width: 0 !important;
+        min-height: 0 !important;
+        aspect-ratio: 1 / 1; 
+    }
+
+    /* 4. The New Bottom Toolbar */
     #mobile-toolbar {
         display: flex; position: fixed; bottom: 0; left: 0; right: 0;
         background: var(--card-bg); padding: 10px; gap: 10px;
@@ -744,7 +751,7 @@ body.dark-mode .variant-tool-btn.active-tool-eraser {
     .toolbar-btn:active { transform: scale(0.95); }
     body.dark-mode .toolbar-btn { background: #334155; color: #f8fafc; }
 
-    /* 4. The "Bottom Sheet" Drawer Effect */
+    /* 5. The "Bottom Sheet" Drawer Effect */
     #left-panel, .side-panel {
         position: fixed; left: 0; right: 0; top: auto; bottom: -100%;
         width: 100%; max-height: 60vh; background: var(--card-bg);
@@ -767,7 +774,7 @@ body.dark-mode .variant-tool-btn.active-tool-eraser {
 
     body.mobile-menu-open #mobile-overlay { opacity: 1; pointer-events: auto; }
 
-    /* 5. 3x3 + 2x2 Numpad layout */
+    /* 6. 3x3 + 2x2 Numpad layout */
     #numpad { 
         display: flex !important; flex-direction: row-reverse; 
         justify-content: center; gap: 15px; margin-top: 5px !important; 
