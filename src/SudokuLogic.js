@@ -16,8 +16,10 @@ export function hasConflict(arr, idx, val) {
         const tr = Math.floor(i / State.size), tc = i % State.size;
         if (tr === r || tc === c || (tr >= br && tr < br + State.bH && tc >= bc && tc < bc + State.bW)) return true;
     }
-
-    // --- NEW: Global Anti-Knight Rule ---
+    
+    // ------------------------------------
+    
+    // --- Global Anti-Knight Rule ---
     if (State.antiKnight) {
         const knightMoves = [
             [-2, -1], [-2, 1], [-1, -2], [-1, 2],
@@ -31,6 +33,20 @@ export function hasConflict(arr, idx, val) {
             }
         }
     }
+
+    // --- Global Anti-King Rule ---
+    if (State.antiKing) {
+        // We only check the 4 diagonals, since row/col are covered by standard rules
+        const kingMoves = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+        for (let [dr, dc] of kingMoves) {
+            const kr = r + dr, kc = c + dc;
+            if (kr >= 0 && kr < State.size && kc >= 0 && kc < State.size) {
+                const kIdx = kr * State.size + kc;
+                if (kIdx !== idx && arr[kIdx].val === val) return true;
+            }
+        }
+    }
+    
     // ------------------------------------
 
     // 2. Variant Rules Loop
@@ -59,6 +75,8 @@ export function hasConflictGen(arr, idx, val) {
         if (arr[boxRow * State.size + boxCol] === val) return true;
     }
 
+    // --------------------------------------------------------
+    
     // --- NEW: Global Anti-Knight Rule (Generator Version) ---
     if (State.antiKnight) {
         const knightMoves = [
@@ -72,6 +90,18 @@ export function hasConflictGen(arr, idx, val) {
             }
         }
     }
+
+    // --- NEW: Global Anti-King Rule (Generator Version) ---
+    if (State.antiKing) {
+        const kingMoves = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+        for (let [dr, dc] of kingMoves) {
+            const kr = r + dr, kc = c + dc;
+            if (kr >= 0 && kr < State.size && kc >= 0 && kc < State.size) {
+                if (arr[kr * State.size + kc] === val) return true;
+            }
+        }
+    }
+    
     // --------------------------------------------------------
 
     // 2. Variant Rules Loop
