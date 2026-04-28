@@ -686,81 +686,77 @@ body.dark-mode .variant-tool-btn.active-tool-eraser {
 ========================================= */
 #mobile-overlay {
     display: none;
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(0,0,0,0.6);
-    z-index: 999;
-    backdrop-filter: blur(3px);
-    opacity: 0;
-    transition: opacity 0.3s;
+    z-index: 999; backdrop-filter: blur(3px);
+    opacity: 0; transition: opacity 0.3s;
 }
 
 #mobile-menu-btn {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1001;
-    padding: 15px 24px;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: none; position: fixed;
+    bottom: 20px; right: 20px;
+    z-index: 1001; padding: 15px 24px;
+    border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     font-size: 14px;
 }
 
 @media (max-width: 950px) {
-    /* 1. Shrink Grid Cells for Small Screens */
-    :root { --cell-size: min(10vw, 52px); }
-
-    /* 2. Stack the Game Column */
-    #app-container { flex-direction: column; align-items: center; }
-    .game-column { width: 100%; }
-    .main-card { padding: 15px; margin-bottom: 20px; max-width: 100%; }
+    /* 1. Aggressively Compress Vertical Space (No Scrolling Required!) */
+    body { padding: 10px; }
+    h1 { font-size: 1.5rem; margin-bottom: 10px; }
+    .main-card { padding: 12px; gap: 12px; margin-bottom: 10px; max-width: 100%; width: 100%; }
+    .row { flex-wrap: wrap; } /* Allows top buttons to wrap if needed */
     
-    /* 3. Show Mobile UI */
+    /* 2. Fix Grid Sizing (Perfect fit without squishing) */
+    /* 100vw minus 40px of total body/wrapper padding, divided by 9.2 to account for thick grid borders */
+    :root { --cell-size: calc((100vw - 40px) / 9.2); }
+
+    /* 3. Stack the Game Column */
+    #app-container { flex-direction: column; align-items: center; width: 100%; }
+    .game-column { width: 100%; }
+    
+    /* 4. Fix Gen-Controls Bug (Stacks them without forcing display:flex) */
+    #gen-controls { grid-template-columns: 1fr !important; }
+    
+    /* 5. Squeeze Numpad to fit underneath the board */
+    #numpad { margin-top: 15px !important; }
+    .numpad-row { flex-wrap: wrap; gap: 5px; margin-bottom: 5px; justify-content: center; }
+    .n-btn { width: clamp(35px, 10vw, 48px); height: 48px; font-size: 14px; }
+    
+    /* 6. Show Mobile UI */
     #mobile-menu-btn { display: block; }
     #mobile-overlay { display: block; pointer-events: none; }
     
-    /* 4. Convert Panels into a Hidden Side Drawer */
+    /* 7. Seamless Hidden Side Drawer (No Gaps!) */
     #left-panel, .side-panel {
-        position: fixed;
-        background: var(--bg-color);
-        z-index: 1000;
-        left: -320px; /* Hide completely off-screen */
-        width: 300px;
+        position: fixed; background: var(--bg-color); z-index: 1000;
+        left: -320px; width: 300px; margin: 0; border-radius: 0;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 5px 0 25px rgba(0,0,0,0.2);
-        border-radius: 0;
-        margin: 0; /* Remove desktop margins */
     }
 
     /* Top half of drawer: Variant Tools */
     #left-panel {
         top: 0;
-        bottom: 45vh; /* Takes up top 55% of the screen */
+        height: 60vh; /* Takes up exactly top 60% */
         overflow-y: auto;
         border-bottom: 2px solid var(--grid-line);
     }
     
     /* Bottom half of drawer: Highlighter */
     .side-panel {
-        top: 55vh; /* Takes up bottom 45% of the screen */
-        bottom: 0;
+        top: 60vh; /* Starts exactly where the top half ends */
+        height: 40vh; /* Takes up exactly bottom 40% */
         overflow-y: auto;
     }
 
-    /* 5. Trigger Drawer Open */
+    /* 8. Trigger Drawer Open */
     body.mobile-menu-open #left-panel,
     body.mobile-menu-open .side-panel {
         transform: translateX(320px);
     }
 
     body.mobile-menu-open #mobile-overlay {
-        opacity: 1;
-        pointer-events: auto;
+        opacity: 1; pointer-events: auto;
     }
-
-    /* 6. Stack Gen Controls & Squeeze Numpad */
-    #gen-controls { display: flex !important; flex-direction: column; }
-    .numpad-row { flex-wrap: wrap; gap: 5px; }
-    .n-btn { width: clamp(40px, 11vw, 48px); }
 }
