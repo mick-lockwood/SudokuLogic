@@ -483,15 +483,36 @@ body.dark-mode .main-card .row div:hover {
     color: #ffffff;
 }
 
-/* Difficulty Badge Styling */
+/* --- DIFFICULTY BADGE STYLING --- */
 #difficulty-badge {
-    background: #e2e8f0; /* Light grey pill */
-    color: #475569;      /* Dark grey text */
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 900;
     text-transform: uppercase;
+    border: 2px solid transparent;
+}
+
+/* Light Mode: Pastel Backgrounds */
+#difficulty-badge.diff-easy { background: #dcfce7; color: #166534; }
+#difficulty-badge.diff-medium { background: #fef08a; color: #854d0e; }
+#difficulty-badge.diff-hard { background: #fee2e2; color: #991b1b; }
+
+/* Dark Mode: Slate Backgrounds with Colored Text & Ambient Glows */
+body.dark-mode #difficulty-badge.diff-easy { 
+    background: #334155; color: #4ade80; 
+    border-color: rgba(74, 222, 128, 0.4); 
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.2);
+}
+body.dark-mode #difficulty-badge.diff-medium { 
+    background: #334155; color: #facc15; 
+    border-color: rgba(250, 204, 21, 0.4); 
+    box-shadow: 0 0 6px rgba(250, 204, 21, 0.2);
+}
+body.dark-mode #difficulty-badge.diff-hard { 
+    background: #334155; color: #f87171; 
+    border-color: rgba(248, 113, 113, 0.4); 
+    box-shadow: 0 0 6px rgba(248, 113, 113, 0.2);
 }
 
 body.dark-mode #difficulty-badge {
