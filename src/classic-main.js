@@ -221,6 +221,20 @@ function handleInput(num) {
     saveState(); 
     
     State.selected.forEach(idx => {
+        // Handle Border Clues (Sandwich/Skyscrapers)
+        if (typeof idx === 'string') {
+            if (!State.clues) State.clues = {};
+            if (num === 0) {
+                delete State.clues[idx];
+            } else {
+                const current = State.clues[idx] || "";
+                // Allows typing "1" then "5" to get "15"
+                State.clues[idx] = current.length < 2 ? current + num : num.toString();
+            }
+            return;
+        }
+
+        // Handle Regular Cells
         const cell = State.board[idx];
         if (State.mode === 'solve' && cell.given) return;
         
