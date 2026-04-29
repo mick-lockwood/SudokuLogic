@@ -66,12 +66,12 @@ cannot contain the same digit.`,
     
     // Visibility Settings
     'toggle-seen':
-`Toggle On/Off the blue cell highlights
-that show which cells are 'seen' 
-by the selected cell`,
+`Highlights all cells that share 
+a row, column, or 3x3 box with
+the currently selected cell`,
 
     // Theme Settings
-    'toggleDarkMode':
-`Toggle between Light and Dark Mode`,
+    'btn-theme':
+`Switch the app between Light and Dark mode themes`,
     
 };
