@@ -27,7 +27,7 @@ export function initHighlighter() {
     });
 }
 
-eexport function updateUI() {
+export function updateUI() {
     const primaryActive = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
     
     // Safely check if the selected cell is a standard board index (a number)
