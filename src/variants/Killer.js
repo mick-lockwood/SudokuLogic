@@ -109,7 +109,7 @@ export function drawKiller(variant, svgElement) {
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         
         // Push X to 1px (or even 0) to hug the line, and tightly link Y to the font size
-        text.setAttribute("x", x + 1); 
+        text.setAttribute("x", x + 0); 
         text.setAttribute("y", y + (fontSize * 0.85)); 
         
         text.setAttribute("font-size", `${fontSize}px`);
