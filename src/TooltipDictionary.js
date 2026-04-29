@@ -63,6 +63,32 @@ apart cannot contain the same digit.`,
 `Cells that touch diagonally 
 (a chess king's move) 
 cannot contain the same digit.`,
+
+    // Perimeter Rules
+    'toggle-outer-clues':
+`Show or hide the perimeter cells around the grid
+used for inputting outside variant clues.`,
+
+    'rule-sandwich':
+`Clues outside the grid indicate the sum of
+the digits between the 1 and 9 in that line.`,
+
+    'rule-skyscraper':
+`Outside clues indicate how many 'buildings' can be seen.\n
+Higher digits block lower digits from view.`,
+
+    'rule-frames':
+`Clues outside the grid indicate the sum of
+the first 3 digits in that line of sight.`,
+
+    'rule-rooms':
+`Clues outside the grid indicate a specific
+digit that must be placed in the N-th cell, 
+where N is the digit in the very first cell 
+from that direction.\n
+For Example:
+If a row/columm starts with a 5, a clue of '8' means the 
+number 8 is placed in the 5th cell of that row/column.`,
     
     // Visibility Settings
     'toggle-seen':
