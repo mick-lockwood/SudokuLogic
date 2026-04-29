@@ -1,5 +1,6 @@
 import { State } from './GameState.js';
 import { hasConflict, getCount, countSolutions } from './SudokuLogic.js';
+import { getLineValues, checkSandwich, checkSkyscraper, checkFrames, checkNumberedRoom } from './variants/Perimeter.js';
 
 export function initHighlighter() {
     const container = document.getElementById('highlighter-tools');
@@ -131,12 +132,34 @@ export function updateUI() {
 
                 const id = `clue-${r}-${c}`;
                 const el = document.getElementById(id);
+                
                 if (el) {
                     const val = State.clues?.[id] || "";
+                    let isError = false;
+
+                    // --- NEW: RUN THE PERIMETER MATH ---
+                    if (val !== "") {
+                        const lineVals = getLineValues(id);
+                        
+                        // We check State.perimeterMode to see which math rule to apply!
+                        if (State.perimeterMode === 'sandwich') isError = checkSandwich(val, lineVals);
+                        if (State.perimeterMode === 'skyscraper') isError = checkSkyscraper(val, lineVals);
+                        if (State.perimeterMode === 'frames') isError = checkFrames(val, lineVals);
+                        if (State.perimeterMode === 'numbered-rooms') isError = checkNumberedRoom(val, lineVals);
+                    }
                     
                     // Match inner cell span layering
                     el.innerHTML = val !== "" ? `<span style="position: relative; z-index: 20;">${val}</span>` : "";
                     
+                    // --- NEW: APPLY ERROR STYLING ---
+                    if (isError) {
+                        el.classList.add('error');
+                        el.style.color = State.darkMode ? "#fb923c" : "#e74c3c"; // Danger Red!
+                    } else {
+                        el.classList.remove('error');
+                        el.style.color = "var(--text-main)"; // Reset to normal text
+                    }
+
                     const isSel = State.selected.includes(id);
                     el.classList.toggle('selected', isSel);
                     
@@ -159,7 +182,6 @@ export function updateUI() {
             }
         }
     }
-}
 
 export function renderGrid() {
     const container = document.getElementById('grid');
