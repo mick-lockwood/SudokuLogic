@@ -49,9 +49,19 @@
                     <button id="btn-clear-variants" class="variant-action-btn danger" onclick="clearVariantGraphics()">Clear All Variants</button>
                     
                     <hr class="tool-divider" style="margin-top: 10px;">
+                    
                     <h3 style="margin: 5px 0; color: var(--text-main);">Global Variant Rules</h3>
                     <label class="switch-label">Anti-Knight <input type="checkbox" id="toggle-anti-knight" onchange="toggleAntiKnight()"></label>
                     <label class="switch-label">Anti-King <input type="checkbox" id="toggle-anti-king" onchange="toggleAntiKing()"></label>
+
+                    <hr class="tool-divider" style="margin: 10px 0;">
+                    
+                    <h3 style="font-size: 13px; text-transform: uppercase; opacity: 0.8; margin-bottom: 8px;">Perimeter Cell Rules</h3>
+                    
+                    <label class="switch-label">Sandwich Sums <input type="checkbox" id="rule-sandwich" onchange="window.updateUI ? window.updateUI() : null"></label>
+                    <label class="switch-label">Skyscrapers <input type="checkbox" id="rule-skyscraper" onchange="window.updateUI ? window.updateUI() : null"></label>
+                    <label class="switch-label">Frames <input type="checkbox" id="rule-frames" onchange="window.updateUI ? window.updateUI() : null"></label>
+                    <label class="switch-label">Numbered Rooms <input type="checkbox" id="rule-rooms" onchange="window.updateUI ? window.updateUI() : null"></label>
 
                     <hr class="tool-divider" style="margin: 15px 0 10px 0;">
                     <h3 style="margin: 5px 0; color: var(--text-main);">Grid Modifications</h3>
