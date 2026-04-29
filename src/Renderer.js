@@ -27,12 +27,15 @@ export function initHighlighter() {
     });
 }
 
-export function updateUI() {
+eexport function updateUI() {
     const primaryActive = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
+    
+    // Safely check if the selected cell is a standard board index (a number)
     const isBoardCell = primaryActive !== null && typeof primaryActive === 'number';
-    const selVal = primaryActive !== null ? State.board[primaryActive].val : 0;
-    const selR = primaryActive !== null ? Math.floor(primaryActive / State.size) : -1;
-    const selC = primaryActive !== null ? primaryActive % State.size : -1;
+
+    const selVal = isBoardCell ? State.board[primaryActive].val : 0;
+    const selR = isBoardCell ? Math.floor(primaryActive / State.size) : -1;
+    const selC = isBoardCell ? primaryActive % State.size : -1;
     const selBlockR = selR !== -1 ? Math.floor(selR / State.bH) : -1;
     const selBlockC = selC !== -1 ? Math.floor(selC / State.bW) : -1;
     const showSeen = document.getElementById('toggle-seen')?.checked ?? true;
@@ -48,10 +51,33 @@ export function updateUI() {
         const blockR = Math.floor(r / State.bH), blockC = Math.floor(c / State.bW);
 
         let tint = "rgba(255, 255, 255, 0)"; 
-        
+        el.style.boxShadow = 'none'; // RESET SHADOW
+
         if (State.selected.includes(i)) {
             el.classList.add('selected');
             tint = State.darkMode ? "rgba(56, 189, 248, 0.5)" : "rgba(52, 152, 219, 0.4)"; 
+
+            // --- SMART CONTIGUOUS BORDERS ---
+            // Checks if neighboring cells are also selected
+            const hasTop = r > 0 && State.selected.includes(i - State.size);
+            const hasBottom = r < State.size - 1 && State.selected.includes(i + State.size);
+            const hasLeft = c > 0 && State.selected.includes(i - 1);
+            const hasRight = c < State.size - 1 && State.selected.includes(i + 1);
+
+            const selColor = State.darkMode ? "#74b9ff" : "#3498db";
+            let shadows = [];
+
+            // Only draws the border on sides that touch unselected cells
+            if (!hasTop) shadows.push(`inset 0 2px 0 0 ${selColor}`);
+            if (!hasBottom) shadows.push(`inset 0 -2px 0 0 ${selColor}`);
+            if (!hasLeft) shadows.push(`inset 2px 0 0 0 ${selColor}`);
+            if (!hasRight) shadows.push(`inset -2px 0 0 0 ${selColor}`);
+
+            if (shadows.length > 0) {
+                el.style.boxShadow = shadows.join(', ');
+            }
+            // --------------------------------
+
         } else if (showSeen && (r === selR || c === selC || (blockR === selBlockR && blockC === selBlockC))) {
             el.classList.add('highlight');
             tint = State.darkMode ? "rgba(56, 189, 248, 0.15)" : "rgba(52, 152, 219, 0.1)"; 
@@ -64,7 +90,6 @@ export function updateUI() {
         el.style.background = `linear-gradient(${tint}, ${tint}), ${highlightBase}`;
 
         if (data.val !== 0) {
-            // Wrap the digit in a span and pull it above the SVG layer (z-index 20)
             el.innerHTML = `<span style="position: relative; z-index: 20;">${data.val}</span>`;
             el.classList.add(data.given ? 'given' : 'user');
             if (hasConflict(State.board, i, data.val)) el.classList.add('error');
@@ -78,14 +103,13 @@ export function updateUI() {
         else if (data.notes.length > 0) {
             const pGrid = document.createElement('div');
             pGrid.className = 'pencil-grid';
-            pGrid.style.zIndex = '20'; // Ensure the grid container is pulled up
+            pGrid.style.zIndex = '20'; 
             
             for(let n = 1; n <= 9; n++) {
                 const nDiv = document.createElement('div'); 
                 nDiv.className = 'pencil-num';
                 
                 if (data.notes.includes(n)) {
-                    // Wrap the pencil digit in the same relative span to pierce the SVG glass
                     nDiv.innerHTML = `<span style="position: relative; z-index: 20;">${n}</span>`;
                     if (hasConflict(State.board, i, n)) nDiv.classList.add('error');
                 }
@@ -105,7 +129,17 @@ export function updateUI() {
             const el = document.getElementById(id);
             if (el) {
                 el.innerText = State.clues?.[id] || "";
-                el.classList.toggle('selected', State.selected.includes(id));
+                
+                const isSel = State.selected.includes(id);
+                el.classList.toggle('selected', isSel);
+                
+                // Give clue cells a standard full selection ring if they are clicked
+                if (isSel) {
+                    const selColor = State.darkMode ? "#74b9ff" : "#3498db";
+                    el.style.boxShadow = `inset 0 0 0 2px ${selColor}`;
+                } else {
+                    el.style.boxShadow = 'none';
+                }
             }
         }
     }
