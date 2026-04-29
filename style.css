@@ -862,10 +862,6 @@ body.mobile-menu-open #mobile-overlay {
     visibility: visible;
 }
 
-/* --- RESPONSIVE THEME BUTTONS (Default to Desktop) --- */
-.mobile-theme-only { display: none !important; }
-.desktop-theme-only { display: block !important; }
-
 @media (max-width: 950px) {
     
     /* 1. Prevent Overlapping: Let the body breathe natively */
@@ -963,8 +959,16 @@ body.mobile-menu-open #mobile-overlay {
         stroke-width: 1px !important;
     }
 
-    /* 10. Responsive Theme Buttons (Mobile Overrides) */
-    .mobile-theme-only { display: block !important; }
+}
+
+/* --- RESPONSIVE THEME BUTTONS --- */
+/* On Desktop: Hide the mobile clone */
+@media (min-width: 951px) {
+    .mobile-theme-only { display: none !important; }
+}
+
+/* On Mobile: Hide the desktop clone, and let the mobile clone obey the tabs natively! */
+@media (max-width: 950px) {
     .desktop-theme-only { display: none !important; }
 }
 
