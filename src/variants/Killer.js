@@ -44,7 +44,7 @@ export function drawKiller(variant, svgElement) {
 
     const svgRect = svgElement.getBoundingClientRect();
     const inset = 3; // How far the dashed line sits inside the cell border
-    const strokeColor = State.darkMode ? "#cbd5e1" : "#475569";
+    const strokeColor = State.darkMode ? "#cbd5e1" : "#cbd5e1";
 
     // 1. Draw the dashed perimeter
     variant.cells.forEach(cellIdx => {
