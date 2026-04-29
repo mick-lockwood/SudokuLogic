@@ -93,7 +93,7 @@ export function drawKiller(variant, svgElement) {
         const y = cellRect.top - svgRect.top;
         
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", x + 3);
+        text.setAttribute("x", x + 1);
         text.setAttribute("y", y + 9);
         text.setAttribute("font-size", "10");
         text.setAttribute("font-weight", "800");
