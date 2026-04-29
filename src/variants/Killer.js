@@ -100,12 +100,35 @@ export function drawKiller(variant, svgElement) {
         const x = cellRect.left - svgRect.left;
         const y = cellRect.top - svgRect.top;
         
+        // --- MATH: VALIDATE MIN/MAX SUM ---
+        let isInvalidSum = false;
+        const numCells = variant.cells.length;
+
+        if (numCells > 9) {
+            isInvalidSum = true; // Impossible to have >9 unique digits
+        } else {
+            let minSum = 0;
+            let maxSum = 0;
+            // Calculate minimum possible sum (1 + 2 + 3...)
+            for (let i = 1; i <= numCells; i++) minSum += i;
+            // Calculate maximum possible sum (9 + 8 + 7...)
+            for (let i = 1; i <= numCells; i++) maxSum += (10 - i);
+
+            if (variant.sum < minSum || variant.sum > maxSum) {
+                isInvalidSum = true;
+            }
+        }
+
+        // Determine final text color based on math validity
+        const dangerColor = State.darkMode ? "#fb923c" : "#e74c3c";
+        const finalTextColor = isInvalidSum ? dangerColor : textFill;
+
         // Dynamic sizing for responsiveness
         const fontSize = Math.max(7, cellRect.width * 0.18); 
         
         // Calculate a shared center point tucked closely into the top-left corner
-        const centerX = (x + (fontSize * 0.9)-3);
-        const centerY = (y + (fontSize * 0.9)-3);
+        const centerX = (x + (fontSize * 0.9) - 3);
+        const centerY = (y + (fontSize * 0.9) - 3);
         
         // --- 2a. Draw the Circle Background ---
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -113,7 +136,9 @@ export function drawKiller(variant, svgElement) {
         circle.setAttribute("cy", centerY);
         circle.setAttribute("r", fontSize * 0.85); // Radius scales with the text
         circle.setAttribute("fill", circleFill);
-        circle.setAttribute("stroke", lineStroke); // Uses the same stroke color as the cage lines
+        
+        // Optional tweak: We also color the circle stroke red if it's invalid for maximum clarity!
+        circle.setAttribute("stroke", isInvalidSum ? dangerColor : lineStroke); 
         circle.setAttribute("stroke-width", "1.5");
         svgElement.appendChild(circle);
         
@@ -124,7 +149,9 @@ export function drawKiller(variant, svgElement) {
         
         text.setAttribute("font-size", `${fontSize}px`);
         text.setAttribute("font-weight", "800");
-        text.setAttribute("fill", textFill);
+        
+        // Apply the mathematically validated color
+        text.setAttribute("fill", finalTextColor);
         
         // Perfectly centers the text mathematically inside the circle's (cx, cy) coordinates
         text.setAttribute("text-anchor", "middle");
