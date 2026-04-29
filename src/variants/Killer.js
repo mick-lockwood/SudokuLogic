@@ -45,14 +45,37 @@ export function drawKiller(variant, svgElement) {
     const svgRect = svgElement.getBoundingClientRect();
     const inset = 3; 
 
-    // --- COLOR THEMES ---
-    // Dark Mode: Lighter lines/stroke, dark circle fill, light text.
-    // Light Mode: Darker lines/stroke, light circle fill, dark text.
-    const lineStroke = State.darkMode ? "#e2e8f0" : "#334155";
+    // --- 1. MATH: VALIDATE MIN/MAX SUM EARLY ---
+    let isInvalidSum = false;
+    const numCells = variant.cells.length;
+
+    // Only run validation if a sum was actually entered
+    if (variant.sum) {
+        if (numCells > 9) {
+            isInvalidSum = true; 
+        } else {
+            let minSum = 0;
+            let maxSum = 0;
+            for (let i = 1; i <= numCells; i++) minSum += i;
+            for (let i = 1; i <= numCells; i++) maxSum += (10 - i);
+            if (variant.sum < minSum || variant.sum > maxSum) {
+                isInvalidSum = true;
+            }
+        }
+    }
+
+    // --- 2. DYNAMIC COLOR THEMES ---
+    const dangerColor = State.darkMode ? "#fb923c" : "#e74c3c";
+    
+    // If invalid, force the lines to be red! Otherwise, use the standard theme colors.
+    const lineStroke = isInvalidSum ? dangerColor : (State.darkMode ? "#e2e8f0" : "#334155");
     const textFill = State.darkMode ? "#f8fafc" : "#0f172a";
     const circleFill = State.darkMode ? "#1e293b" : "#ffffff"; 
+    
+    // The text turns red if invalid, otherwise matches the theme
+    const finalTextColor = isInvalidSum ? dangerColor : textFill;
 
-    // 1. Draw the dashed perimeter
+    // --- 3. Draw the dashed perimeter ---
     variant.cells.forEach(cellIdx => {
         const el = document.getElementById(`cell-${cellIdx}`);
         if (!el) return;
@@ -75,7 +98,7 @@ export function drawKiller(variant, svgElement) {
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
             line.setAttribute("x1", x1); line.setAttribute("y1", y1);
             line.setAttribute("x2", x2); line.setAttribute("y2", y2);
-            line.setAttribute("stroke", lineStroke);
+            line.setAttribute("stroke", lineStroke); // This will now be red if invalid!
             line.setAttribute("stroke-width", "1.5");     
             line.setAttribute("stroke-dasharray", "3 3"); 
             svgElement.appendChild(line);
@@ -90,7 +113,7 @@ export function drawKiller(variant, svgElement) {
         if (!hasRight) drawLine(x + rightEdge, y + inset, x + rightEdge, y + bottomEdge);
     });
 
-    // 2. Draw the Sum Circle & Text in the top-left cell
+    // --- 4. Draw the Sum Circle & Text ---
     const sortedCells = [...variant.cells].sort((a, b) => a - b);
     const topLeftCell = sortedCells[0];
     
@@ -100,60 +123,28 @@ export function drawKiller(variant, svgElement) {
         const x = cellRect.left - svgRect.left;
         const y = cellRect.top - svgRect.top;
         
-        // --- MATH: VALIDATE MIN/MAX SUM ---
-        let isInvalidSum = false;
-        const numCells = variant.cells.length;
-
-        if (numCells > 9) {
-            isInvalidSum = true; // Impossible to have >9 unique digits
-        } else {
-            let minSum = 0;
-            let maxSum = 0;
-            // Calculate minimum possible sum (1 + 2 + 3...)
-            for (let i = 1; i <= numCells; i++) minSum += i;
-            // Calculate maximum possible sum (9 + 8 + 7...)
-            for (let i = 1; i <= numCells; i++) maxSum += (10 - i);
-
-            if (variant.sum < minSum || variant.sum > maxSum) {
-                isInvalidSum = true;
-            }
-        }
-
-        // Determine final text color based on math validity
-        const dangerColor = State.darkMode ? "#fb923c" : "#e74c3c";
-        const finalTextColor = isInvalidSum ? dangerColor : textFill;
-
-        // Dynamic sizing for responsiveness
         const fontSize = Math.max(7, cellRect.width * 0.18); 
         
-        // Calculate a shared center point tucked closely into the top-left corner
         const centerX = (x + (fontSize * 0.9) - 3);
         const centerY = (y + (fontSize * 0.9) - 3);
         
-        // --- 2a. Draw the Circle Background ---
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("cx", centerX);
         circle.setAttribute("cy", centerY);
-        circle.setAttribute("r", fontSize * 0.85); // Radius scales with the text
+        circle.setAttribute("r", fontSize * 0.85); 
         circle.setAttribute("fill", circleFill);
-        
-        // Optional tweak: We also color the circle stroke red if it's invalid for maximum clarity!
-        circle.setAttribute("stroke", isInvalidSum ? dangerColor : lineStroke); 
+        circle.setAttribute("stroke", lineStroke); 
         circle.setAttribute("stroke-width", "1.5");
         svgElement.appendChild(circle);
         
-        // --- 2b. Draw the Text ---
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("x", centerX); 
         text.setAttribute("y", centerY); 
         
         text.setAttribute("font-size", `${fontSize}px`);
         text.setAttribute("font-weight", "800");
+        text.setAttribute("fill", finalTextColor); 
         
-        // Apply the mathematically validated color
-        text.setAttribute("fill", finalTextColor);
-        
-        // Perfectly centers the text mathematically inside the circle's (cx, cy) coordinates
         text.setAttribute("text-anchor", "middle");
         text.setAttribute("dominant-baseline", "central");
         
