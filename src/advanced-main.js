@@ -32,7 +32,7 @@ window.setTool = (tool) => {
     
     // 1. Strip ALL active classes from ALL variant buttons
     document.querySelectorAll('.variant-tool-btn').forEach(btn => {
-        btn.classList.remove('active-tool-pointer', 'active-tool-variant', 'active-tool-eraser');
+        btn.classList.remove('active-tool-pointer', 'active-tool-variant', 'active-tool-edit', 'active-tool-eraser');
     });
 
     // 2. Find the clicked button and apply the correct category class
