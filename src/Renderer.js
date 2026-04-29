@@ -123,48 +123,69 @@ export function updateUI() {
     renderNumpad();
 
     // --- RENDER PERIMETER CLUES ---
-    for (let r = -1; r <= State.size; r++) {
-        for (let c = -1; c <= State.size; c++) {
-            const id = `clue-${r}-${c}`;
-            const el = document.getElementById(id);
-            if (el) {
-                el.innerText = State.clues?.[id] || "";
-                
-                const isSel = State.selected.includes(id);
-                el.classList.toggle('selected', isSel);
-                
-                // Give clue cells a standard full selection ring if they are clicked
-                if (isSel) {
-                    const selColor = State.darkMode ? "#74b9ff" : "#3498db";
-                    el.style.boxShadow = `inset 0 0 0 2px ${selColor}`;
-                } else {
-                    el.style.boxShadow = 'none';
+    if (State.showOuterClues) {
+        for (let r = -1; r <= State.size; r++) {
+            for (let c = -1; c <= State.size; c++) {
+                const isOuter = (r === -1 || r === State.size || c === -1 || c === State.size);
+                if (!isOuter) continue;
+
+                const id = `clue-${r}-${c}`;
+                const el = document.getElementById(id);
+                if (el) {
+                    const val = State.clues?.[id] || "";
+                    
+                    // Match inner cell span layering
+                    el.innerHTML = val !== "" ? `<span style="position: relative; z-index: 20;">${val}</span>` : "";
+                    
+                    const isSel = State.selected.includes(id);
+                    el.classList.toggle('selected', isSel);
+                    
+                    // SMART BORDERS: Check if this cell is part of ANY drawn variant line
+                    const hasVariant = State.variants.some(v => v.cells.includes(id));
+                    
+                    if (val !== "" || hasVariant) {
+                        el.classList.add('active-clue');
+                    } else {
+                        el.classList.remove('active-clue');
+                    }
+                    
+                    if (isSel) {
+                        const selColor = State.darkMode ? "#74b9ff" : "#3498db";
+                        el.style.boxShadow = `inset 0 0 0 2px ${selColor}`;
+                    } else {
+                        el.style.boxShadow = 'none';
+                    }
                 }
             }
         }
     }
-}
-
+    
 export function renderGrid() {
     const container = document.getElementById('grid');
     container.innerHTML = '';
     container.style.display = 'grid';
     container.style.width = 'fit-content'; 
-    container.style.gap = '0px';     // NEW: We remove the gap so the clues float cleanly
-    container.style.border = 'none'; // NEW: We handle the thick border dynamically
-    container.style.gridTemplateColumns = `repeat(${State.size + 2}, var(--cell-size))`; // N+2 Grid!
+    container.style.gap = '0px';     
+    container.style.border = 'none'; 
+    
+    // Dynamically sets columns to 9x9 or 11x11
+    const show = State.showOuterClues;
+    container.style.gridTemplateColumns = `repeat(${show ? State.size + 2 : State.size}, var(--cell-size))`; 
     
     const gridLine = State.darkMode ? "#ffffff" : "#1e293b";
     const wrapper = document.getElementById('grid-wrapper');
     
-    wrapper.style.background = 'transparent'; // Let the page background show through the clues
+    wrapper.style.background = 'transparent'; 
     wrapper.style.width = 'fit-content'; 
     wrapper.style.margin = '0 auto';     
     container.style.background = 'transparent';
 
-    // Loop from -1 to State.size to build the outer perimeter
-    for (let r = -1; r <= State.size; r++) {
-        for (let c = -1; c <= State.size; c++) {
+    // Shrinks the loop to skip the -1 and +1 perimeter if hidden
+    const start = show ? -1 : 0;
+    const end = show ? State.size : State.size - 1;
+
+    for (let r = start; r <= end; r++) {
+        for (let c = start; c <= end; c++) {
             const isOuter = (r === -1 || r === State.size || c === -1 || c === State.size);
             const isCorner = isOuter && (r === -1 || r === State.size) && (c === -1 || c === State.size);
 
@@ -350,4 +371,25 @@ export function getCellCenter(index) {
         x: (cellRect.left - svgRect.left) + (cellRect.width / 2),
         y: (cellRect.top - svgRect.top) + (cellRect.height / 2)
     };
+}
+
+// UNIVERSAL CELL PARSER
+// Helps your variants draw lines seamlessly between inner and outer cells!
+export function getCellData(idx) {
+    if (typeof idx === 'string') {
+        const match = idx.match(/clue-(-?\d+)-(-?\d+)/);
+        return {
+            id: idx,
+            r: parseInt(match[1]),
+            c: parseInt(match[2]),
+            isOuter: true
+        };
+    } else {
+        return {
+            id: `cell-${idx}`,
+            r: Math.floor(idx / State.size),
+            c: idx % State.size,
+            isOuter: false
+        };
+    }
 }
