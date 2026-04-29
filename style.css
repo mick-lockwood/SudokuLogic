@@ -257,10 +257,12 @@ body.dark-mode .kropki-dot[fill="#000000"] {
 .cell.given { color: #64748b; }
 .cell.user { color: var(--primary); font-style: italic; }
 .cell.error { color: var(--danger) !important; }
-.cell.selected { box-shadow: inset 0 0 0 2px var(--primary); z-index: 2; }
+.cell.selected { box-shadow: inset 0 0 0 2px #3498db !important; z-index: 2; outline: none; } /* Light Mode Selection (Classic Blue) */
+
 body.dark-mode .cell.given { color: #38bdf8; font-weight: 800; }
 body.dark-mode .cell.user { color: #f8fafc; }
 body.dark-mode .cell.error { color: #fb923c !important; }
+body.dark-mode .cell.selected { box-shadow: inset 0 0 0 2px #74b9ff !important; } /* Dark Mode Selection (Bright Blue) */
 
 /* Pencil Mark Colors for Normal & Dark Mode */
 .pencil-grid { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; height: 100%; position: absolute; pointer-events: none; padding: 18%; box-sizing: border-box; }
