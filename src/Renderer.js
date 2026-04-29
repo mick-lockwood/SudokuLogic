@@ -182,6 +182,7 @@ export function updateUI() {
             }
         }
     }
+}
 
 export function renderGrid() {
     const container = document.getElementById('grid');
