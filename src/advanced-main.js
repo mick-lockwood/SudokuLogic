@@ -346,34 +346,94 @@ function drawVariantLine(variant) {
 
 // --- UX ENHANCEMENTS ---
 
-// 1. Keyboard Shortcuts (Esc/V, Undo, Redo)
+// 1. Unified Keyboard Shortcuts (Undo, Redo, Esc, Delete, Zero)
+// We use `true` for the capture phase to intercept keys BEFORE classic-main.js processes them!
 window.addEventListener('keydown', (e) => {
     if (State.paused || State.isWon) return;
     
-    // Drop tool (Escape or V)
+    const isZ = e.key.toLowerCase() === 'z';
+    const isY = e.key.toLowerCase() === 'y';
+    const isCtrl = e.ctrlKey || e.metaKey;
+
+    // --- A. UNDO & REDO (CTRL + Z / CTRL + Y) ---
+    if (isCtrl && (isZ || isY)) {
+        e.preventDefault();
+        e.stopImmediatePropagation(); // Block classic-main's old undo/redo logic
+        
+        // REDO: Ctrl+Y or Ctrl+Shift+Z
+        if (isY || (isZ && e.shiftKey)) {
+            if (window.AdvancedState.activeTool !== 'pointer') {
+                window.redoVariant();
+            } else if (typeof window.triggerRedo === 'function') {
+                window.triggerRedo();
+            }
+        } 
+        // UNDO: Ctrl+Z
+        else if (isZ && !e.shiftKey) {
+            if (window.AdvancedState.activeTool !== 'pointer') {
+                window.undoVariant();
+            } else if (typeof window.triggerUndo === 'function') {
+                window.triggerUndo();
+            }
+        }
+        return;
+    }
+
+    // --- B. BLOCK CLASSIC'S OLD 'Z' KEY ---
+    // If the user presses just 'z' (without Ctrl), we swallow it so it doesn't fire classic's old undo
+    if (!isCtrl && isZ) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return;
+    }
+
+    // --- C. THE '0' KEY FIX ---
+    if (e.key === '0') {
+        e.preventDefault();
+        e.stopImmediatePropagation(); // Stop classic from treating '0' as an erase command!
+        
+        const primary = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
+        if (typeof primary === 'string' && primary.startsWith('clue')) {
+            if (!State.clues) State.clues = {};
+            const current = State.clues[primary] || "";
+            
+            // Allow appending '0' to make 10, 20, 30, etc.
+            if (current.length < 2 && current.length > 0) {
+                State.clues[primary] = current + "0";
+                if (typeof window.updateUI === 'function') window.updateUI();
+            }
+        }
+        return; // If it's a standard grid cell, '0' is ignored natively
+    }
+
+    // --- D. BACKSPACE / DELETE ---
+    if (e.key === 'Backspace' || e.key === 'Delete') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        const primary = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
+        
+        if (typeof primary === 'string' && primary.startsWith('clue')) {
+            if (!State.clues) State.clues = {};
+            const current = State.clues[primary] || "";
+            
+            // UX Bonus: Backspace removes 1 digit at a time instead of wiping the whole thing
+            State.clues[primary] = current.slice(0, -1);
+            if (typeof window.updateUI === 'function') window.updateUI();
+        } else {
+            // If it's a standard 9x9 cell, tell the engine to run the standard erase logic
+            if (typeof window.handleInput === 'function') window.handleInput(0);
+        }
+        return;
+    }
+
+    // --- E. DROP TOOL (Esc / V) ---
     if (e.key === 'Escape' || e.key.toLowerCase() === 'v') {
         if (window.AdvancedState.activeTool !== 'pointer') {
             window.setTool('pointer');
         }
     }
-
-    // Only intercept Undo/Redo if a VARIANT tool is currently selected
-    if (window.AdvancedState.activeTool !== 'pointer') {
-        
-        // Undo: Ctrl + Z (or Cmd + Z)
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
-            e.preventDefault(); // Stop standard grid undo
-            window.undoVariant();
-        }
-        
-        // Redo: Ctrl + Y OR Ctrl + Shift + Z
-        if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') || 
-            ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z')) {
-            e.preventDefault(); // Stop standard grid redo
-            window.redoVariant();
-        }
-    }
-});
+}, true); // <-- 'true' enables the Capture Phase!
 
 // 2. Intercept Mode Switching to hide tools and reset to pointer
 const originalSetAppMode = window.setAppMode;
