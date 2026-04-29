@@ -43,8 +43,14 @@ export function drawKiller(variant, svgElement) {
     if (variant.cells.length === 0) return;
 
     const svgRect = svgElement.getBoundingClientRect();
-    const inset = 3; // How far the dashed line sits inside the cell border
-    const strokeColor = State.darkMode ? "#cbd5e1" : "#475569";
+    const inset = 3; 
+
+    // --- NEW COLOR THEMES ---
+    // Dark Mode: Lighter lines, light text, dark stroke.
+    // Light Mode: Darker lines, dark text, light stroke.
+    const lineStroke = State.darkMode ? "#e2e8f0" : "#334155";
+    const textFill = State.darkMode ? "#f8fafc" : "#0f172a";
+    const textStroke = State.darkMode ? "#1e293b" : "#ffffff";
 
     // 1. Draw the dashed perimeter
     variant.cells.forEach(cellIdx => {
@@ -60,7 +66,6 @@ export function drawKiller(variant, svgElement) {
         const r = Math.floor(cellIdx / State.size);
         const c = cellIdx % State.size;
 
-        // Check if neighboring cells are also inside this cage
         const hasTop = r > 0 && variant.cells.includes(cellIdx - State.size);
         const hasBottom = r < State.size - 1 && variant.cells.includes(cellIdx + State.size);
         const hasLeft = c > 0 && variant.cells.includes(cellIdx - 1);
@@ -70,16 +75,21 @@ export function drawKiller(variant, svgElement) {
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
             line.setAttribute("x1", x1); line.setAttribute("y1", y1);
             line.setAttribute("x2", x2); line.setAttribute("y2", y2);
-            line.setAttribute("stroke", strokeColor);
-            line.setAttribute("stroke-width", "2");
-            line.setAttribute("stroke-dasharray", "4 4");
+            line.setAttribute("stroke", lineStroke);
+            line.setAttribute("stroke-width", "1.5");     // Thinner line for elegance
+            line.setAttribute("stroke-dasharray", "3 3"); // Tighter dashes
             svgElement.appendChild(line);
         };
 
-        if (!hasTop) drawLine(x + inset, y + inset, x + w - inset, y + inset);
-        if (!hasBottom) drawLine(x + inset, y + h - inset, x + w - inset, y + h - inset);
-        if (!hasLeft) drawLine(x + inset, y + inset, x + inset, y + h - inset);
-        if (!hasRight) drawLine(x + w - inset, y + inset, x + w - inset, y + h - inset);
+        // --- THE INSET FIX ---
+        // Subtract 1 extra pixel from the right and bottom to account for CSS border thickness
+        const rightEdge = w - inset - 1;
+        const bottomEdge = h - inset - 1;
+
+        if (!hasTop) drawLine(x + inset, y + inset, x + rightEdge, y + inset);
+        if (!hasBottom) drawLine(x + inset, y + bottomEdge, x + rightEdge, y + bottomEdge);
+        if (!hasLeft) drawLine(x + inset, y + inset, x + inset, y + bottomEdge);
+        if (!hasRight) drawLine(x + rightEdge, y + inset, x + rightEdge, y + bottomEdge);
     });
 
     // 2. Draw the Sum Text in the top-left cell of the cage
@@ -92,14 +102,23 @@ export function drawKiller(variant, svgElement) {
         const x = cellRect.left - svgRect.left;
         const y = cellRect.top - svgRect.top;
         
+        // --- DYNAMIC SCALING ---
+        // Font size is exactly 22% of the cell width (never dropping below 7px)
+        const fontSize = Math.max(7, cellRect.width * 0.22);
+        
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", x + 1);
-        text.setAttribute("y", y + 8);
-        text.setAttribute("font-size", "8");
+        
+        // Positions the text proportionally so it hugs the corner perfectly on all screens
+        text.setAttribute("x", x + (cellRect.width * 0.05)); 
+        text.setAttribute("y", y + (cellRect.width * 0.26)); 
+        
+        text.setAttribute("font-size", `${fontSize}px`);
         text.setAttribute("font-weight", "800");
-        text.setAttribute("fill", strokeColor);
+        
+        // Apply our custom theme variables
+        text.setAttribute("fill", textFill);
         text.setAttribute('paint-order', 'stroke');
-        text.setAttribute('stroke', State.darkMode ? '#1e293b' : '#ffffff');
+        text.setAttribute('stroke', textStroke);
         text.setAttribute('stroke-width', '3px');
         text.setAttribute('stroke-linejoin', 'round');
         
