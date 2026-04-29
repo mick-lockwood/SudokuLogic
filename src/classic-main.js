@@ -17,6 +17,8 @@ window.toggleDarkMode = () => {
     document.body.classList.toggle('dark-mode', State.darkMode);
     Renderer.renderGrid();
     Renderer.updateUI();
+
+    if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
 };
 
 window.openMobileMenu = (tab) => {
