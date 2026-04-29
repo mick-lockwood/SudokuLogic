@@ -15,6 +15,13 @@ window.handleCellSelection = handleCellSelection;
 window.toggleDarkMode = () => {
     State.darkMode = !State.darkMode;
     document.body.classList.toggle('dark-mode', State.darkMode);
+
+    // --- Swap the Theme Button Text ---
+    const themeBtn = document.getElementById('btn-theme');
+    if (themeBtn) {
+        themeBtn.innerText = State.darkMode ? "Toggle Light Mode" : "Toggle Dark Mode";
+    }
+    
     Renderer.renderGrid();
     Renderer.updateUI();
 
