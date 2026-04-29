@@ -1,5 +1,6 @@
 // src/variants/Killer.js
 import { State } from '../GameState.js';
+import { getCellData } from '../Renderer.js';
 
 export function killerConflict(variant, arr, idx, val, isFlatArray = false) {
     if (!variant.cells.includes(idx)) return false;
@@ -77,7 +78,11 @@ export function drawKiller(variant, svgElement) {
 
     // --- 3. Draw the dashed perimeter ---
     variant.cells.forEach(cellIdx => {
-        const el = document.getElementById(`cell-${cellIdx}`);
+        // Use the parser to get the correct ID, Row, and Column
+        const data = getCellData(cellIdx);
+        
+        // Pass the parsed ID to getElementById
+        const el = document.getElementById(data.id);
         if (!el) return;
         
         const cellRect = el.getBoundingClientRect();
@@ -86,8 +91,9 @@ export function drawKiller(variant, svgElement) {
         const w = cellRect.width;
         const h = cellRect.height;
 
-        const r = Math.floor(cellIdx / State.size);
-        const c = cellIdx % State.size;
+        // Use the parsed row and column instead of doing math!
+        const r = data.r;
+        const c = data.c;
 
         const hasTop = r > 0 && variant.cells.includes(cellIdx - State.size);
         const hasBottom = r < State.size - 1 && variant.cells.includes(cellIdx + State.size);
