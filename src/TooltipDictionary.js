@@ -6,9 +6,6 @@ export const Tooltips = {
 `Select cells and input numbers.\n
 Shortcut: Esc or V`,
     
-    'tool-eraser':
-`Click any drawn variant graphic to delete it.`,
-    
     // Variant Tools
     'tool-thermo':
 `Numbers must strictly increase
@@ -40,6 +37,14 @@ Example: 3 and 6.\n
 Click and drag between cells to place.`,
     
     // Actions    
+
+    'tool-edit':
+`Click any drawn variant graphic to edit it's value.\n
+Example: Edit the number value shown on a Killer Cage.`,
+    
+    'tool-eraser':
+`Click any drawn variant graphic to delete it.`,
+    
     'btn-undo-variant': 
 `Undo the last drawn variant.\n
 Shortcut: Ctrl+Z (While variant tool active)`,
