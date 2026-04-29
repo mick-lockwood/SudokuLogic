@@ -726,6 +726,13 @@ body.dark-mode .variant-tool-btn:hover {
     box-shadow: 0 2px 8px rgba(155, 89, 182, 0.4);
 }
 
+/* Edit State (Orange) */
+.variant-tool-btn.active-tool-edit {
+    background: #f39c12; 
+    color: white;
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.4);
+}
+
 /* Eraser State (Red) */
 .variant-tool-btn.active-tool-eraser {
     background: #e74c3c; /* Red for erasing */
@@ -809,6 +816,11 @@ body.dark-mode .variant-tool-btn.active-tool-pointer {
 body.dark-mode .variant-tool-btn.active-tool-variant {
     box-shadow: 0 0 15px rgba(155, 89, 182, 0.8);
     border-color: #c39bd3; /* Light purple border */
+}
+
+body.dark-mode .variant-tool-btn.active-tool-edit {
+    box-shadow: 0 0 15px rgba(243, 156, 18, 0.8);
+    border-color: #f5b041; /* Light orange border */
 }
 
 body.dark-mode .variant-tool-btn.active-tool-eraser {
