@@ -360,7 +360,11 @@ export function stopConfetti() {
 
 // --- SVG DRAWING ENGINE ---
 export function getCellCenter(index) {
-    const el = document.getElementById(`cell-${index}`);
+    // Parse the index so it understands both '45' and 'clue--1-4'
+    const data = getCellData(index);
+    
+    // Look up the element using the safely parsed ID
+    const el = document.getElementById(data.id);
     const svg = document.getElementById('svg-layer');
     if (!el || !svg) return { x: 0, y: 0 };
 
