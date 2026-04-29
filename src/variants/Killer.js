@@ -103,19 +103,18 @@ export function drawKiller(variant, svgElement) {
         const y = cellRect.top - svgRect.top;
         
         // --- DYNAMIC SCALING ---
-        // Font size is exactly 22% of the cell width (never dropping below 7px)
-        const fontSize = Math.max(7, cellRect.width * 0.22);
+        // Reduced from 0.22 to 0.18 for a smaller, sleeker look that fits better on mobile
+        const fontSize = Math.max(7, cellRect.width * 0.18); 
         
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         
-        // Positions the text proportionally so it hugs the corner perfectly on all screens
-        text.setAttribute("x", x + (cellRect.width * 0.05)); 
-        text.setAttribute("y", y + (cellRect.width * 0.26)); 
+        // Push X to 1px (or even 0) to hug the line, and tightly link Y to the font size
+        text.setAttribute("x", x + 1); 
+        text.setAttribute("y", y + (fontSize * 0.85)); 
         
         text.setAttribute("font-size", `${fontSize}px`);
         text.setAttribute("font-weight", "800");
         
-        // Apply our custom theme variables
         text.setAttribute("fill", textFill);
         text.setAttribute('paint-order', 'stroke');
         text.setAttribute('stroke', textStroke);
@@ -125,4 +124,3 @@ export function drawKiller(variant, svgElement) {
         text.textContent = variant.sum;
         svgElement.appendChild(text);
     }
-}
