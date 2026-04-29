@@ -43,6 +43,13 @@ window.closeMobileMenu = () => {
     document.body.classList.remove('mobile-menu-open');
 };
 
+window.toggleOuterClues = () => {
+    State.showOuterClues = document.getElementById('toggle-outer-clues').checked;
+    Renderer.renderGrid(); // Rebuilds the HTML grid size
+    Renderer.updateUI();   // Re-applies the numbers/colors
+    if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
+};
+
 window.setGridSize = (s) => {
     initBoardState(s);
     document.getElementById('size6').className = (s === 6) ? 'active' : '';
@@ -236,9 +243,8 @@ function handleInput(num) {
             if (num === 0) {
                 delete State.clues[idx];
             } else {
-                const current = State.clues[idx] || "";
-                // Allows typing "1" then "5" to get "15"
-                State.clues[idx] = current.length < 2 ? current + num : num.toString();
+                // REPLACES the number, ensuring only 1 digit is shown
+                State.clues[idx] = num.toString();
             }
             return;
         }
