@@ -305,10 +305,10 @@ export function renderNumpad() {
 
     const row2 = document.createElement('div'); row2.className = 'numpad-row';
     const btns = [
-        { text: 'Undo\n(Z)', action: window.triggerUndo, disabled: State.undoStack.length === 0 },
-        { text: 'Redo\n(Shift Z)', action: window.triggerRedo, disabled: State.redoStack.length === 0 },
+        { text: 'Undo\n(Ctrl + Z)', action: window.triggerUndo, disabled: State.undoStack.length === 0 },
+        { text: 'Redo\n(Ctrl + Y)', action: window.triggerRedo, disabled: State.redoStack.length === 0 },
         { text: State.pencil ? 'Pencil ON\n(N)' : 'Pencil OFF\n(N)', action: () => { State.pencil = !State.pencil; renderNumpad(); }, solveOnly: true, isPencil: true },
-        { text: 'Erase\n(0)', action: () => window.handleInput(0), danger: true }
+        { text: 'Erase\n(Del)', action: () => window.handleInput(0), danger: true }
     ];
 
     btns.forEach(cfg => {
