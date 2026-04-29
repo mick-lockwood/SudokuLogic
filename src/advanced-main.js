@@ -151,6 +151,72 @@ window.clearVariantGraphics = () => {
     Renderer.updateUI(); 
 };
 
+// --- PERIMETER RULE SYNCING ---
+window.togglePerimeterRule = () => {
+    const isAnyRuleChecked = 
+        document.getElementById('rule-sandwich').checked ||
+        document.getElementById('rule-skyscraper').checked ||
+        document.getElementById('rule-frames').checked ||
+        document.getElementById('rule-rooms').checked;
+
+    const outerCluesToggle = document.getElementById('toggle-outer-clues');
+    
+    // If a rule is turned on, but the grid is hidden, force the grid to show!
+    if (isAnyRuleChecked && !outerCluesToggle.checked) {
+        outerCluesToggle.checked = true;
+        window.toggleOuterClues(); 
+    } else {
+        if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
+        if (typeof window.updateUI === 'function') window.updateUI();
+    }
+};
+
+// Intercept the master toggle: If it gets turned off, wipe out the child checkboxes!
+const originalToggleOuterClues = window.toggleOuterClues;
+window.toggleOuterClues = () => {
+    const isChecked = document.getElementById('toggle-outer-clues').checked;
+    
+    if (!isChecked) {
+        document.getElementById('rule-sandwich').checked = false;
+        document.getElementById('rule-skyscraper').checked = false;
+        document.getElementById('rule-frames').checked = false;
+        document.getElementById('rule-rooms').checked = false;
+    }
+    
+    if (originalToggleOuterClues) originalToggleOuterClues();
+    
+    if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
+    if (typeof window.updateUI === 'function') window.updateUI();
+};
+
+// --- MULTI-DIGIT INPUT HIJACKER ---
+// Allows typing "4" then "5" to make "45" in the outer cells
+const originalHandleInput = window.handleInput;
+window.handleInput = (val) => {
+    const primary = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
+    
+    // Check if the user is currently focused on an outer clue cell
+    if (typeof primary === 'string' && primary.startsWith('clue')) {
+        if (!State.clues) State.clues = {};
+        
+        if (val === 0) {
+            State.clues[primary] = ""; // Erase on pressing 0 or Delete
+        } else {
+            const current = State.clues[primary] || "";
+            // If it's already 2 digits long, start over. Otherwise, append the number!
+            if (current.length >= 2) {
+                State.clues[primary] = val.toString(); 
+            } else {
+                State.clues[primary] = current + val.toString();
+            }
+        }
+        if (typeof window.updateUI === 'function') window.updateUI();
+    } else {
+        // If it's a normal inner cell, run the standard 1-9 logic
+        if (originalHandleInput) originalHandleInput(val);
+    }
+};
+
 // --- GLOBAL RULE TOGGLES ---
 window.toggleAntiKnight = () => {
     State.antiKnight = document.getElementById('toggle-anti-knight').checked;
@@ -403,6 +469,10 @@ window.updateDynamicTitle = () => {
     // 2. Check global rules
     if (State.antiKnight) activeTypes.add('Anti-Knight');
     if (State.antiKing) activeTypes.add('Anti-King');
+    if (document.getElementById('rule-sandwich')?.checked) activeTypes.add('Sandwich');
+    if (document.getElementById('rule-skyscraper')?.checked) activeTypes.add('Skyscraper');
+    if (document.getElementById('rule-frames')?.checked) activeTypes.add('Frames');
+    if (document.getElementById('rule-rooms')?.checked) activeTypes.add('Rooms');
     
     // 3. Update the HTML
     const titleEl = document.getElementById('puzzle-title');
