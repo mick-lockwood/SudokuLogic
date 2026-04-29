@@ -37,7 +37,6 @@ Example: 3 and 6.\n
 Click and drag between cells to place.`,
     
     // Actions    
-
     'tool-edit':
 `Click any drawn variant graphic to edit it's value.\n
 Example: Edit the number value shown on a Killer Cage.`,
@@ -64,5 +63,15 @@ apart cannot contain the same digit.`,
 `Cells that touch diagonally 
 (a chess king's move) 
 cannot contain the same digit.`,
+    
+    // Visibility Settings
+    'toggle-seen':
+`Toggle On/Off the blue cell highlights
+that show which cells are 'seen' 
+by the selected cell`,
+
+    // Theme Settings
+    'toggleDarkMode':
+`Toggle between Light and Dark Mode`,
     
 };
