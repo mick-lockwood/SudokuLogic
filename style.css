@@ -862,6 +862,10 @@ body.mobile-menu-open #mobile-overlay {
     visibility: visible;
 }
 
+/* --- RESPONSIVE THEME BUTTONS (Default to Desktop) --- */
+.mobile-theme-only { display: none !important; }
+.desktop-theme-only { display: block !important; }
+
 @media (max-width: 950px) {
     
     /* 1. Prevent Overlapping: Let the body breathe natively */
@@ -958,6 +962,10 @@ body.mobile-menu-open #mobile-overlay {
         r: 4.5px !important; /* CSS magically overrides the SVG radius! */
         stroke-width: 1px !important;
     }
+
+    /* 10. Responsive Theme Buttons (Mobile Overrides) */
+    .mobile-theme-only { display: block !important; }
+    .desktop-theme-only { display: none !important; }
 }
 
 /* --- KILL THE OUTER BUBBLE ON THE SIDE PANEL --- */
