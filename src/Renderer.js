@@ -141,11 +141,17 @@ export function updateUI() {
                     if (val !== "") {
                         const lineVals = getLineValues(id);
                         
-                        // We check State.perimeterMode to see which math rule to apply!
-                        if (State.perimeterMode === 'sandwich') isError = checkSandwich(val, lineVals);
-                        if (State.perimeterMode === 'skyscraper') isError = checkSkyscraper(val, lineVals);
-                        if (State.perimeterMode === 'frames') isError = checkFrames(val, lineVals);
-                        if (State.perimeterMode === 'numbered-rooms') isError = checkNumberedRoom(val, lineVals);
+                        // 1. Check which rules are currently turned on in the UI
+                        const isSandwich = document.getElementById('rule-sandwich')?.checked;
+                        const isSkyscraper = document.getElementById('rule-skyscraper')?.checked;
+                        const isFrames = document.getElementById('rule-frames')?.checked;
+                        const isRooms = document.getElementById('rule-rooms')?.checked;
+
+                        // 2. If a rule is active, and the line breaks that rule, flag it as an error!
+                        if (isSandwich && checkSandwich(val, lineVals)) isError = true;
+                        if (isSkyscraper && checkSkyscraper(val, lineVals)) isError = true;
+                        if (isFrames && checkFrames(val, lineVals)) isError = true;
+                        if (isRooms && checkNumberedRoom(val, lineVals)) isError = true;
                     }
                     
                     // Match inner cell span layering
