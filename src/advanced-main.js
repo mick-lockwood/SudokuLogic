@@ -67,28 +67,24 @@ window.clearVariantGraphics = () => {
 const originalHandleCellSelection = window.handleCellSelection;
 
 window.handleCellSelection = (index, isMulti, isDragging) => {
-    // NEW: If this is an outer clue cell (a string ID), skip drawing logic
     const isClueCell = typeof index === 'string';
 
-    if (!isClueCell && ['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(window.AdvancedState.activeTool)) {
+    if (['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(window.AdvancedState.activeTool)) {
         handleLineDrawing(index, isDragging);
     } 
     // --- EDIT LOGIC ---
-    else if (!isClueCell && window.AdvancedState.activeTool === 'edit') {
+    else if (window.AdvancedState.activeTool === 'edit') {
         if (!isDragging) {
-            // Find if the clicked cell belongs to ANY variant
             const variantToEdit = State.variants.find(v => v.cells.includes(index));
             
-            // Only Killer Cages currently have editable text values
             if (variantToEdit && variantToEdit.type === 'killer') {
                 setTimeout(() => {
-                    // Pre-fill the prompt with their current sum
                     const sumInput = prompt("Enter new target sum for this cage:", variantToEdit.sum);
-                    if (sumInput !== null) { // Ensures they didn't click "Cancel"
+                    if (sumInput !== null) { 
                         const sumVal = parseInt(sumInput);
                         if (!isNaN(sumVal) && sumVal > 0) {
-                            window.saveVariantState(); // Save to undo stack
-                            variantToEdit.sum = sumVal; // Update the sum!
+                            window.saveVariantState(); 
+                            variantToEdit.sum = sumVal; 
                             renderSVGLayer();
                             Renderer.updateUI();
                         }
@@ -96,14 +92,14 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                 }, 10);
             }
         }
-    }
-    // --- ERASER LOGIC ---
-    else if (!isClueCell && window.AdvancedState.activeTool === 'eraser') {
+    } 
+    // --------------------
         
+    // --- ERASER LOGIC ---
+    else if (window.AdvancedState.activeTool === 'eraser') {
         if (!isDragging) {
             const originalLength = State.variants.length;
             const newVariants = State.variants.filter(v => !v.cells.includes(index));
-            
             if (newVariants.length < originalLength) {
                 window.saveVariantState(); 
                 State.variants = newVariants;
@@ -112,7 +108,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
             }
         }
     }
-    // -----------------------
+    // --------------------
     else {
         // This will now handle both regular cell selection AND our new clue selection
         originalHandleCellSelection(index, isMulti, isDragging);
