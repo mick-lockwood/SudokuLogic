@@ -46,11 +46,11 @@ export function drawKiller(variant, svgElement) {
     const inset = 3; 
 
     // --- NEW COLOR THEMES ---
-    // Dark Mode: Lighter lines, light text, dark stroke.
-    // Light Mode: Darker lines, dark text, light stroke.
+    // Dark Mode: Lighter lines/stroke, dark circle fill, light text.
+    // Light Mode: Darker lines/stroke, light circle fill, dark text.
     const lineStroke = State.darkMode ? "#e2e8f0" : "#334155";
     const textFill = State.darkMode ? "#f8fafc" : "#0f172a";
-    const textStroke = State.darkMode ? "#1e293b" : "#ffffff";
+    const circleFill = State.darkMode ? "#1e293b" : "#ffffff"; 
 
     // 1. Draw the dashed perimeter
     variant.cells.forEach(cellIdx => {
@@ -76,13 +76,11 @@ export function drawKiller(variant, svgElement) {
             line.setAttribute("x1", x1); line.setAttribute("y1", y1);
             line.setAttribute("x2", x2); line.setAttribute("y2", y2);
             line.setAttribute("stroke", lineStroke);
-            line.setAttribute("stroke-width", "1.5");     // Thinner line for elegance
-            line.setAttribute("stroke-dasharray", "3 3"); // Tighter dashes
+            line.setAttribute("stroke-width", "1.5");     
+            line.setAttribute("stroke-dasharray", "3 3"); 
             svgElement.appendChild(line);
         };
 
-        // --- THE INSET FIX ---
-        // Subtract 1 extra pixel from the right and bottom to account for CSS border thickness
         const rightEdge = w - inset - 1;
         const bottomEdge = h - inset - 1;
 
@@ -92,7 +90,7 @@ export function drawKiller(variant, svgElement) {
         if (!hasRight) drawLine(x + rightEdge, y + inset, x + rightEdge, y + bottomEdge);
     });
 
-    // 2. Draw the Sum Text in the top-left cell of the cage
+    // 2. Draw the Sum Circle & Text in the top-left cell
     const sortedCells = [...variant.cells].sort((a, b) => a - b);
     const topLeftCell = sortedCells[0];
     
@@ -102,24 +100,35 @@ export function drawKiller(variant, svgElement) {
         const x = cellRect.left - svgRect.left;
         const y = cellRect.top - svgRect.top;
         
-        // --- DYNAMIC SCALING ---
-        // Reduced from 0.22 to 0.18 for a smaller, sleeker look that fits better on mobile
+        // Dynamic sizing for responsiveness
         const fontSize = Math.max(7, cellRect.width * 0.18); 
         
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        // Calculate a shared center point tucked closely into the top-left corner
+        const centerX = x + (fontSize * 0.9);
+        const centerY = y + (fontSize * 0.9);
         
-        // Push X to 1px (or even 0) to hug the line, and tightly link Y to the font size
-        text.setAttribute("x", x - 2); 
-        text.setAttribute("y", y + (fontSize * 0.85)-2); 
+        // --- 2a. Draw the Circle Background ---
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", centerX);
+        circle.setAttribute("cy", centerY);
+        circle.setAttribute("r", fontSize * 0.85); // Radius scales with the text
+        circle.setAttribute("fill", circleFill);
+        circle.setAttribute("stroke", lineStroke); // Uses the same stroke color as the cage lines
+        circle.setAttribute("stroke-width", "1.5");
+        svgElement.appendChild(circle);
+        
+        // --- 2b. Draw the Text ---
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", centerX); 
+        text.setAttribute("y", centerY); 
         
         text.setAttribute("font-size", `${fontSize}px`);
         text.setAttribute("font-weight", "800");
-        
         text.setAttribute("fill", textFill);
-        text.setAttribute('paint-order', 'stroke');
-        text.setAttribute('stroke', textStroke);
-        text.setAttribute('stroke-width', '3px');
-        text.setAttribute('stroke-linejoin', 'round');
+        
+        // Perfectly centers the text mathematically inside the circle's (cx, cy) coordinates
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("dominant-baseline", "central");
         
         text.textContent = variant.sum;
         svgElement.appendChild(text);
