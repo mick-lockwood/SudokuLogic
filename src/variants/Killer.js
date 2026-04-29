@@ -45,7 +45,7 @@ export function drawKiller(variant, svgElement) {
     const svgRect = svgElement.getBoundingClientRect();
     const inset = 3; 
 
-    // --- NEW COLOR THEMES ---
+    // --- COLOR THEMES ---
     // Dark Mode: Lighter lines/stroke, dark circle fill, light text.
     // Light Mode: Darker lines/stroke, light circle fill, dark text.
     const lineStroke = State.darkMode ? "#e2e8f0" : "#334155";
@@ -104,8 +104,8 @@ export function drawKiller(variant, svgElement) {
         const fontSize = Math.max(7, cellRect.width * 0.18); 
         
         // Calculate a shared center point tucked closely into the top-left corner
-        const centerX = x + (fontSize * 0.9);
-        const centerY = y + (fontSize * 0.9);
+        const centerX = (x + (fontSize * 0.9)-3);
+        const centerY = (y + (fontSize * 0.9)-3);
         
         // --- 2a. Draw the Circle Background ---
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
