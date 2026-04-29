@@ -124,3 +124,4 @@ export function drawKiller(variant, svgElement) {
         text.textContent = variant.sum;
         svgElement.appendChild(text);
     }
+}
