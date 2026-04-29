@@ -959,3 +959,15 @@ body.mobile-menu-open #mobile-overlay {
         stroke-width: 1px !important;
     }
 }
+
+/* --- KILL THE OUTER BUBBLE ON THE SIDE PANEL --- */
+.side-panel {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border: none !important;
+    
+    display: flex !important;
+    flex-direction: column;
+    gap: 15px; /* Creates the space between the Theme and Highlighter bubbles */
+}
