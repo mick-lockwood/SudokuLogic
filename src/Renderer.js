@@ -202,9 +202,20 @@ export function renderGrid() {
                 
                 div.addEventListener('pointerdown', (e) => {
                     if (State.paused || State.isWon) return;
-                    // Route to our selection handler using the String ID
+                    e.target.releasePointerCapture(e.pointerId); // Added for smooth dragging
                     window.handleCellSelection(clueId, e.ctrlKey || e.metaKey, false);
                 });
+                
+                // --- THE MISSING PIECE ---
+                // This tells the drawing tools when your mouse enters the clue cell!
+                div.addEventListener('pointerenter', (e) => {
+                    if (State.paused || State.isWon) return;
+                    if (e.buttons === 1) { 
+                        window.handleCellSelection(clueId, true, true); 
+                    }
+                });
+
+                div.addEventListener('contextmenu', (e) => e.preventDefault());
                 
             } else {
                 // 3. The Standard Sudoku Cells
