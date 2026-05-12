@@ -518,7 +518,7 @@ export function updateGameRules() {
     const list = document.getElementById('game-rules-list');
     if (!panel || !list) return;
 
-    if (State.mode !== 'create') {
+    if (State.mode !== 'solve') {
         panel.style.display = 'none';
         return;
     }
