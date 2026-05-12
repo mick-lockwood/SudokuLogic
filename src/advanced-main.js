@@ -264,59 +264,46 @@ window.toggleAntiKing = () => {
 };
 
 // --- GRID MODIFICATION TOGGLES ---
+
 window.toggleJigsawMode = () => {
     State.jigsawMode = document.getElementById('toggle-jigsaw').checked;
     
-    const regionToolBtn = document.getElementById('tool-region');
-    
+    // --- MUTUAL EXCLUSIVITY ---
     if (State.jigsawMode) {
-        // Show the Region Painter tool
-        if (regionToolBtn) regionToolBtn.style.display = 'block';
-        window.setTool('region');
-    } else {
-        // Hide the Region Painter tool
-        if (regionToolBtn) regionToolBtn.style.display = 'none';
-        
-        // If the user was holding the painter tool, force them back to the pointer
-        if (window.AdvancedState.activeTool === 'region') {
-            window.setTool('pointer');
-        }
-        
-        // --- THE RESET SWITCH ---
-        // Instantly revert all cells back to classic 3x3 box regions
-        State.board.forEach((cell, i) => {
-            const r = Math.floor(i / State.size);
-            const c = i % State.size;
-            const boxIndex = Math.floor(r / State.bH) * (State.size / State.bW) + Math.floor(c / State.bW);
-            cell.region = `box-${boxIndex}`;
-        });
-        
-        // Force the grid to redraw its standard borders
-        if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
+        document.getElementById('toggle-suguru').checked = false;
+        State.suguruMode = false;
     }
-    
-    if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
-    if (typeof window.updateUI === 'function') window.updateUI();
+
+    updateRegionPainterState();
 };
 
 window.toggleSuguruMode = () => {
     State.suguruMode = document.getElementById('toggle-suguru').checked;
     
-    // Make them mutually exclusive in the UI
+    // --- MUTUAL EXCLUSIVITY ---
     if (State.suguruMode) {
         document.getElementById('toggle-jigsaw').checked = false;
         State.jigsawMode = false;
     }
 
+    updateRegionPainterState();
+};
+
+// --- SHARED PAINTER LOGIC ---
+// Since both modes do the exact same thing to the UI, we extract it into one clean function
+function updateRegionPainterState() {
     const regionToolBtn = document.getElementById('tool-region');
     
-    if (State.suguruMode || State.jigsawMode) {
+    if (State.jigsawMode || State.suguruMode) {
+        // Show and equip the painter
         if (regionToolBtn) regionToolBtn.style.display = 'block';
         window.setTool('region'); 
     } else {
+        // Hide the painter and drop it
         if (regionToolBtn) regionToolBtn.style.display = 'none';
         if (window.AdvancedState.activeTool === 'region') window.setTool('pointer');
         
+        // Reset the grid back to standard 3x3 boxes
         State.board.forEach((cell, i) => {
             const r = Math.floor(i / State.size);
             const c = i % State.size;
@@ -328,7 +315,7 @@ window.toggleSuguruMode = () => {
     
     if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
     if (typeof window.updateUI === 'function') window.updateUI();
-};
+}
 
 // --- DYNAMIC DRAWING (BACKTRACKING) ---
 function handleLineDrawing(index, isDragging) {
