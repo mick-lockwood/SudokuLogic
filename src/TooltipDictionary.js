@@ -71,7 +71,8 @@ cannot contain the same digit.`,
     // Grid Modification Toggles
     'toggle-jigsaw':
 `Replace standard 3x3 boxes with custom irregular regions.
-Each region must contain exactly 9 cells containing the digits 1-9\n
+Each region must contain exactly 9 cells\n
+Fill each region with 1-9\n
 Use the Region Painter tool to draw your own grid shapes.`,
     
     'toggle-suguru':
