@@ -15,6 +15,7 @@ export const State = {
     antiKnight: false,
     showOuterClues: false,
     jigsawMode: false,
+    suguruMode: false,
 
     // Highlighter Color Palette 
     // (Laid out in rows of 3 to match the UI grid)
@@ -35,7 +36,7 @@ export const State = {
 
 export function initBoardState(sizeParam) {
     // --- NEW: Check if we need to save the Jigsaw map before wiping! ---
-    const preserveRegions = State.jigsawMode && State.board && State.board.length === sizeParam * sizeParam;
+    const preserveRegions = (State.jigsawMode || State.suguruMode) && State.board && State.board.length === sizeParam * sizeParam;
     const oldRegions = preserveRegions ? State.board.map(c => c.region) : [];
 
     State.size = sizeParam;
