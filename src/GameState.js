@@ -14,6 +14,7 @@ export const State = {
     showGhost: false,
     antiKnight: false,
     showOuterClues: false,
+    jigsawMode: false,
 
     // Highlighter Color Palette 
     // (Laid out in rows of 3 to match the UI grid)
@@ -63,6 +64,7 @@ export function initBoardState(sizeParam) {
     State.showGhost = false;
     State.antiKnight = false;
     State.showOuterClues = false;
+    State.jigsawMode = false;
 }
 
 export function saveState(isUndoAction = false) {
