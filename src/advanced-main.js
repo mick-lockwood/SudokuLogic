@@ -47,15 +47,18 @@ window.setTool = (tool) => {
         } else if (tool === 'eraser') {
             activeBtn.classList.add('active-tool-eraser');
         } else {
-            // Catch-all: Thermos, Whispers, and any future variants become purple
             activeBtn.classList.add('active-tool-variant');
         }
     }
     
-    // 3. Clear the classic grid selection if we switch to drawing/erasing
+    // 3. Clear grid selection and FORCE UI update
     if (tool !== 'pointer') {
         State.selected = [];
-        window.updateUI();
+    }
+    
+    // This MUST run unconditionally to wipe Jigsaw colors when switching tools!
+    if (typeof window.updateUI === 'function') {
+        window.updateUI(); 
     }
 };
 window.clearVariantGraphics = () => {
