@@ -30,15 +30,14 @@ export function initHighlighter() {
 
 export function updateUI() {
     const primaryActive = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
-    
-    // Safely check if the selected cell is a standard board index (a number)
     const isBoardCell = primaryActive !== null && typeof primaryActive === 'number';
 
     const selVal = isBoardCell ? State.board[primaryActive].val : 0;
     const selR = isBoardCell ? Math.floor(primaryActive / State.size) : -1;
     const selC = isBoardCell ? primaryActive % State.size : -1;
-    const selBlockR = selR !== -1 ? Math.floor(selR / State.bH) : -1;
-    const selBlockC = selC !== -1 ? Math.floor(selC / State.bW) : -1;
+    
+    // --- NEW: MAP-BASED REGION HIGHLIGHTING ---
+    const selRegion = isBoardCell ? State.board[primaryActive].region : null;
     const showSeen = document.getElementById('toggle-seen')?.checked ?? true;
 
     State.board.forEach((data, i) => {
@@ -49,17 +48,14 @@ export function updateUI() {
         el.className = el.className.split(' ').filter(c => !['selected', 'highlight', 'match', 'given', 'user', 'error'].includes(c)).join(' ');
 
         const r = Math.floor(i / State.size), c = i % State.size;
-        const blockR = Math.floor(r / State.bH), blockC = Math.floor(c / State.bW);
 
         let tint = "rgba(255, 255, 255, 0)"; 
-        el.style.boxShadow = 'none'; // RESET SHADOW
+        el.style.boxShadow = 'none';
 
         if (State.selected.includes(i)) {
             el.classList.add('selected');
             tint = State.darkMode ? "rgba(56, 189, 248, 0.5)" : "rgba(52, 152, 219, 0.4)"; 
 
-            // --- SMART CONTIGUOUS BORDERS ---
-            // Checks if neighboring cells are also selected
             const hasTop = r > 0 && State.selected.includes(i - State.size);
             const hasBottom = r < State.size - 1 && State.selected.includes(i + State.size);
             const hasLeft = c > 0 && State.selected.includes(i - 1);
@@ -68,18 +64,15 @@ export function updateUI() {
             const selColor = State.darkMode ? "#74b9ff" : "#3498db";
             let shadows = [];
 
-            // Only draws the border on sides that touch unselected cells
             if (!hasTop) shadows.push(`inset 0 2px 0 0 ${selColor}`);
             if (!hasBottom) shadows.push(`inset 0 -2px 0 0 ${selColor}`);
             if (!hasLeft) shadows.push(`inset 2px 0 0 0 ${selColor}`);
             if (!hasRight) shadows.push(`inset -2px 0 0 0 ${selColor}`);
 
-            if (shadows.length > 0) {
-                el.style.boxShadow = shadows.join(', ');
-            }
-            // --------------------------------
+            if (shadows.length > 0) { el.style.boxShadow = shadows.join(', '); }
 
-        } else if (showSeen && (r === selR || c === selC || (blockR === selBlockR && blockC === selBlockC))) {
+        // --- NEW: REPLACED blockR MATH WITH data.region === selRegion ---
+        } else if (showSeen && (r === selR || c === selC || data.region === selRegion)) {
             el.classList.add('highlight');
             tint = State.darkMode ? "rgba(56, 189, 248, 0.15)" : "rgba(52, 152, 219, 0.1)"; 
         } else if (selVal !== 0 && data.val === selVal) {
@@ -348,19 +341,21 @@ export function validateStatus() {
         return;
     }
 
-    // --- THE FAIL-FAST SAFETY CHECK ---
-    // If the user placed a number that breaks a rule, instantly abort!
-    // Otherwise, the solver tries millions of combinations to solve an impossible board, freezing the UI.
     const hasExistingConflict = State.board.some((c, i) => hasConflict(State.board, i, c.val));
     if (hasExistingConflict) {
         label.textContent = "Rule Conflict";
         label.style.color = "var(--danger)";
-        return; // <-- This completely prevents the browser crash!
+        return; 
     }
-    // ----------------------------------------
+
+    // Pass 'true' so the solver knows it's the first call and resets the safety counter
+    const solutions = countSolutions([...currentBoard], 0, true);
     
-    const solutions = countSolutions([...currentBoard]);
-    if (solutions === 1) {
+    // --- NEW: HANDLE ABORTED CALCULATIONS ---
+    if (solutions === -1) {
+        label.textContent = "Complex Board...";
+        label.style.color = "#94a3b8"; // Grey text while the board is too sparse
+    } else if (solutions === 1) {
         label.textContent = "Unique Puzzle";
         label.style.color = "var(--success)";
     } else if (solutions > 1) {
