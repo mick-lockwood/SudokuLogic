@@ -39,16 +39,50 @@ export function updateUI() {
     const selRegion = isBoardCell && State.board[primaryActive] ? State.board[primaryActive].region : null;
     const showSeen = document.getElementById('toggle-seen')?.checked ?? true;
 
-    // --- NEW: JIGSAW PAINTER MATH ---
-    // If the tool is active, count the exact size of every region on the board
+    // --- NEW: JIGSAW PAINTER MATH (CONTIGUOUS FLOOD FILL) ---
     const isRegionTool = typeof window !== 'undefined' && window.AdvancedState && window.AdvancedState.activeTool === 'region';
-    const regionCounts = {};
+    const cellRegionCounts = Array(State.size * State.size).fill(0);
+    
     if (isRegionTool) {
-        State.board.forEach(c => {
-            regionCounts[c.region] = (regionCounts[c.region] || 0) + 1;
-        });
+        const visited = new Set();
+        for (let i = 0; i < State.size * State.size; i++) {
+            if (visited.has(i)) continue;
+            
+            const targetRegion = State.board[i].region;
+            const queue = [i];
+            const component = [i];
+            visited.add(i);
+            
+            while(queue.length > 0) {
+                const curr = queue.shift();
+                const r = Math.floor(curr / State.size);
+                const c = curr % State.size;
+                
+                // Find physical neighbors (Up, Down, Left, Right)
+                const neighbors = [];
+                if (r > 0) neighbors.push(curr - State.size);
+                if (r < State.size - 1) neighbors.push(curr + State.size);
+                if (c > 0) neighbors.push(curr - 1);
+                if (c < State.size - 1) neighbors.push(curr + 1);
+                
+                for (const n of neighbors) {
+                    // If neighbor shares the exact same name AND hasn't been counted yet
+                    if (!visited.has(n) && State.board[n].region === targetRegion) {
+                        visited.add(n);
+                        queue.push(n);
+                        component.push(n); // Add to this specific blob
+                    }
+                }
+            }
+            
+            // Assign the total blob count to every cell that belongs to it
+            const count = component.length;
+            for (const cellIdx of component) {
+                cellRegionCounts[cellIdx] = count;
+            }
+        }
     }
-    // --------------------------------
+    // --------------------------------------------------------
 
     try {
         State.board.forEach((data, i) => {
@@ -65,7 +99,7 @@ export function updateUI() {
 
             // --- NEW: REGION PAINTER COLOR LOGIC ---
             if (isRegionTool) {
-                const count = regionCounts[data.region];
+                const count = cellRegionCounts[i];
                 if (count === State.size) {
                     tint = State.darkMode ? "rgba(74, 222, 128, 0.25)" : "rgba(46, 204, 113, 0.25)"; // PERFECT: Faded Green
                 } else if (count > State.size) {
@@ -127,7 +161,7 @@ export function updateUI() {
             } else if (isRegionTool) {
                 // --- NEW: REGION PAINTER TEXT OVERLAY ---
                 // Shows the target count inside empty cells!
-                const count = regionCounts[data.region];
+                const count = cellRegionCounts[i];
                 const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(30, 41, 59, 0.3)";
                 el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-size: 13px; font-weight: 800;">${count}/${State.size}</span>`;
             }
