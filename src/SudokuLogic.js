@@ -10,11 +10,13 @@ export function hasConflict(arr, idx, val) {
     const r = Math.floor(idx / State.size), c = idx % State.size;
     const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
     
-    // 1. Standard Rules
+    // 1. Standard / Map-Based Rules
     for (let i = 0; i < State.size * State.size; i++) {
         if (i === idx || arr[i].val !== val) continue;
         const tr = Math.floor(i / State.size), tc = i % State.size;
-        if (tr === r || tc === c || (tr >= br && tr < br + State.bH && tc >= bc && tc < bc + State.bW)) return true;
+        
+        // Conflict if they share a row, column, OR the same exact region string!
+        if (tr === r || tc === c || arr[i].region === myRegion) return true;
     }
     
     // ------------------------------------
@@ -65,19 +67,17 @@ export function hasConflictGen(arr, idx, val) {
     const r = Math.floor(idx / State.size), c = idx % State.size;
     const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
 
-    // 1. Standard Rules
-    for (let i = 0; i < State.size; i++) {
-        if (arr[r * State.size + i] === val) return true;
-        if (arr[i * State.size + c] === val) return true;
+    // 1. Standard / Map-Based Rules
+    for (let i = 0; i < State.size * State.size; i++) {
+        if (i === idx || arr[i] !== val) continue;
+        const tr = Math.floor(i / State.size), tc = i % State.size;
         
-        let boxRow = br + Math.floor(i / State.bW);
-        let boxCol = bc + (i % State.bW);
-        if (arr[boxRow * State.size + boxCol] === val) return true;
+        if (tr === r || tc === c || State.board[i].region === myRegion) return true;
     }
 
     // --------------------------------------------------------
     
-    // --- NEW: Global Anti-Knight Rule (Generator Version) ---
+    // --- Global Anti-Knight Rule (Generator Version) ---
     if (State.antiKnight) {
         const knightMoves = [
             [-2, -1], [-2, 1], [-1, -2], [-1, 2],
@@ -91,7 +91,7 @@ export function hasConflictGen(arr, idx, val) {
         }
     }
 
-    // --- NEW: Global Anti-King Rule (Generator Version) ---
+    // --- Global Anti-King Rule (Generator Version) ---
     if (State.antiKing) {
         const kingMoves = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
         for (let [dr, dc] of kingMoves) {
@@ -122,11 +122,13 @@ export function getCount(num) {
 
 export function cleanPencilsAfterMove(idx, val) {
     const r = Math.floor(idx / State.size), c = idx % State.size;
-    const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
+    const myRegion = State.board[idx].region;
 
     State.board.forEach((cell, i) => {
         const tr = Math.floor(i / State.size), tc = i % State.size;
-        if (tr === r || tc === c || (tr >= br && tr < br + State.bH && tc >= bc && tc < bc + State.bW)) {
+        
+        // Clear pencil marks from the row, column, and the custom region
+        if (tr === r || tc === c || cell.region === myRegion) {
             const noteIdx = cell.notes.indexOf(val);
             if (noteIdx > -1) cell.notes.splice(noteIdx, 1);
         }
