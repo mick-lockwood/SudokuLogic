@@ -239,31 +239,31 @@ export function renderGrid() {
                 const currentRegion = State.board[i].region;
 
                 // --- DYNAMIC INNER BORDERS (Map-Based) ---
-                div.style.borderRight = `1px solid ${gridLine}`; // Default thin
-                div.style.borderBottom = `1px solid ${gridLine}`; // Default thin
+                div.style.borderRight = `1px solid ${gridLine}`; 
+                div.style.borderBottom = `1px solid ${gridLine}`; 
                 
-                // Outer Top/Left Thick Borders (Always thick on the edges)
-                if (r === 0) div.style.borderTop = `2px solid ${gridLine}`;
-                if (c === 0) div.style.borderLeft = `2px solid ${gridLine}`;
+                // Outer Top/Left Thick Borders
+                if (r === 0) div.style.borderTop = `3px solid ${gridLine}`; // Bumped to 3px
+                if (c === 0) div.style.borderLeft = `3px solid ${gridLine}`; // Bumped to 3px
                 
                 // Dynamic Right Border
                 if (c < State.size - 1) {
                     const rightNeighborRegion = State.board[i + 1].region;
                     if (currentRegion !== rightNeighborRegion) {
-                        div.style.borderRight = `2px solid ${gridLine}`; // Boundary found!
+                        div.style.borderRight = `3px solid ${gridLine}`; // Bumped to 3px
                     }
                 } else {
-                    div.style.borderRight = `2px solid ${gridLine}`; // Absolute right edge
+                    div.style.borderRight = `3px solid ${gridLine}`; 
                 }
 
                 // Dynamic Bottom Border
                 if (r < State.size - 1) {
                     const bottomNeighborRegion = State.board[i + State.size].region;
                     if (currentRegion !== bottomNeighborRegion) {
-                        div.style.borderBottom = `2px solid ${gridLine}`; // Boundary found!
+                        div.style.borderBottom = `3px solid ${gridLine}`; // Bumped to 3px
                     }
                 } else {
-                    div.style.borderBottom = `2px solid ${gridLine}`; // Absolute bottom edge
+                    div.style.borderBottom = `3px solid ${gridLine}`; 
                 }
                 // ------------------------------
           
@@ -302,7 +302,7 @@ export function renderNumpad() {
     const btns = [
         { text: 'Undo\n(Ctrl + Z)', action: window.triggerUndo, disabled: State.undoStack.length === 0 },
         { text: 'Redo\n(Ctrl + Y)', action: window.triggerRedo, disabled: State.redoStack.length === 0 },
-        { text: State.pencil ? 'Pencil ON\n(N)' : 'Pencil OFF\n(N)', action: () => { State.pencil = !State.pencil; renderNumpad(); }, solveOnly: true, isPencil: true },
+        { text: State.pencil ? 'Pencil ON\n(Tab)' : 'Pencil OFF\n(Tab)', action: () => { State.pencil = !State.pencil; renderNumpad(); }, solveOnly: true, isPencil: true },
         { text: 'Erase\n(Del)', action: () => window.handleInput(0), danger: true }
     ];
 
