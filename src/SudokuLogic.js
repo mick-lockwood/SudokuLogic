@@ -8,18 +8,17 @@ import { kropkiConflict } from './variants/Kropki.js';
 export function hasConflict(arr, idx, val) {
     if (val === 0) return false;
     const r = Math.floor(idx / State.size), c = idx % State.size;
-    const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
-    
+    // Safely pull the dynamic region, or fallback to prevent crashes
+    const myRegion = arr[idx] && arr[idx].region ? arr[idx].region : "fallback";
+
     // 1. Standard / Map-Based Rules
     for (let i = 0; i < State.size * State.size; i++) {
-        if (i === idx || arr[i].val !== val) continue;
+        if (i === idx || !arr[i] || arr[i].val !== val) continue;
         const tr = Math.floor(i / State.size), tc = i % State.size;
         
         // Conflict if they share a row, column, OR the same exact region string!
         if (tr === r || tc === c || arr[i].region === myRegion) return true;
     }
-    
-    // ------------------------------------
     
     // --- Global Anti-Knight Rule ---
     if (State.antiKnight) {
@@ -38,7 +37,6 @@ export function hasConflict(arr, idx, val) {
 
     // --- Global Anti-King Rule ---
     if (State.antiKing) {
-        // We only check the 4 diagonals, since row/col are covered by standard rules
         const kingMoves = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
         for (let [dr, dc] of kingMoves) {
             const kr = r + dr, kc = c + dc;
@@ -49,8 +47,6 @@ export function hasConflict(arr, idx, val) {
         }
     }
     
-    // ------------------------------------
-
     // 2. Variant Rules Loop
     if (State.variants && State.variants.length > 0) {
         for (let v of State.variants) {
@@ -65,18 +61,16 @@ export function hasConflict(arr, idx, val) {
 
 export function hasConflictGen(arr, idx, val) {
     const r = Math.floor(idx / State.size), c = idx % State.size;
-    const br = Math.floor(r / State.bH) * State.bH, bc = Math.floor(c / State.bW) * State.bW;
+    const myRegion = State.board[idx] ? State.board[idx].region : "fallback";
 
     // 1. Standard / Map-Based Rules
     for (let i = 0; i < State.size * State.size; i++) {
         if (i === idx || arr[i] !== val) continue;
         const tr = Math.floor(i / State.size), tc = i % State.size;
         
-        if (tr === r || tc === c || State.board[i].region === myRegion) return true;
+        if (tr === r || tc === c || (State.board[i] && State.board[i].region === myRegion)) return true;
     }
 
-    // --------------------------------------------------------
-    
     // --- Global Anti-Knight Rule (Generator Version) ---
     if (State.antiKnight) {
         const knightMoves = [
@@ -101,8 +95,6 @@ export function hasConflictGen(arr, idx, val) {
             }
         }
     }
-    
-    // --------------------------------------------------------
 
     // 2. Variant Rules Loop
     if (State.variants && State.variants.length > 0) {
@@ -122,12 +114,12 @@ export function getCount(num) {
 
 export function cleanPencilsAfterMove(idx, val) {
     const r = Math.floor(idx / State.size), c = idx % State.size;
-    const myRegion = State.board[idx].region;
+    const myRegion = State.board[idx] ? State.board[idx].region : "fallback";
 
     State.board.forEach((cell, i) => {
         const tr = Math.floor(i / State.size), tc = i % State.size;
         
-        // Clear pencil marks from the row, column, and the custom region
+        // Jigsaw Map Checking for auto-cleaning
         if (tr === r || tc === c || cell.region === myRegion) {
             const noteIdx = cell.notes.indexOf(val);
             if (noteIdx > -1) cell.notes.splice(noteIdx, 1);
@@ -142,8 +134,8 @@ export function countSolutions(boardArray, count = 0, isFirstCall = true) {
     if (isFirstCall) solveIterations = 0;
     solveIterations++;
 
-    // FAIL-SAFE: If the board is too sparse, abort to prevent freezing the browser!
-    if (solveIterations > 25000) return -1; 
+    // FAIL-SAFE: Abort to prevent main thread freezing
+    if (solveIterations > 20000) return -1; 
 
     let pos = boardArray.indexOf(0);
     if (pos === -1) return count + 1;
@@ -154,7 +146,6 @@ export function countSolutions(boardArray, count = 0, isFirstCall = true) {
             count = countSolutions(boardArray, count, false);
             boardArray[pos] = 0;
             
-            // If we found multiple solutions, OR if the fail-safe triggered, abort immediately!
             if (count > 1 || count === -1) return count; 
         }
     }
