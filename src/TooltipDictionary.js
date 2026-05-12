@@ -63,6 +63,10 @@ apart cannot contain the same digit.`,
 `Cells that touch diagonally 
 (a chess king's move) 
 cannot contain the same digit.`,
+     
+    'tool-region':
+`Paint custom irregular regions for Jigsaw Sudoku.\n
+Click and drag across cells to group them into a single region.`,   
 
     // Perimeter Rules
     'toggle-outer-clues':
