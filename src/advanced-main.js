@@ -3,6 +3,7 @@ import './classic-main.js';
 import { State } from './GameState.js';
 import * as Renderer from './Renderer.js';
 import { Tooltips } from './TooltipDictionary.js';
+import { resetGenSafety } from './SudokuLogic.js';
 
 // import variant rules
 import { drawThermo } from './variants/Thermo.js';
@@ -536,6 +537,37 @@ window.setGridSize = (s) => {
 // --- JIGSAW GENERATOR SAFETY INTERCEPTOR ---
 const originalGenerateNew = window.generateNew;
 
+const generateWithRetry = (attemptsLeft) => {
+    if (attemptsLeft <= 0) {
+        // If it fails 15 times, the shape is mathematically impossible to fill. Clean up.
+        State.board.forEach(c => { c.val = 0; c.given = false; c.notes = []; });
+        if (typeof window.updateUI === 'function') window.updateUI();
+        
+        const label = document.getElementById('status-label');
+        if (label) {
+            label.textContent = "Generation Failed";
+            label.style.color = "var(--danger)";
+        }
+        alert("This specific Jigsaw layout is too highly constrained to generate quickly. Please adjust your regions to be slightly less intertwined and try again.");
+        return;
+    }
+
+    try {
+        resetGenSafety();
+        if (originalGenerateNew) originalGenerateNew();
+        // If it finishes without throwing an error, we are successfully done!
+    } catch (e) {
+        if (e.message === "JIGSAW_TIMEOUT") {
+            console.log(`Jigsaw branch stuck. Restarting... (Attempt ${15 - attemptsLeft + 1}/15)`);
+            
+            // Wait 10 milliseconds before retrying so the browser doesn't freeze
+            setTimeout(() => generateWithRetry(attemptsLeft - 1), 10);
+        } else {
+            console.error("Generator Error:", e);
+        }
+    }
+};
+
 window.generateNew = () => {
     if (State.jigsawMode) {
         // 1. Count how many cells are in each region
@@ -549,12 +581,20 @@ window.generateNew = () => {
 
         if (invalidRegions) {
             alert(`Generation Failed: Jigsaw rules require every painted region to contain exactly ${State.size} cells. Please adjust your regions and try again!`);
-            return; // Abort the generator before it crashes the browser!
+            return; 
         }
-    }
 
-    // If it's a valid grid, let the backtracking engine do its thing
-    if (originalGenerateNew) originalGenerateNew();
+        // 3. Start the asynchronous retry loop for Jigsaw
+        const label = document.getElementById('status-label');
+        if (label) {
+            label.textContent = "Generating Jigsaw...";
+            label.style.color = "var(--text-main)";
+        }
+        setTimeout(() => generateWithRetry(15), 10); // Give it 15 chances to succeed
+    } else {
+        // Classic mode runs the original generator flawlessly
+        if (originalGenerateNew) originalGenerateNew();
+    }
 };
 
 // --- INITIALIZE TOOLTIPS ---
