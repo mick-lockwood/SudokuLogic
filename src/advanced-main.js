@@ -264,6 +264,7 @@ window.toggleJigsawMode = () => {
     if (State.jigsawMode) {
         // Show the Region Painter tool
         if (regionToolBtn) regionToolBtn.style.display = 'block';
+        window.setTool('region');
     } else {
         // Hide the Region Painter tool
         if (regionToolBtn) regionToolBtn.style.display = 'none';
@@ -483,6 +484,22 @@ window.addEventListener('keydown', (e) => {
         return;
     }
 
+    // --- NEW: PENCIL TOGGLE (Tab) ---
+    if (e.key === 'Tab') {
+        e.preventDefault(); // Crucial: Stops the browser from changing focus!
+        e.stopImmediatePropagation();
+        
+        State.pencil = !State.pencil;
+        
+        // Re-render the numpad to update the button highlight
+        if (typeof Renderer !== 'undefined' && Renderer.renderNumpad) {
+            Renderer.renderNumpad();
+        } else if (typeof window.updateUI === 'function') {
+            window.updateUI(); 
+        }
+        return;
+    }
+    
     // --- E. DROP TOOL (Esc / V) ---
     if (e.key === 'Escape' || e.key.toLowerCase() === 'v') {
         if (window.AdvancedState.activeTool !== 'pointer') {
