@@ -234,6 +234,41 @@ window.toggleAntiKing = () => {
     if (typeof window.updateUI === 'function') window.updateUI(); 
 };
 
+// --- GRID MODIFICATION TOGGLES ---
+window.toggleJigsawMode = () => {
+    State.jigsawMode = document.getElementById('toggle-jigsaw').checked;
+    
+    const regionToolBtn = document.getElementById('tool-region');
+    
+    if (State.jigsawMode) {
+        // Show the Region Painter tool
+        if (regionToolBtn) regionToolBtn.style.display = 'block';
+    } else {
+        // Hide the Region Painter tool
+        if (regionToolBtn) regionToolBtn.style.display = 'none';
+        
+        // If the user was holding the painter tool, force them back to the pointer
+        if (window.AdvancedState.activeTool === 'region') {
+            window.setTool('pointer');
+        }
+        
+        // --- THE RESET SWITCH ---
+        // Instantly revert all cells back to classic 3x3 box regions
+        State.board.forEach((cell, i) => {
+            const r = Math.floor(i / State.size);
+            const c = i % State.size;
+            const boxIndex = Math.floor(r / State.bH) * (State.size / State.bW) + Math.floor(c / State.bW);
+            cell.region = `box-${boxIndex}`;
+        });
+        
+        // Force the grid to redraw its standard borders
+        if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
+    }
+    
+    if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
+    if (typeof window.updateUI === 'function') window.updateUI();
+};
+
 // --- DYNAMIC DRAWING (BACKTRACKING) ---
 function handleLineDrawing(index, isDragging) {
     if (!isDragging) {
@@ -527,6 +562,7 @@ window.updateDynamicTitle = () => {
     }
     
     // 2. Check global rules
+    if (State.jigsawMode) activeTypes.add('Jigsaw');
     if (State.antiKnight) activeTypes.add('Anti-Knight');
     if (State.antiKing) activeTypes.add('Anti-King');
     if (document.getElementById('rule-sandwich')?.checked) activeTypes.add('Sandwich');
