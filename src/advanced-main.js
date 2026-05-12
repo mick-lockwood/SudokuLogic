@@ -324,6 +324,58 @@ function handleLineDrawing(index, isDragging) {
 window.addEventListener('pointerup', () => {
     const tool = window.AdvancedState.activeTool;
     
+    // --- NEW: SANITIZE SEVERED JIGSAW REGIONS ---
+    // Runs the flood-fill to find disjoint pieces and renames them so the engine doesn't break!
+    if (tool === 'region') {
+        const visited = new Set();
+        const newRegions = Array(State.size * State.size).fill(null);
+        let nextId = 0;
+        
+        for (let i = 0; i < State.size * State.size; i++) {
+            if (visited.has(i)) continue;
+            
+            const originalId = State.board[i].region;
+            const baseName = originalId.split('_chunk_')[0]; // Prevents names from getting infinitely long
+            const newAssignedId = `${baseName}_chunk_${nextId++}`;
+            
+            const queue = [i];
+            visited.add(i);
+            
+            while(queue.length > 0) {
+                const curr = queue.shift();
+                newRegions[curr] = newAssignedId;
+                
+                const r = Math.floor(curr / State.size);
+                const c = curr % State.size;
+                
+                const neighbors = [];
+                if (r > 0) neighbors.push(curr - State.size);
+                if (r < State.size - 1) neighbors.push(curr + State.size);
+                if (c > 0) neighbors.push(curr - 1);
+                if (c < State.size - 1) neighbors.push(curr + 1);
+                
+                for (let n of neighbors) {
+                    if (!visited.has(n) && State.board[n].region === originalId) {
+                        visited.add(n);
+                        queue.push(n);
+                    }
+                }
+            }
+        }
+        
+        // Permanently apply the clean, disjoint IDs
+        for (let i = 0; i < State.size * State.size; i++) {
+            State.board[i].region = newRegions[i];
+        }
+        
+        // Force the physical borders to snap into place
+        if (typeof Renderer !== 'undefined' && Renderer.renderGrid) {
+            Renderer.renderGrid();
+            Renderer.updateUI();
+        }
+    }
+    // ----------------------------------------------
+    
     if (['thermo', 'whisper', 'killer', 'kropki-white', 'kropki-black'].includes(tool) && window.AdvancedState.isDrawing) {
         window.AdvancedState.isDrawing = false;
         
