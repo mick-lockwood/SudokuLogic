@@ -159,11 +159,11 @@ export function updateUI() {
                 }
                 el.appendChild(pGrid);
             } else if (isRegionTool) {
-                // --- NEW: REGION PAINTER TEXT OVERLAY ---
-                // Shows the target count inside empty cells!
-                const count = cellRegionCounts[i];
+                // --- NEW: DYNAMIC REGION TEXT OVERLAY ---
+                const count = cellRegionCounts[i]; 
+                const textStr = State.suguruMode ? count : `${count}/${State.size}`;
                 const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(30, 41, 59, 0.3)";
-                el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-size: 13px; font-weight: 800;">${count}/${State.size}</span>`;
+                el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-size: 13px; font-weight: 800;">${textStr}</span>`;
             }
         });
     } catch (e) {
