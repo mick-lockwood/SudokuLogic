@@ -1,6 +1,7 @@
 import { State } from './GameState.js';
 import { hasConflict, getCount, countSolutions } from './SudokuLogic.js';
 import { getLineValues, checkSandwich, checkSkyscraper, checkFrames, checkNumberedRoom } from './variants/Perimeter.js';
+import { GameRules } from './RuleDictionary.js';
 
 export function initHighlighter() {
     const container = document.getElementById('highlighter-tools');
@@ -506,4 +507,57 @@ export function getCellData(idx) {
             isOuter: false
         };
     }
+}
+
+// --- DYNAMIC RULE GENERATOR ---
+export function updateGameRules() {
+    const panel = document.getElementById('game-rules-panel');
+    const list = document.getElementById('game-rules-list');
+    if (!panel || !list) return;
+
+    if (State.mode !== 'solve') {
+        panel.style.display = 'none';
+        return;
+    }
+
+    panel.style.display = 'block';
+    list.innerHTML = ''; 
+
+    const rules = [];
+
+    // 1. Core Grid Rules
+    if (State.suguruMode) {
+        rules.push(GameRules.suguru());
+    } else if (State.jigsawMode) {
+        rules.push(GameRules.jigsaw(State.size));
+    } else {
+        rules.push(GameRules.classic(State.size));
+    }
+
+    // 2. Global Modifiers
+    if (State.antiKnight) rules.push(GameRules.antiKnight());
+    if (State.antiKing && !State.suguruMode) rules.push(GameRules.antiKing());
+
+    // 3. Painted Variants
+    const hasVar = (type) => State.variants && State.variants.some(v => v.type === type || v.type.startsWith(type));
+    
+    if (hasVar('thermo')) rules.push(GameRules.thermo());
+    if (hasVar('whisper')) rules.push(GameRules.whisper());
+    if (hasVar('killer')) rules.push(GameRules.killer());
+    if (hasVar('kropki-white')) rules.push(GameRules.kropkiWhite());
+    if (hasVar('kropki-black')) rules.push(GameRules.kropkiBlack());
+
+    // 4. Perimeter Constraints
+    if (document.getElementById('rule-sandwich')?.checked) rules.push(GameRules.sandwich());
+    if (document.getElementById('rule-skyscraper')?.checked) rules.push(GameRules.skyscraper());
+    if (document.getElementById('rule-frames')?.checked) rules.push(GameRules.frames());
+    if (document.getElementById('rule-rooms')?.checked) rules.push(GameRules.rooms());
+
+    // Inject into UI
+    rules.forEach(r => {
+        const li = document.createElement('li');
+        li.innerHTML = r;
+        li.style.marginBottom = '10px';
+        list.appendChild(li);
+    });
 }
