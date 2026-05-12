@@ -348,6 +348,17 @@ export function validateStatus() {
         return;
     }
 
+    // --- THE FAIL-FAST SAFETY CHECK ---
+    // If the user placed a number that breaks a rule, instantly abort!
+    // Otherwise, the solver tries millions of combinations to solve an impossible board, freezing the UI.
+    const hasExistingConflict = State.board.some((c, i) => hasConflict(State.board, i, c.val));
+    if (hasExistingConflict) {
+        label.textContent = "Rule Conflict";
+        label.style.color = "var(--danger)";
+        return; // <-- This completely prevents the browser crash!
+    }
+    // ----------------------------------------
+    
     const solutions = countSolutions([...currentBoard]);
     if (solutions === 1) {
         label.textContent = "Unique Puzzle";
