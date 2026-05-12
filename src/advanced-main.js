@@ -22,6 +22,7 @@ window.AdvancedState = {
     activeTool: 'pointer',
     isDrawing: false,
     currentLine: [],
+    currentRegionId: null,
     variantUndoStack: [],
     variantRedoStack: []
 };
@@ -72,6 +73,25 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
     if (['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(window.AdvancedState.activeTool)) {
         handleLineDrawing(index, isDragging);
     } 
+        
+    // --- NEW: REGION PAINTER LOGIC ---
+    else if (window.AdvancedState.activeTool === 'region') {
+        if (!isClueCell) { // Prevent painting outer perimeter clues
+            if (!isDragging) {
+                // Clicking a new cell starts a brand new region!
+                window.AdvancedState.currentRegionId = `jigsaw-${Date.now()}`;
+                State.board[index].region = window.AdvancedState.currentRegionId;
+            } else if (window.AdvancedState.currentRegionId) {
+                // Dragging continues applying the same region ID
+                State.board[index].region = window.AdvancedState.currentRegionId;
+            }
+            
+            // We must force a grid re-render so the thick borders update instantly
+            if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
+            Renderer.updateUI(); 
+        }
+    }
+        
     // --- EDIT LOGIC ---
     else if (window.AdvancedState.activeTool === 'edit') {
         if (!isDragging) {
