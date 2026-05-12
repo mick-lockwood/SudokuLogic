@@ -27,6 +27,7 @@
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     
                     <button id="tool-pointer" class="variant-tool-btn active" onclick="setTool('pointer')">Number Input<br>(Esc/V)</button>
+                    <button id="tool-region" class="variant-tool-btn" style="display: none;" onclick="setTool('region')">Region Painter</button>
                     
                     <hr class="tool-divider">
                     
@@ -35,8 +36,7 @@
                     <button id="tool-killer" class="variant-tool-btn" onclick="setTool('killer')">Killer Cage</button>
                     <button id="tool-kropki-white" class="variant-tool-btn" onclick="setTool('kropki-white')">White Kropki Dot</button> 
                     <button id="tool-kropki-black" class="variant-tool-btn" onclick="setTool('kropki-black')">Black Kropki Dot</button>
-                    <button id="tool-region" class="variant-tool-btn" onclick="setTool('region')">Region Painter</button>
-                    
+                                        
                     <hr class="tool-divider">
                     
                     <button id="tool-edit" class="variant-tool-btn" onclick="setTool('edit')">Edit Variant<br>(Click Variant)</button>
@@ -57,9 +57,13 @@
 
                     <hr class="tool-divider" style="margin: 10px 0;">
                     
-                    <h3 style="margin: 5px 0; color: var(--text-main);">Perimeter Cell Rules</h3>  
+                    <h3 style="margin: 5px 0; color: var(--text-main);">Grid Modifications</h3>  
+                    <label class="switch-label">Jigsaw Regions <input type="checkbox" id="toggle-jigsaw" onchange="toggleJigsawMode()"></label>
                     <label class="switch-label">Show Perimeter Cells <input type="checkbox" id="toggle-outer-clues" onchange="toggleOuterClues()"></label>
+                    
                     <hr class="tool-divider" style="margin: 10px 0;">
+                    
+                    <h3 style="margin: 5px 0; color: var(--text-main);">Perimeter Cell Rules</h3>
                     <label class="switch-label">Sandwich Sums <input type="checkbox" id="rule-sandwich" onchange="togglePerimeterRule()"></label>
                     <label class="switch-label">Skyscrapers <input type="checkbox" id="rule-skyscraper" onchange="togglePerimeterRule()"></label>
                     <label class="switch-label">Frames <input type="checkbox" id="rule-frames" onchange="togglePerimeterRule()"></label>
