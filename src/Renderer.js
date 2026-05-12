@@ -36,11 +36,20 @@ export function updateUI() {
     const selR = isBoardCell ? Math.floor(primaryActive / State.size) : -1;
     const selC = isBoardCell ? primaryActive % State.size : -1;
     
-    // Grab the dynamic region instead of 3x3 block coordinates
     const selRegion = isBoardCell && State.board[primaryActive] ? State.board[primaryActive].region : null;
     const showSeen = document.getElementById('toggle-seen')?.checked ?? true;
 
-    // Fail-Safe Wrapper prevents crashes from wiping the board
+    // --- NEW: JIGSAW PAINTER MATH ---
+    // If the tool is active, count the exact size of every region on the board
+    const isRegionTool = typeof window !== 'undefined' && window.AdvancedState && window.AdvancedState.activeTool === 'region';
+    const regionCounts = {};
+    if (isRegionTool) {
+        State.board.forEach(c => {
+            regionCounts[c.region] = (regionCounts[c.region] || 0) + 1;
+        });
+    }
+    // --------------------------------
+
     try {
         State.board.forEach((data, i) => {
             const el = document.getElementById(`cell-${i}`);
@@ -54,7 +63,19 @@ export function updateUI() {
             let tint = "rgba(255, 255, 255, 0)"; 
             el.style.boxShadow = 'none';
 
-            if (State.selected.includes(i)) {
+            // --- NEW: REGION PAINTER COLOR LOGIC ---
+            if (isRegionTool) {
+                const count = regionCounts[data.region];
+                if (count === State.size) {
+                    tint = State.darkMode ? "rgba(74, 222, 128, 0.25)" : "rgba(46, 204, 113, 0.25)"; // PERFECT: Faded Green
+                } else if (count > State.size) {
+                    tint = State.darkMode ? "rgba(248, 113, 113, 0.25)" : "rgba(231, 76, 60, 0.25)"; // OVERFLOW: Faded Red
+                } else {
+                    tint = State.darkMode ? "rgba(148, 163, 184, 0.3)" : "rgba(203, 213, 225, 0.6)"; // IN-PROGRESS: Faded Grey
+                }
+            } 
+            // ---------------------------------------
+            else if (State.selected.includes(i)) {
                 el.classList.add('selected');
                 tint = State.darkMode ? "rgba(56, 189, 248, 0.5)" : "rgba(52, 152, 219, 0.4)"; 
 
@@ -71,7 +92,6 @@ export function updateUI() {
                 if (!hasRight) shadows.push(`inset -2px 0 0 0 ${selColor}`);
                 if (shadows.length > 0) el.style.boxShadow = shadows.join(', ');
 
-            // SMART HIGHLIGHTING: Highlights custom regions instead of hardcoded 3x3s
             } else if (showSeen && (r === selR || c === selC || data.region === selRegion)) {
                 el.classList.add('highlight');
                 tint = State.darkMode ? "rgba(56, 189, 248, 0.15)" : "rgba(52, 152, 219, 0.1)"; 
@@ -104,6 +124,12 @@ export function updateUI() {
                     pGrid.appendChild(nDiv);
                 }
                 el.appendChild(pGrid);
+            } else if (isRegionTool) {
+                // --- NEW: REGION PAINTER TEXT OVERLAY ---
+                // Shows the target count inside empty cells!
+                const count = regionCounts[data.region];
+                const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(30, 41, 59, 0.3)";
+                el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-size: 13px; font-weight: 800;">${count}/${State.size}</span>`;
             }
         });
     } catch (e) {
