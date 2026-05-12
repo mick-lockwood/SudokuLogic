@@ -135,16 +135,27 @@ export function cleanPencilsAfterMove(idx, val) {
     });
 }
 
-export function countSolutions(boardArray, count = 0) {
+let solveIterations = 0;
+
+export function countSolutions(boardArray, count = 0, isFirstCall = true) {
+    // Reset the fail-safe counter on the first click
+    if (isFirstCall) solveIterations = 0;
+    solveIterations++;
+
+    // FAIL-SAFE: If the board is too sparse, abort to prevent freezing the browser!
+    if (solveIterations > 25000) return -1; 
+
     let pos = boardArray.indexOf(0);
     if (pos === -1) return count + 1;
 
     for (let n = 1; n <= State.size; n++) { 
         if (!hasConflictGen(boardArray, pos, n)) {
             boardArray[pos] = n;
-            count = countSolutions(boardArray, count);
+            count = countSolutions(boardArray, count, false);
             boardArray[pos] = 0;
-            if (count > 1) return count; 
+            
+            // If we found multiple solutions, OR if the fail-safe triggered, abort immediately!
+            if (count > 1 || count === -1) return count; 
         }
     }
     return count;
