@@ -533,6 +533,30 @@ window.setGridSize = (s) => {
     renderSVGLayer();
 };
 
+// --- JIGSAW GENERATOR SAFETY INTERCEPTOR ---
+const originalGenerateNew = window.generateNew;
+
+window.generateNew = () => {
+    if (State.jigsawMode) {
+        // 1. Count how many cells are in each region
+        const regionCounts = {};
+        State.board.forEach(c => {
+            regionCounts[c.region] = (regionCounts[c.region] || 0) + 1;
+        });
+
+        // 2. Check if ANY region has too many or too few cells
+        const invalidRegions = Object.values(regionCounts).some(count => count !== State.size);
+
+        if (invalidRegions) {
+            alert(`Generation Failed: Jigsaw rules require every painted region to contain exactly ${State.size} cells. Please adjust your regions and try again!`);
+            return; // Abort the generator before it crashes the browser!
+        }
+    }
+
+    // If it's a valid grid, let the backtracking engine do its thing
+    if (originalGenerateNew) originalGenerateNew();
+};
+
 // --- INITIALIZE TOOLTIPS ---
 // Loops through the dictionary and applies the text to the matching HTML elements
 Object.keys(Tooltips).forEach(id => {
