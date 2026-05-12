@@ -185,7 +185,10 @@ export function renderGrid() {
     const show = State.showOuterClues;
     container.style.gridTemplateColumns = `repeat(${show ? State.size + 2 : State.size}, var(--cell-size))`; 
     
-    const gridLine = State.darkMode ? "#ffffff" : "#1e293b";
+    // --- NEW: SPLIT GRID LINES FOR HIGH CONTRAST ---
+    const thinGridLine = State.darkMode ? "#475569" : "#1e293b"; 
+    const thickGridLine = State.darkMode ? "#ffffff" : "#1e293b";
+
     const wrapper = document.getElementById('grid-wrapper');
     
     wrapper.style.background = 'transparent'; 
@@ -238,32 +241,32 @@ export function renderGrid() {
                 
                 const currentRegion = State.board[i].region;
 
-                // --- DYNAMIC INNER BORDERS (Map-Based) ---
-                div.style.borderRight = `1px solid ${gridLine}`; 
-                div.style.borderBottom = `1px solid ${gridLine}`; 
+                // --- DYNAMIC INNER BORDERS (Map-Based using thinGridLine) ---
+                div.style.borderRight = `1px solid ${thinGridLine}`; 
+                div.style.borderBottom = `1px solid ${thinGridLine}`; 
                 
-                // Outer Top/Left Thick Borders
-                if (r === 0) div.style.borderTop = `3px solid ${gridLine}`; // Bumped to 3px
-                if (c === 0) div.style.borderLeft = `3px solid ${gridLine}`; // Bumped to 3px
+                // Outer Top/Left Thick Borders (using thickGridLine)
+                if (r === 0) div.style.borderTop = `3px solid ${thickGridLine}`;
+                if (c === 0) div.style.borderLeft = `3px solid ${thickGridLine}`;
                 
                 // Dynamic Right Border
                 if (c < State.size - 1) {
                     const rightNeighborRegion = State.board[i + 1].region;
                     if (currentRegion !== rightNeighborRegion) {
-                        div.style.borderRight = `3px solid ${gridLine}`; // Bumped to 3px
+                        div.style.borderRight = `3px solid ${thickGridLine}`; 
                     }
                 } else {
-                    div.style.borderRight = `3px solid ${gridLine}`; 
+                    div.style.borderRight = `3px solid ${thickGridLine}`; 
                 }
 
                 // Dynamic Bottom Border
                 if (r < State.size - 1) {
                     const bottomNeighborRegion = State.board[i + State.size].region;
                     if (currentRegion !== bottomNeighborRegion) {
-                        div.style.borderBottom = `3px solid ${gridLine}`; // Bumped to 3px
+                        div.style.borderBottom = `3px solid ${thickGridLine}`; 
                     }
                 } else {
-                    div.style.borderBottom = `3px solid ${gridLine}`; 
+                    div.style.borderBottom = `3px solid ${thickGridLine}`; 
                 }
                 // ------------------------------
           
