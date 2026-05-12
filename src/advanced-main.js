@@ -299,6 +299,37 @@ window.toggleJigsawMode = () => {
     if (typeof window.updateUI === 'function') window.updateUI();
 };
 
+window.toggleSuguruMode = () => {
+    State.suguruMode = document.getElementById('toggle-suguru').checked;
+    
+    // Make them mutually exclusive in the UI
+    if (State.suguruMode) {
+        document.getElementById('toggle-jigsaw').checked = false;
+        State.jigsawMode = false;
+    }
+
+    const regionToolBtn = document.getElementById('tool-region');
+    
+    if (State.suguruMode || State.jigsawMode) {
+        if (regionToolBtn) regionToolBtn.style.display = 'block';
+        window.setTool('region'); 
+    } else {
+        if (regionToolBtn) regionToolBtn.style.display = 'none';
+        if (window.AdvancedState.activeTool === 'region') window.setTool('pointer');
+        
+        State.board.forEach((cell, i) => {
+            const r = Math.floor(i / State.size);
+            const c = i % State.size;
+            const boxIndex = Math.floor(r / State.bH) * (State.size / State.bW) + Math.floor(c / State.bW);
+            cell.region = `box-${boxIndex}`;
+        });
+        if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
+    }
+    
+    if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
+    if (typeof window.updateUI === 'function') window.updateUI();
+};
+
 // --- DYNAMIC DRAWING (BACKTRACKING) ---
 function handleLineDrawing(index, isDragging) {
     if (!isDragging) {
@@ -646,30 +677,34 @@ const generateWithRetry = (attemptsLeft) => {
 };
 
 window.generateNew = () => {
-    if (State.jigsawMode) {
-        // 1. Count how many cells are in each region
+    if (State.jigsawMode || State.suguruMode) {
         const regionCounts = {};
         State.board.forEach(c => {
             regionCounts[c.region] = (regionCounts[c.region] || 0) + 1;
         });
 
-        // 2. Check if ANY region has too many or too few cells
-        const invalidRegions = Object.values(regionCounts).some(count => count !== State.size);
-
-        if (invalidRegions) {
-            alert(`Generation Failed: Jigsaw rules require every painted region to contain exactly ${State.size} cells. Please adjust your regions and try again!`);
-            return; 
+        if (State.jigsawMode) {
+            const invalidRegions = Object.values(regionCounts).some(count => count !== State.size);
+            if (invalidRegions) {
+                alert(`Generation Failed: Jigsaw rules require every painted region to contain exactly ${State.size} cells.`);
+                return; 
+            }
+        } else if (State.suguruMode) {
+            // Suguru only cares that a region isn't mathematically impossible (> 9 cells)
+            const invalidRegions = Object.values(regionCounts).some(count => count > 9);
+            if (invalidRegions) {
+                alert(`Generation Failed: Suguru regions cannot exceed 9 cells!`);
+                return; 
+            }
         }
 
-        // 3. Start the asynchronous retry loop for Jigsaw
         const label = document.getElementById('status-label');
         if (label) {
-            label.textContent = "Generating Jigsaw...";
+            label.textContent = State.suguruMode ? "Generating Suguru..." : "Generating Jigsaw...";
             label.style.color = "var(--text-main)";
         }
-        setTimeout(() => generateWithRetry(15), 10); // Give it 15 chances to succeed
+        setTimeout(() => generateWithRetry(15), 10);
     } else {
-        // Classic mode runs the original generator flawlessly
         if (originalGenerateNew) originalGenerateNew();
     }
 };
