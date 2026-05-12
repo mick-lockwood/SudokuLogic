@@ -759,6 +759,7 @@ window.updateDynamicTitle = () => {
     
     // 2. Check global rules
     if (State.jigsawMode) activeTypes.add('Jigsaw');
+    if (State.suguruMode) activeTypes.add('Suguru');
     if (State.antiKnight) activeTypes.add('Anti-Knight');
     if (State.antiKing) activeTypes.add('Anti-King');
     if (document.getElementById('rule-sandwich')?.checked) activeTypes.add('Sandwich');
