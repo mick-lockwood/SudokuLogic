@@ -14,13 +14,31 @@ export function hasConflict(arr, idx, val) {
     // Safely pull the dynamic region, or fallback to prevent crashes
     const myRegion = arr[idx] && arr[idx].region ? arr[idx].region : "fallback";
 
-    // 1. Standard / Map-Based Rules
-    for (let i = 0; i < State.size * State.size; i++) {
-        if (i === idx || !arr[i] || arr[i].val !== val) continue;
-        const tr = Math.floor(i / State.size), tc = i % State.size;
+   // --- SUGURU RULES ---
+    if (State.suguruMode) {
+        // Find the maximum allowed number for this specific region
+        const regSize = State.board.filter(cell => cell && cell.region === myRegion).length;
+        if (val > regSize) return true; // Cannot place a 5 in a 4-cell region!
+
+        for (let i = 0; i < State.size * State.size; i++) {
+            if (i === idx || !arr[i] || arr[i].val !== val) continue;
+            
+            // Rule 1: No duplicates in the same region
+            if (arr[i].region === myRegion) return true;
+            
+            // Rule 2: The Adjacency Touch Rule (No same numbers touching anywhere!)
+            const tr = Math.floor(i / State.size), tc = i % State.size;
+            if (Math.abs(tr - r) <= 1 && Math.abs(tc - c) <= 1) return true;
+        }
+    } 
         
-        // Conflict if they share a row, column, OR the same exact region string!
-        if (tr === r || tc === c || arr[i].region === myRegion) return true;
+    // --- CLASSIC / JIGSAW RULES ---
+    else {
+        for (let i = 0; i < State.size * State.size; i++) {
+            if (i === idx || !arr[i] || arr[i].val !== val) continue;
+            const tr = Math.floor(i / State.size), tc = i % State.size;
+            if (tr === r || tc === c || arr[i].region === myRegion) return true;
+        }
     }
     
     // --- Global Anti-Knight Rule ---
@@ -63,23 +81,34 @@ export function hasConflict(arr, idx, val) {
 }
 
 export function hasConflictGen(arr, idx, val) {
-
-    // --- THE JIGSAW KILL-SWITCH ---
     genSafetyCounter++;
-    if (State.jigsawMode && genSafetyCounter > 250000) {
+    if ((State.jigsawMode || State.suguruMode) && genSafetyCounter > 250000) {
         throw new Error("JIGSAW_TIMEOUT");
     }
-    // -----------------------------------
-    
+
     const r = Math.floor(idx / State.size), c = idx % State.size;
     const myRegion = State.board[idx] ? State.board[idx].region : "fallback";
 
-    // 1. Standard / Map-Based Rules
-    for (let i = 0; i < State.size * State.size; i++) {
-        if (i === idx || arr[i] !== val) continue;
-        const tr = Math.floor(i / State.size), tc = i % State.size;
-        
-        if (tr === r || tc === c || (State.board[i] && State.board[i].region === myRegion)) return true;
+    // --- SUGURU RULES ---
+    if (State.suguruMode) {
+        const regSize = State.board.filter(cell => cell && cell.region === myRegion).length;
+        if (val > regSize) return true; 
+
+        for (let i = 0; i < State.size * State.size; i++) {
+            if (i === idx || arr[i] !== val) continue;
+            if (State.board[i] && State.board[i].region === myRegion) return true;
+            
+            const tr = Math.floor(i / State.size), tc = i % State.size;
+            if (Math.abs(tr - r) <= 1 && Math.abs(tc - c) <= 1) return true;
+        }
+    } 
+    // --- CLASSIC / JIGSAW RULES ---
+    else {
+        for (let i = 0; i < State.size * State.size; i++) {
+            if (i === idx || arr[i] !== val) continue;
+            const tr = Math.floor(i / State.size), tc = i % State.size;
+            if (tr === r || tc === c || (State.board[i] && State.board[i].region === myRegion)) return true;
+        }
     }
 
     // --- Global Anti-Knight Rule (Generator Version) ---
@@ -129,9 +158,17 @@ export function cleanPencilsAfterMove(idx, val) {
 
     State.board.forEach((cell, i) => {
         const tr = Math.floor(i / State.size), tc = i % State.size;
+        let shouldClean = false;
         
-        // Jigsaw Map Checking for auto-cleaning
-        if (tr === r || tc === c || cell.region === myRegion) {
+        if (State.suguruMode) {
+            // Clean from same region and ALL 8 touching cells
+            if (cell.region === myRegion || (Math.abs(tr - r) <= 1 && Math.abs(tc - c) <= 1)) shouldClean = true;
+        } else {
+            // Classic cleaning
+            if (tr === r || tc === c || cell.region === myRegion) shouldClean = true;
+        }
+
+        if (shouldClean) {
             const noteIdx = cell.notes.indexOf(val);
             if (noteIdx > -1) cell.notes.splice(noteIdx, 1);
         }
