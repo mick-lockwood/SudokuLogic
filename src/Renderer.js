@@ -253,22 +253,34 @@ export function renderGrid() {
                 div.className = 'cell'; 
                 div.id = `cell-${i}`;
                 
-                // --- DYNAMIC INNER BORDERS ---
-                div.style.borderRight = `1px solid ${gridLine}`;
-                div.style.borderBottom = `1px solid ${gridLine}`;
+                const currentRegion = State.board[i].region;
+
+                // --- DYNAMIC INNER BORDERS (Map-Based) ---
+                div.style.borderRight = `1px solid ${gridLine}`; // Default thin
+                div.style.borderBottom = `1px solid ${gridLine}`; // Default thin
                 
-                // Outer Thick Borders
+                // Outer Top/Left Thick Borders (Always thick on the edges)
                 if (r === 0) div.style.borderTop = `2px solid ${gridLine}`;
                 if (c === 0) div.style.borderLeft = `2px solid ${gridLine}`;
-                if (c === State.size - 1) div.style.borderRight = `2px solid ${gridLine}`;
-                if (r === State.size - 1) div.style.borderBottom = `2px solid ${gridLine}`;
                 
-                // Inner Block Borders (The 3x3 boundaries)
-                if ((c + 1) % State.bW === 0 && c < State.size - 1) {
-                    div.style.borderRight = `2px solid ${gridLine}`;
+                // Dynamic Right Border
+                if (c < State.size - 1) {
+                    const rightNeighborRegion = State.board[i + 1].region;
+                    if (currentRegion !== rightNeighborRegion) {
+                        div.style.borderRight = `2px solid ${gridLine}`; // Boundary found!
+                    }
+                } else {
+                    div.style.borderRight = `2px solid ${gridLine}`; // Absolute right edge
                 }
-                if ((r + 1) % State.bH === 0 && r < State.size - 1) {
-                    div.style.borderBottom = `2px solid ${gridLine}`;
+
+                // Dynamic Bottom Border
+                if (r < State.size - 1) {
+                    const bottomNeighborRegion = State.board[i + State.size].region;
+                    if (currentRegion !== bottomNeighborRegion) {
+                        div.style.borderBottom = `2px solid ${gridLine}`; // Boundary found!
+                    }
+                } else {
+                    div.style.borderBottom = `2px solid ${gridLine}`; // Absolute bottom edge
                 }
                 // ------------------------------
           
