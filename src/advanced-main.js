@@ -40,7 +40,7 @@ window.setTool = (tool) => {
     if (activeBtn) {
         if (tool === 'pointer') {
             activeBtn.classList.add('active-tool-pointer');
-        } else if (tool === 'edit') {
+        } else if (tool === 'edit' || tool === 'region') {
             activeBtn.classList.add('active-tool-edit');
         } else if (tool === 'eraser') {
             activeBtn.classList.add('active-tool-eraser');
