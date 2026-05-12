@@ -5,6 +5,10 @@ export const Tooltips = {
     'tool-pointer':
 `Select cells and input numbers.\n
 Shortcut: Esc or V`,
+     
+    'tool-region':
+`Paint custom irregular regions for Jigsaw Sudoku.\n
+Click and drag across cells to group them into a single region.`,
     
     // Variant Tools
     'tool-thermo':
@@ -63,16 +67,17 @@ apart cannot contain the same digit.`,
 `Cells that touch diagonally 
 (a chess king's move) 
 cannot contain the same digit.`,
-     
-    'tool-region':
-`Paint custom irregular regions for Jigsaw Sudoku.\n
-Click and drag across cells to group them into a single region.`,   
 
-    // Perimeter Rules
+    // Grid Modification Toggles
+    'toggle-jigsaw':
+`Replace standard 3x3 boxes with custom irregular regions.\n
+Enables the Region Painter tool to draw your own grid shapes.`,
+    
     'toggle-outer-clues':
 `Show or hide the perimeter cells around the grid
 used for inputting outside variant clues.`,
 
+    // Perimeter Rules
     'rule-sandwich':
 `Clues outside the grid indicate the sum of
 the digits between the 1 and 9 in that line.`,
