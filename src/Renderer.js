@@ -232,6 +232,9 @@ export function updateUI() {
             }
         }
     }
+    
+    updateGameRules(); 
+    
 }
 
 export function renderGrid() {
@@ -515,7 +518,7 @@ export function updateGameRules() {
     const list = document.getElementById('game-rules-list');
     if (!panel || !list) return;
 
-    if (State.mode !== 'solve') {
+    if (State.mode !== 'create') {
         panel.style.display = 'none';
         return;
     }
