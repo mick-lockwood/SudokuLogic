@@ -5,6 +5,9 @@ import { whisperConflict } from './variants/Whisper.js';
 import { killerConflict } from './variants/Killer.js';
 import { kropkiConflict } from './variants/Kropki.js';
 
+export let genSafetyCounter = 0;
+export function resetGenSafety() { genSafetyCounter = 0; }
+
 export function hasConflict(arr, idx, val) {
     if (val === 0) return false;
     const r = Math.floor(idx / State.size), c = idx % State.size;
@@ -60,6 +63,14 @@ export function hasConflict(arr, idx, val) {
 }
 
 export function hasConflictGen(arr, idx, val) {
+
+    // --- THE JIGSAW KILL-SWITCH ---
+    genSafetyCounter++;
+    if (State.jigsawMode && genSafetyCounter > 250000) {
+        throw new Error("JIGSAW_TIMEOUT");
+    }
+    // -----------------------------------
+    
     const r = Math.floor(idx / State.size), c = idx % State.size;
     const myRegion = State.board[idx] ? State.board[idx].region : "fallback";
 
