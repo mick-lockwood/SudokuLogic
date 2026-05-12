@@ -37,7 +37,23 @@ export function initBoardState(sizeParam) {
     State.bW = 3;
     State.bH = (sizeParam === 6) ? 2 : 3;
     State.isPlayOnly = false;
-    State.board = Array.from({ length: State.size * State.size }, () => ({ val: 0, given: false, notes: [], color: null }));
+    
+    // --- NEW: INITIALIZE WITH REGION MAPPING ---
+    State.board = Array.from({ length: State.size * State.size }, (_, i) => {
+        const r = Math.floor(i / State.size);
+        const c = i % State.size;
+        // Calculate the classic box index (0 through 8)
+        const boxIndex = Math.floor(r / State.bH) * (State.size / State.bW) + Math.floor(c / State.bW);
+        
+        return { 
+            val: 0, 
+            given: false, 
+            notes: [], 
+            color: null,
+            region: `box-${boxIndex}` // Every cell now explicitly knows its region!
+        };
+    });
+    
     State.undoStack = []; 
     State.redoStack = [];
     State.selected = []; 
@@ -47,7 +63,6 @@ export function initBoardState(sizeParam) {
     State.showGhost = false;
     State.antiKnight = false;
     State.showOuterClues = false;
-    
 }
 
 export function saveState(isUndoAction = false) {
