@@ -36,82 +36,79 @@ export function updateUI() {
     const selR = isBoardCell ? Math.floor(primaryActive / State.size) : -1;
     const selC = isBoardCell ? primaryActive % State.size : -1;
     
-    // --- NEW: MAP-BASED REGION HIGHLIGHTING ---
-    const selRegion = isBoardCell ? State.board[primaryActive].region : null;
+    // Grab the dynamic region instead of 3x3 block coordinates
+    const selRegion = isBoardCell && State.board[primaryActive] ? State.board[primaryActive].region : null;
     const showSeen = document.getElementById('toggle-seen')?.checked ?? true;
 
-    State.board.forEach((data, i) => {
-        const el = document.getElementById(`cell-${i}`);
-        if (!el) return;
+    // Fail-Safe Wrapper prevents crashes from wiping the board
+    try {
+        State.board.forEach((data, i) => {
+            const el = document.getElementById(`cell-${i}`);
+            if (!el) return;
 
-        el.innerHTML = '';
-        el.className = el.className.split(' ').filter(c => !['selected', 'highlight', 'match', 'given', 'user', 'error'].includes(c)).join(' ');
+            el.innerHTML = '';
+            el.className = el.className.split(' ').filter(c => !['selected', 'highlight', 'match', 'given', 'user', 'error'].includes(c)).join(' ');
 
-        const r = Math.floor(i / State.size), c = i % State.size;
+            const r = Math.floor(i / State.size), c = i % State.size;
 
-        let tint = "rgba(255, 255, 255, 0)"; 
-        el.style.boxShadow = 'none';
+            let tint = "rgba(255, 255, 255, 0)"; 
+            el.style.boxShadow = 'none';
 
-        if (State.selected.includes(i)) {
-            el.classList.add('selected');
-            tint = State.darkMode ? "rgba(56, 189, 248, 0.5)" : "rgba(52, 152, 219, 0.4)"; 
+            if (State.selected.includes(i)) {
+                el.classList.add('selected');
+                tint = State.darkMode ? "rgba(56, 189, 248, 0.5)" : "rgba(52, 152, 219, 0.4)"; 
 
-            const hasTop = r > 0 && State.selected.includes(i - State.size);
-            const hasBottom = r < State.size - 1 && State.selected.includes(i + State.size);
-            const hasLeft = c > 0 && State.selected.includes(i - 1);
-            const hasRight = c < State.size - 1 && State.selected.includes(i + 1);
+                const hasTop = r > 0 && State.selected.includes(i - State.size);
+                const hasBottom = r < State.size - 1 && State.selected.includes(i + State.size);
+                const hasLeft = c > 0 && State.selected.includes(i - 1);
+                const hasRight = c < State.size - 1 && State.selected.includes(i + 1);
 
-            const selColor = State.darkMode ? "#74b9ff" : "#3498db";
-            let shadows = [];
+                const selColor = State.darkMode ? "#74b9ff" : "#3498db";
+                let shadows = [];
+                if (!hasTop) shadows.push(`inset 0 2px 0 0 ${selColor}`);
+                if (!hasBottom) shadows.push(`inset 0 -2px 0 0 ${selColor}`);
+                if (!hasLeft) shadows.push(`inset 2px 0 0 0 ${selColor}`);
+                if (!hasRight) shadows.push(`inset -2px 0 0 0 ${selColor}`);
+                if (shadows.length > 0) el.style.boxShadow = shadows.join(', ');
 
-            if (!hasTop) shadows.push(`inset 0 2px 0 0 ${selColor}`);
-            if (!hasBottom) shadows.push(`inset 0 -2px 0 0 ${selColor}`);
-            if (!hasLeft) shadows.push(`inset 2px 0 0 0 ${selColor}`);
-            if (!hasRight) shadows.push(`inset -2px 0 0 0 ${selColor}`);
-
-            if (shadows.length > 0) { el.style.boxShadow = shadows.join(', '); }
-
-        // --- NEW: REPLACED blockR MATH WITH data.region === selRegion ---
-        } else if (showSeen && (r === selR || c === selC || data.region === selRegion)) {
-            el.classList.add('highlight');
-            tint = State.darkMode ? "rgba(56, 189, 248, 0.15)" : "rgba(52, 152, 219, 0.1)"; 
-        } else if (selVal !== 0 && data.val === selVal) {
-            el.classList.add('match');
-            tint = State.darkMode ? "rgba(74, 222, 128, 0.4)" : "rgba(46, 204, 113, 0.3)"; 
-        }
-
-        let highlightBase = data.color || (State.darkMode ? "#1e293b" : "white");
-        el.style.background = `linear-gradient(${tint}, ${tint}), ${highlightBase}`;
-
-        if (data.val !== 0) {
-            el.innerHTML = `<span style="position: relative; z-index: 20;">${data.val}</span>`;
-            el.classList.add(data.given ? 'given' : 'user');
-            if (hasConflict(State.board, i, data.val)) el.classList.add('error');
-        }
-            
-        else if (State.mode === 'create' && State.showGhost && State.solution && State.solution[i]) {
-            const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(30, 41, 59, 0.2)";
-            el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-style: italic;">${State.solution[i]}</span>`;
-        }
-            
-        else if (data.notes.length > 0) {
-            const pGrid = document.createElement('div');
-            pGrid.className = 'pencil-grid';
-            pGrid.style.zIndex = '20'; 
-            
-            for(let n = 1; n <= 9; n++) {
-                const nDiv = document.createElement('div'); 
-                nDiv.className = 'pencil-num';
-                
-                if (data.notes.includes(n)) {
-                    nDiv.innerHTML = `<span style="position: relative; z-index: 20;">${n}</span>`;
-                    if (hasConflict(State.board, i, n)) nDiv.classList.add('error');
-                }
-                pGrid.appendChild(nDiv);
+            // SMART HIGHLIGHTING: Highlights custom regions instead of hardcoded 3x3s
+            } else if (showSeen && (r === selR || c === selC || data.region === selRegion)) {
+                el.classList.add('highlight');
+                tint = State.darkMode ? "rgba(56, 189, 248, 0.15)" : "rgba(52, 152, 219, 0.1)"; 
+            } else if (selVal !== 0 && data.val === selVal) {
+                el.classList.add('match');
+                tint = State.darkMode ? "rgba(74, 222, 128, 0.4)" : "rgba(46, 204, 113, 0.3)"; 
             }
-            el.appendChild(pGrid);
-        }
-    });
+
+            let highlightBase = data.color || (State.darkMode ? "#1e293b" : "white");
+            el.style.background = `linear-gradient(${tint}, ${tint}), ${highlightBase}`;
+
+            if (data.val !== 0) {
+                el.innerHTML = `<span style="position: relative; z-index: 20;">${data.val}</span>`;
+                el.classList.add(data.given ? 'given' : 'user');
+                if (hasConflict(State.board, i, data.val)) el.classList.add('error');
+            } else if (State.mode === 'create' && State.showGhost && State.solution && State.solution[i]) {
+                const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(30, 41, 59, 0.2)";
+                el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-style: italic;">${State.solution[i]}</span>`;
+            } else if (data.notes.length > 0) {
+                const pGrid = document.createElement('div');
+                pGrid.className = 'pencil-grid';
+                pGrid.style.zIndex = '20'; 
+                for(let n = 1; n <= 9; n++) {
+                    const nDiv = document.createElement('div'); 
+                    nDiv.className = 'pencil-num';
+                    if (data.notes.includes(n)) {
+                        nDiv.innerHTML = `<span style="position: relative; z-index: 20;">${n}</span>`;
+                        if (hasConflict(State.board, i, n)) nDiv.classList.add('error');
+                    }
+                    pGrid.appendChild(nDiv);
+                }
+                el.appendChild(pGrid);
+            }
+        });
+    } catch (e) {
+        console.error("Renderer crash prevented safely:", e);
+    }
     
     if (State.mode === 'create') validateStatus();
     renderNumpad();
@@ -130,39 +127,32 @@ export function updateUI() {
                     const val = State.clues?.[id] || "";
                     let isError = false;
 
-                    // --- NEW: RUN THE PERIMETER MATH ---
                     if (val !== "") {
                         const lineVals = getLineValues(id);
-                        
-                        // 1. Check which rules are currently turned on in the UI
                         const isSandwich = document.getElementById('rule-sandwich')?.checked;
                         const isSkyscraper = document.getElementById('rule-skyscraper')?.checked;
                         const isFrames = document.getElementById('rule-frames')?.checked;
                         const isRooms = document.getElementById('rule-rooms')?.checked;
 
-                        // 2. If a rule is active, and the line breaks that rule, flag it as an error!
                         if (isSandwich && checkSandwich(val, lineVals)) isError = true;
                         if (isSkyscraper && checkSkyscraper(val, lineVals)) isError = true;
                         if (isFrames && checkFrames(val, lineVals)) isError = true;
                         if (isRooms && checkNumberedRoom(val, lineVals)) isError = true;
                     }
                     
-                    // Match inner cell span layering
                     el.innerHTML = val !== "" ? `<span style="position: relative; z-index: 20;">${val}</span>` : "";
                     
-                    // --- NEW: APPLY ERROR STYLING ---
                     if (isError) {
                         el.classList.add('error');
-                        el.style.color = State.darkMode ? "#fb923c" : "#e74c3c"; // Danger Red!
+                        el.style.color = State.darkMode ? "#fb923c" : "#e74c3c"; 
                     } else {
                         el.classList.remove('error');
-                        el.style.color = "var(--text-main)"; // Reset to normal text
+                        el.style.color = "var(--text-main)"; 
                     }
 
                     const isSel = State.selected.includes(id);
                     el.classList.toggle('selected', isSel);
                     
-                    // SMART BORDERS: Check if this cell is part of ANY drawn variant line
                     const hasVariant = State.variants.some(v => v.cells.includes(id));
                     
                     if (val !== "" || hasVariant) {
@@ -341,6 +331,7 @@ export function validateStatus() {
         return;
     }
 
+    // SAFETY CHECK: Abort instantly if the user just placed a conflicting number!
     const hasExistingConflict = State.board.some((c, i) => hasConflict(State.board, i, c.val));
     if (hasExistingConflict) {
         label.textContent = "Rule Conflict";
@@ -348,13 +339,12 @@ export function validateStatus() {
         return; 
     }
 
-    // Pass 'true' so the solver knows it's the first call and resets the safety counter
     const solutions = countSolutions([...currentBoard], 0, true);
     
-    // --- NEW: HANDLE ABORTED CALCULATIONS ---
+    // Handles the new abort code from the solver
     if (solutions === -1) {
-        label.textContent = "Complex Board...";
-        label.style.color = "#94a3b8"; // Grey text while the board is too sparse
+        label.textContent = "Validating...";
+        label.style.color = "#94a3b8"; 
     } else if (solutions === 1) {
         label.textContent = "Unique Puzzle";
         label.style.color = "var(--success)";
