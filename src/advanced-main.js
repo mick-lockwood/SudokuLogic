@@ -289,21 +289,40 @@ window.toggleSuguruMode = () => {
     updateRegionPainterState();
 };
 
+// --- RESET REGIONS BUTTON ---
+window.resetRegions = () => {
+    // Failsafe: Only run if we are actually in an irregular mode
+    if (!State.jigsawMode && !State.suguruMode) return; 
+
+    // Loop through all 81 cells and mathematically snap them back to their classic boxes
+    State.board.forEach((cell, i) => {
+        const r = Math.floor(i / State.size);
+        const c = i % State.size;
+        const boxIndex = Math.floor(r / State.bH) * (State.size / State.bW) + Math.floor(c / State.bW);
+        cell.region = `box-${boxIndex}`;
+    });
+
+    // Force the physical borders and UI overlays to update instantly
+    if (typeof Renderer !== 'undefined' && Renderer.renderGrid) {
+        Renderer.renderGrid();
+        Renderer.updateUI();
+    }
+};
+
 // --- SHARED PAINTER LOGIC ---
-// Since both modes do the exact same thing to the UI, we extract it into one clean function
 function updateRegionPainterState() {
     const regionToolBtn = document.getElementById('tool-region');
+    const resetRegionsBtn = document.getElementById('btn-reset-regions'); // <-- Grab the new button
     
     if (State.jigsawMode || State.suguruMode) {
-        // Show and equip the painter
         if (regionToolBtn) regionToolBtn.style.display = 'block';
+        if (resetRegionsBtn) resetRegionsBtn.style.display = 'block'; // <-- Show it
         window.setTool('region'); 
     } else {
-        // Hide the painter and drop it
         if (regionToolBtn) regionToolBtn.style.display = 'none';
+        if (resetRegionsBtn) resetRegionsBtn.style.display = 'none'; // <-- Hide it
         if (window.AdvancedState.activeTool === 'region') window.setTool('pointer');
         
-        // Reset the grid back to standard 3x3 boxes
         State.board.forEach((cell, i) => {
             const r = Math.floor(i / State.size);
             const c = i % State.size;
