@@ -3,7 +3,7 @@
 export const State = {
     size: 9, bW: 3, bH: 3,
     mode: 'create', 
-    pencil: false, paused: false, isWon: false, darkMode: false,
+    pencil: false, paused: false, isWon: false, darkMode: true,
     isPlayOnly: false,
     board: [], 
     timerVal: 0, timerInt: null,
