@@ -1,5 +1,7 @@
 // src/GameState.js
 
+
+
 export const State = {
     size: 9, bW: 3, bH: 3,
     mode: 'create', 
@@ -16,6 +18,11 @@ export const State = {
     showOuterClues: false,
     jigsawMode: false,
     suguruMode: false,
+
+    fogMode: false,
+    fogMap: Array(81).fill(false),
+    fogRevealed: Array(81).fill(false),
+    fogLinks: {},
 
     // Highlighter Color Palette 
     // (Laid out in rows of 3 to match the UI grid)
