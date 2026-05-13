@@ -31,6 +31,7 @@ window.AdvancedState = {
 // --- TOOL MANAGER ---
 window.setTool = (tool) => {
     window.AdvancedState.activeTool = tool;
+    window.AdvancedState.fogLinkSource = null;
     
     // 1. Strip ALL active classes from ALL variant buttons
     document.querySelectorAll('.variant-tool-btn').forEach(btn => {
