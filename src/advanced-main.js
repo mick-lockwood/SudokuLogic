@@ -263,6 +263,109 @@ window.toggleAntiKing = () => {
     if (typeof window.updateUI === 'function') window.updateUI(); 
 };
 
+// --- FOG OF WAR LOGIC ---
+
+window.toggleFogMode = () => {
+    State.fogMode = document.getElementById('toggle-fog').checked;
+    const fogBtn = document.getElementById('tool-fog');
+    const fogLinkBtn = document.getElementById('tool-fog-link');
+    
+    if (State.fogMode) {
+        if (fogBtn) fogBtn.style.display = 'block';
+        if (fogLinkBtn) fogLinkBtn.style.display = 'block';
+        window.setTool('fog');
+    } else {
+        if (fogBtn) fogBtn.style.display = 'none';
+        if (fogLinkBtn) fogLinkBtn.style.display = 'none';
+        if (['fog', 'fog-link'].includes(window.AdvancedState.activeTool)) {
+            window.setTool('pointer');
+        }
+    }
+    if (typeof window.updateGameRules === 'function') window.updateGameRules();
+    if (typeof window.updateUI === 'function') window.updateUI();
+};
+
+const originalHandleCellSelection = window.handleCellSelection;
+window.handleCellSelection = (idx, isMulti, isDragging) => {
+    const tool = window.AdvancedState.activeTool;
+    
+    // 1. FOG PAINTER
+    if (tool === 'fog' && State.mode === 'create') {
+        if (typeof idx === 'number') { 
+            if (!isDragging) window.AdvancedState.paintFogValue = !State.fogMap[idx];
+            State.fogMap[idx] = window.AdvancedState.paintFogValue;
+            if (typeof window.updateUI === 'function') window.updateUI();
+        }
+        return; 
+    }
+    
+    // 2. FOG LINKER (Custom Triggers)
+    if (tool === 'fog-link' && State.mode === 'create') {
+        if (typeof idx === 'number' && !isDragging) {
+            if (window.AdvancedState.fogLinkSource == null) {
+                // First click: Set the Trigger Cell
+                window.AdvancedState.fogLinkSource = idx;
+            } else if (window.AdvancedState.fogLinkSource === idx) {
+                // Clicked the Trigger again: Deselect
+                window.AdvancedState.fogLinkSource = null;
+            } else {
+                // Clicked another cell: Toggle it as a Target Reveal
+                const source = window.AdvancedState.fogLinkSource;
+                if (!State.fogLinks[source]) State.fogLinks[source] = [];
+                
+                const targetIdx = State.fogLinks[source].indexOf(idx);
+                if (targetIdx > -1) {
+                    State.fogLinks[source].splice(targetIdx, 1); 
+                } else {
+                    State.fogLinks[source].push(idx); 
+                }
+            }
+            if (typeof window.updateUI === 'function') window.updateUI();
+        }
+        return;
+    }
+    
+    if (originalHandleCellSelection) originalHandleCellSelection(idx, isMulti, isDragging);
+};
+
+// 3. THE HYBRID REVEAL ENGINE
+const originalHandleInput = window.handleInput;
+window.handleInput = (val) => {
+    if (originalHandleInput) originalHandleInput(val);
+    
+    // Check if we need to push back the fog!
+    if (State.mode === 'solve' && State.fogMode && !State.pencil && val !== 0) {
+        const activeCell = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
+        
+        if (activeCell !== null && State.solution && State.solution[activeCell] === val) {
+            
+            // HYBRID LOGIC: Did the setter manually link this cell?
+            if (State.fogLinks && State.fogLinks[activeCell] && State.fogLinks[activeCell].length > 0) {
+                // YES: Reveal only the specific cells the setter chose
+                State.fogLinks[activeCell].forEach(targetIdx => {
+                    State.fogRevealed[targetIdx] = true;
+                });
+            } else {
+                // NO: Fallback to the organic 3x3 proximity reveal
+                const r = Math.floor(activeCell / State.size);
+                const c = activeCell % State.size;
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const nr = r + i, nc = c + j;
+                        if (nr >= 0 && nr < State.size && nc >= 0 && nc < State.size) {
+                            State.fogRevealed[nr * State.size + nc] = true;
+                        }
+                    }
+                }
+            }
+            
+            // Guarantee the cell we just solved is revealed so it doesn't get stuck in fog!
+            State.fogRevealed[activeCell] = true; 
+            if (typeof window.updateUI === 'function') window.updateUI();
+        }
+    }
+};
+
 // --- GRID MODIFICATION TOGGLES ---
 
 window.toggleJigsawMode = () => {
