@@ -369,20 +369,40 @@ window.toggleFogMode = () => {
     State.fogMode = document.getElementById('toggle-fog').checked;
     const fogBtn = document.getElementById('tool-fog');
     const fogLinkBtn = document.getElementById('tool-fog-link');
+    const clearFogBtn = document.getElementById('btn-clear-fog'); // <-- Grab the new button
     
     if (State.fogMode) {
         if (fogBtn) fogBtn.style.display = 'block';
         if (fogLinkBtn) fogLinkBtn.style.display = 'block';
+        if (clearFogBtn) clearFogBtn.style.display = 'block'; // <-- Show it
         window.setTool('fog');
     } else {
         if (fogBtn) fogBtn.style.display = 'none';
         if (fogLinkBtn) fogLinkBtn.style.display = 'none';
+        if (clearFogBtn) clearFogBtn.style.display = 'none'; // <-- Hide it
         if (['fog', 'fog-link'].includes(window.AdvancedState.activeTool)) {
             window.setTool('pointer');
         }
     }
     if (typeof window.updateGameRules === 'function') window.updateGameRules();
     if (typeof window.updateUI === 'function') window.updateUI();
+};
+
+window.clearFogData = () => {
+    if (!confirm("Are you sure you want to clear all painted fog, custom links, and trigger keys?")) return;
+
+    // 1. Wipe the memory arrays and objects clean
+    State.fogMap = Array(State.size * State.size).fill(false);
+    State.fogRevealed = Array(State.size * State.size).fill(false);
+    State.fogLinks = {};
+    State.fogTriggers = {};
+
+    // 2. Drop the linker focus so you don't have a ghost cell selected
+    window.AdvancedState.fogLinkSource = null;
+
+    // 3. Force the SVG layer and main UI to redraw instantly
+    if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
+    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
 };
 
 // --- GRID MODIFICATION TOGGLES ---
