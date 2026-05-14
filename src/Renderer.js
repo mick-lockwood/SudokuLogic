@@ -85,6 +85,14 @@ export function updateUI() {
     }
     // --------------------------------------------------------
 
+    // --- NEW: FOG CONFLICT MASK ---
+    // Creates a temporary copy of the board where fogged cells are treated as empty (val: 0)
+    // This completely prevents "spidey-sense" cheating!
+    const maskedBoard = State.board.map((cell, idx) => {
+        const isHidden = State.mode === 'solve' && State.fogMode && State.fogMap && State.fogMap[idx] && State.fogRevealed && !State.fogRevealed[idx];
+        return isHidden ? { ...cell, val: 0 } : cell;
+    });
+
     try {
         State.board.forEach((data, i) => {
             const el = document.getElementById(`cell-${i}`);
@@ -158,7 +166,7 @@ export function updateUI() {
             if (data.val !== 0) {
                 el.innerHTML = `<span style="position: relative; z-index: 20;">${data.val}</span>`;
                 el.classList.add(data.given ? 'given' : 'user');
-                if (hasConflict(State.board, i, data.val)) el.classList.add('error');
+                if (hasConflict(maskedBoard, i, data.val)) el.classList.add('error');
             } else if (State.mode === 'create' && State.showGhost && State.solution && State.solution[i]) {
                 const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(30, 41, 59, 0.2)";
                 el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-style: italic;">${State.solution[i]}</span>`;
@@ -171,7 +179,7 @@ export function updateUI() {
                     nDiv.className = 'pencil-num';
                     if (data.notes.includes(n)) {
                         nDiv.innerHTML = `<span style="position: relative; z-index: 20;">${n}</span>`;
-                        if (hasConflict(State.board, i, n)) nDiv.classList.add('error');
+                        if (hasConflict(maskedBoard, i, n)) nDiv.classList.add('error');
                     }
                     pGrid.appendChild(nDiv);
                 }
