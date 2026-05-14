@@ -292,57 +292,68 @@ window.handleInput = (val) => {
         if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
         return; // Stop here!
     } 
-    
-    // --- 2. FOG HYBRID REVEAL LOGIC (RUNS FIRST!) ---
-    if (State.mode === 'solve' && State.fogMode && !State.pencil && val != 0 && primary !== null) {
-        
-        const primaryKey = String(primary);
-        let isCorrect = false;
 
-        // CHECK 1: Did the setter explicitly demand a specific digit here?
-        if (State.fogTriggers && State.fogTriggers[primaryKey] !== undefined) {
-            isCorrect = (val == State.fogTriggers[primaryKey]);
-        } 
-        // CHECK 2: Fallback to the auto-generated math solution
-        else if (State.solution && State.solution[primary] !== undefined) {
-            isCorrect = (val == State.solution[primary]);
+    // --- 2. INNER CELL LOGIC ---
+    else {
+        // --- NEW: FOG INPUT BLOCKER ---
+        // Prevents the user from guessing digits or leaving pencil marks inside active fog
+        if (State.mode === 'solve' && State.fogMode && primary !== null) {
+            if (State.fogMap[primary] && !State.fogRevealed[primary]) {
+                return; // Kills the input instantly!
+            }
         }
+        
+        // --- 2. FOG HYBRID REVEAL LOGIC (RUNS FIRST!) ---
+        if (State.mode === 'solve' && State.fogMode && !State.pencil && val != 0 && primary !== null) {
+            
+            const primaryKey = String(primary);
+            let isCorrect = false;
 
-        // If either condition passes, push back the clouds!
-        if (isCorrect) {
-            if (!State.fogRevealed) State.fogRevealed = Array(State.size * State.size).fill(false);
-            if (!State.fogLinks) State.fogLinks = {};
+            // CHECK 1: Did the setter explicitly demand a specific digit here?
+            if (State.fogTriggers && State.fogTriggers[primaryKey] !== undefined) {
+                isCorrect = (val == State.fogTriggers[primaryKey]);
+            } 
+            // CHECK 2: Fallback to the auto-generated math solution
+            else if (State.solution && State.solution[primary] !== undefined) {
+                isCorrect = (val == State.solution[primary]);
+            }
 
-            // HYBRID LOGIC: Follow custom paths or default 3x3
-            if (State.fogLinks[primaryKey] && State.fogLinks[primaryKey].length > 0) {
-                State.fogLinks[primaryKey].forEach(targetIdx => {
-                    State.fogRevealed[targetIdx] = true;
-                });
-            } else {
-                const r = Math.floor(primary / State.size);
-                const c = primary % State.size;
-                for (let i = -1; i <= 1; i++) {
-                    for (let j = -1; j <= 1; j++) {
-                        const nr = r + i, nc = c + j;
-                        if (nr >= 0 && nr < State.size && nc >= 0 && nc < State.size) {
-                            State.fogRevealed[nr * State.size + nc] = true;
+            // If either condition passes, push back the clouds!
+            if (isCorrect) {
+                if (!State.fogRevealed) State.fogRevealed = Array(State.size * State.size).fill(false);
+                if (!State.fogLinks) State.fogLinks = {};
+
+                // HYBRID LOGIC: Follow custom paths or default 3x3
+                if (State.fogLinks[primaryKey] && State.fogLinks[primaryKey].length > 0) {
+                    State.fogLinks[primaryKey].forEach(targetIdx => {
+                        State.fogRevealed[targetIdx] = true;
+                    });
+                } else {
+                    const r = Math.floor(primary / State.size);
+                    const c = primary % State.size;
+                    for (let i = -1; i <= 1; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            const nr = r + i, nc = c + j;
+                            if (nr >= 0 && nr < State.size && nc >= 0 && nc < State.size) {
+                                State.fogRevealed[nr * State.size + nc] = true;
+                            }
                         }
                     }
                 }
+                State.fogRevealed[primary] = true; 
             }
-            State.fogRevealed[primary] = true; 
         }
-    }
-    
-    // --- 3. CLASSIC INNER CELL LOGIC ---
-    // Run the standard 1-9 logic safely
-    try {
-        if (originalHandleInput) originalHandleInput(val);
-    } catch(e) { console.error("Classic Input Error:", e); }
-    
-    // --- 4. FORCE UI UPDATE ---
-    if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
-        Renderer.updateUI();
+        
+        // --- 3. CLASSIC INNER CELL LOGIC ---
+        // Run the standard 1-9 logic safely
+        try {
+            if (originalHandleInput) originalHandleInput(val);
+        } catch(e) { console.error("Classic Input Error:", e); }
+        
+        // --- 4. FORCE UI UPDATE ---
+        if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
+            Renderer.updateUI();
+        }
     }
 };
 
