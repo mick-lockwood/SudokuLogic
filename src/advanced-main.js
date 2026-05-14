@@ -829,9 +829,15 @@ window.setAppMode = (m) => {
     const variantPanel = document.getElementById('variant-tools-panel');
     if (variantPanel) variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
     
-    // --- THE FIX: Hide/Show the Auto-Fill button ---
     const autoFillBtn = document.getElementById('btn-autofill-pencils');
     if (autoFillBtn) autoFillBtn.style.display = (m === 'solve') ? 'inline' : 'none';
+    
+    // --- NEW: TOGGLE THE ACTION MENUS ---
+    const createActions = document.getElementById('create-mode-actions');
+    const solveActions = document.getElementById('solve-mode-actions');
+    if (createActions) createActions.style.display = (m === 'create') ? 'flex' : 'none';
+    if (solveActions) solveActions.style.display = (m === 'solve') ? 'flex' : 'none';
+    // ------------------------------------
     
     window.setTool('pointer');
     
@@ -1018,43 +1024,64 @@ window.updateDynamicTitle = () => {
 
 // --- MASTER RESET CONTROLS ---
 
-// 1. Override the classic Reset Board link to wipe variants & fog in Create Mode
-window.handleClearBoard = () => {
-    if (State.mode === 'create') {
-        if (!confirm("Wipe the entire board? This will delete all digits, variants, clues, and fog.")) return;
-        
-        // Wipe everything
-        State.board.forEach(c => { c.val = 0; c.given = false; c.notes = []; c.color = null; });
-        State.variants = [];
-        State.fogMap = Array(State.size * State.size).fill(false);
-        State.fogRevealed = Array(State.size * State.size).fill(false);
-        State.fogLinks = {};
-        State.fogTriggers = {};
-        State.clues = {};
-        window.AdvancedState.fogLinkSource = null;
-        window.AdvancedState.variantUndoStack = [];
-        window.AdvancedState.variantRedoStack = [];
-        
-        // Un-lock the title
-        window.isCustomTitle = false; 
-        
-        if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
-        if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
-        if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
-        
-    } else {
-        // In Solve Mode, just reset the user's progress
-        if (!confirm("Restart puzzle? This will clear all your inputs and pencil marks.")) return;
-        State.board.forEach(c => { if(!c.given) { c.val = 0; c.notes = []; c.color = null; } });
-        if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
-    }
+// 1. CREATE MODE: Nuclear Wipe
+window.handleClearAllCreate = () => {
+    if (!confirm("Wipe the entire board? This will delete all digits, variants, clues, and fog.")) return;
+    State.board.forEach(c => { c.val = 0; c.given = false; c.notes = []; c.color = null; });
+    State.variants = [];
+    State.fogMap = Array(State.size * State.size).fill(false);
+    State.fogRevealed = Array(State.size * State.size).fill(false);
+    State.fogLinks = {};
+    State.fogTriggers = {};
+    State.clues = {};
+    window.AdvancedState.fogLinkSource = null;
+    window.AdvancedState.variantUndoStack = [];
+    window.AdvancedState.variantRedoStack = [];
+    window.isCustomTitle = false; 
+    if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
+    if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
+    if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
 };
 
-// 2. The Nuclear Cache Wipe
+// 2. CREATE MODE: Digits Only
+window.handleClearDigitsCreate = () => {
+    if (!confirm("Clear all digits? Variants and fog will remain.")) return;
+    State.board.forEach(c => { c.val = 0; c.given = false; c.notes = []; });
+    if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
+};
+
+// 3. SOLVE MODE: Full Restart
+window.handleResetSolve = () => {
+    if (!confirm("Restart puzzle? This will clear your inputs, pencils, and reset the fog.")) return;
+    State.board.forEach(c => { if(!c.given) { c.val = 0; c.notes = []; c.color = null; } });
+    if (State.fogMode) State.fogRevealed = Array(State.size * State.size).fill(false);
+    State.isWon = false;
+    const winOverlay = document.getElementById('win-overlay');
+    if (winOverlay) winOverlay.style.display = 'none';
+    if (typeof Renderer !== 'undefined' && Renderer.stopConfetti) Renderer.stopConfetti();
+    if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
+};
+
+// 4. SOLVE MODE: Inputs Only
+window.handleClearUserInputs = () => {
+    if (!confirm("Clear all your main digit inputs? (Pencil marks will remain)")) return;
+    State.board.forEach(c => { if(!c.given) c.val = 0; });
+    if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
+};
+
+// 5. SOLVE MODE: Pencils Only
+window.handleClearPencils = () => {
+    if (!confirm("Clear all pencil marks?")) return;
+    State.board.forEach(c => { if(!c.given) c.notes = []; });
+    if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
+};
+
+// 6. NUCLEAR CACHE WIPE (Deep Clean)
 window.hardResetApp = () => {
     if (confirm("Are you absolutely sure?\n\nThis will permanently delete your autosave and restore all default app settings. This cannot be undone.")) {
         localStorage.removeItem('sudoku_autosave');
-        window.location.reload();
+        // THE FIX: Force a deep reload that strips cached URLs
+        window.location.href = window.location.pathname; 
     }
 };
 
