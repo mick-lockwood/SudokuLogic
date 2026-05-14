@@ -39,6 +39,7 @@ export function updateUI() {
     
     const selRegion = isBoardCell && State.board[primaryActive] ? State.board[primaryActive].region : null;
     const showSeen = document.getElementById('toggle-seen')?.checked ?? true;
+    const showMatch = document.getElementById('toggle-match')?.checked ?? true;
 
     // --- NEW: JIGSAW PAINTER MATH (CONTIGUOUS FLOOD FILL) ---
     const isRegionTool = typeof window !== 'undefined' && window.AdvancedState && window.AdvancedState.activeTool === 'region';
