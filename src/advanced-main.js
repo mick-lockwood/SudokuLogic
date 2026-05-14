@@ -97,10 +97,33 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
     else if (tool === 'fog-link' && State.mode === 'create') {
         if (!isClueCell && !isDragging) {
             if (window.AdvancedState.fogLinkSource == null) {
+                // Select the source cell FIRST
                 window.AdvancedState.fogLinkSource = index;
+                if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+                
+                // Prompt the setter for the Trigger Digit
+                setTimeout(() => {
+                    if (!State.fogTriggers) State.fogTriggers = {};
+                    const existing = State.fogTriggers[index] || "";
+                    
+                    const triggerStr = prompt("Enter the digit (1-9) required to unlock this cell:\n(Leave blank to use the auto-generated solution)", existing);
+                    
+                    if (triggerStr !== null && triggerStr.trim() !== "") {
+                        const triggerVal = parseInt(triggerStr);
+                        if (!isNaN(triggerVal) && triggerVal >= 1 && triggerVal <= 9) {
+                            State.fogTriggers[index] = triggerVal;
+                        }
+                    } else if (triggerStr !== null) {
+                        delete State.fogTriggers[index]; // Erase key if left blank
+                    }
+                    if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer(); 
+                }, 10);
+                
             } else if (window.AdvancedState.fogLinkSource === index) {
-                window.AdvancedState.fogLinkSource = null;
+                window.AdvancedState.fogLinkSource = null; // Deselect
+                if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
             } else {
+                // Add/Remove Target Cells
                 const sourceKey = String(window.AdvancedState.fogLinkSource);
                 if (!State.fogLinks) State.fogLinks = {};
                 if (!State.fogLinks[sourceKey]) State.fogLinks[sourceKey] = [];
@@ -111,11 +134,9 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                 } else {
                     State.fogLinks[sourceKey].push(index); 
                 }
+                if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer(); 
+                if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
             }
-            
-            // THE FIX: UI must update FIRST to draw the pink highlights, then SVG draws the arrows
-            if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
-            if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer(); 
         }
         return;
     }
@@ -273,24 +294,31 @@ window.handleInput = (val) => {
     } 
     
     // --- 2. FOG HYBRID REVEAL LOGIC (RUNS FIRST!) ---
-    // We run this BEFORE the classic input to guarantee it fires
     if (State.mode === 'solve' && State.fogMode && !State.pencil && val != 0 && primary !== null) {
         
-        // Loose equality (==) ensures keystrokes match internal math perfectly
-        if (State.solution && val == State.solution[primary]) {
-            
+        const primaryKey = String(primary);
+        let isCorrect = false;
+
+        // CHECK 1: Did the setter explicitly demand a specific digit here?
+        if (State.fogTriggers && State.fogTriggers[primaryKey] !== undefined) {
+            isCorrect = (val == State.fogTriggers[primaryKey]);
+        } 
+        // CHECK 2: Fallback to the auto-generated math solution
+        else if (State.solution && State.solution[primary] !== undefined) {
+            isCorrect = (val == State.solution[primary]);
+        }
+
+        // If either condition passes, push back the clouds!
+        if (isCorrect) {
             if (!State.fogRevealed) State.fogRevealed = Array(State.size * State.size).fill(false);
             if (!State.fogLinks) State.fogLinks = {};
 
-            const primaryKey = String(primary);
-
-            // HYBRID LOGIC: Did the setter manually link this cell?
+            // HYBRID LOGIC: Follow custom paths or default 3x3
             if (State.fogLinks[primaryKey] && State.fogLinks[primaryKey].length > 0) {
                 State.fogLinks[primaryKey].forEach(targetIdx => {
                     State.fogRevealed[targetIdx] = true;
                 });
             } else {
-                // NO: Fallback to the organic 3x3 proximity reveal
                 const r = Math.floor(primary / State.size);
                 const c = primary % State.size;
                 for (let i = -1; i <= 1; i++) {
@@ -302,8 +330,6 @@ window.handleInput = (val) => {
                     }
                 }
             }
-            
-            // Guarantee the current cell is revealed
             State.fogRevealed[primary] = true; 
         }
     }
@@ -578,7 +604,7 @@ window.renderSVGLayer = function renderSVGLayer() {
         });
     }
     
-    // --- NEW: FOG LINK VISUALIZER ---
+    // --- FOG LINK VISUALIZER ---
     if (State.mode === 'create' && window.AdvancedState.activeTool === 'fog-link' && State.fogLinks) {
         let defs = svg.querySelector('defs');
         if (!defs) {
@@ -592,25 +618,31 @@ window.renderSVGLayer = function renderSVGLayer() {
         Object.keys(State.fogLinks).forEach(sourceIdx => {
             const s = parseInt(sourceIdx);
             if (isNaN(s)) return;
-            
-            // THE FIX: Tell the app to use the Renderer to find the cell coordinates!
             const sourcePos = Renderer.getCellCenter(s); 
             
+            // Draw Arrows
             State.fogLinks[sourceIdx].forEach(targetIdx => {
                 const targetPos = Renderer.getCellCenter(targetIdx);
-                
-                // Draw arrow from Source to Target
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                line.setAttribute("x1", sourcePos.x);
-                line.setAttribute("y1", sourcePos.y);
-                line.setAttribute("x2", targetPos.x);
-                line.setAttribute("y2", targetPos.y);
-                line.setAttribute("stroke", "#ec4899"); 
-                line.setAttribute("stroke-width", "3");
-                line.setAttribute("stroke-dasharray", "5,5");
-                line.setAttribute("marker-end", "url(#fog-arrow)");
+                line.setAttribute("x1", sourcePos.x); line.setAttribute("y1", sourcePos.y);
+                line.setAttribute("x2", targetPos.x); line.setAttribute("y2", targetPos.y);
+                line.setAttribute("stroke", "#ec4899"); line.setAttribute("stroke-width", "3");
+                line.setAttribute("stroke-dasharray", "5,5"); line.setAttribute("marker-end", "url(#fog-arrow)");
                 svg.appendChild(line);
             });
+
+            // Draw the Setter's Trigger Key!
+            if (State.fogTriggers && State.fogTriggers[sourceIdx]) {
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", sourcePos.x - 22);
+                text.setAttribute("y", sourcePos.y - 12);
+                text.setAttribute("fill", "#a855f7"); // Purple to match the source box
+                text.setAttribute("font-size", "14px");
+                text.setAttribute("font-weight", "900");
+                text.style.pointerEvents = "none";
+                text.textContent = `🔑 ${State.fogTriggers[sourceIdx]}`;
+                svg.appendChild(text);
+            }
         });
     }
     // ---------------------------------
