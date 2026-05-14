@@ -86,7 +86,9 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
         if (!isClueCell) { 
             if (!isDragging) window.AdvancedState.paintFogValue = !State.fogMap[index];
             State.fogMap[index] = window.AdvancedState.paintFogValue;
-            if (typeof window.updateUI === 'function') window.updateUI();
+            
+            // THE FIX: Correctly call the imported Renderer
+            if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI(); 
         }
         return; 
     }
@@ -99,7 +101,6 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
             } else if (window.AdvancedState.fogLinkSource === index) {
                 window.AdvancedState.fogLinkSource = null;
             } else {
-                // Force String dictionary keys so links never get lost!
                 const sourceKey = String(window.AdvancedState.fogLinkSource);
                 if (!State.fogLinks) State.fogLinks = {};
                 if (!State.fogLinks[sourceKey]) State.fogLinks[sourceKey] = [];
@@ -112,9 +113,9 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                 }
             }
             
-            // CRUCIAL FIX: Force the arrows to draw and the highlights to update immediately!
+            // THE FIX: UI must update FIRST to draw the pink highlights, then SVG draws the arrows
+            if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
             if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer(); 
-            if (typeof window.updateUI === 'function') window.updateUI();
         }
         return;
     }
@@ -134,7 +135,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                 State.board[index].region = window.AdvancedState.currentRegionId;
             }
             if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
-            Renderer.updateUI(); 
+            if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI(); 
         }
     }
         
@@ -151,7 +152,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                             window.saveVariantState(); 
                             variantToEdit.sum = sumVal; 
                             renderSVGLayer();
-                            Renderer.updateUI();
+                            if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
                         }
                     }
                 }, 10);
@@ -168,7 +169,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                 window.saveVariantState(); 
                 State.variants = newVariants;
                 renderSVGLayer();
-                Renderer.updateUI();
+                if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
             }
         }
     }
