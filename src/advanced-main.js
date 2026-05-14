@@ -1021,17 +1021,12 @@ window.updateDynamicTitle = () => {
 // =====================================================================
 
 window.autoSaveTimeout = null;
-window.isBooting = true; // <-- NEW: The Safety Shield!
 
 window.forceAutosave = () => {
-    // --- NEW: Block all saves while the classic engine is booting! ---
-    if (window.isBooting) return; 
-
     // Failsafe: Don't save empty/broken states
     if (!State.board || State.board.length === 0) return;
 
     const sessionData = {
-        // Core Data
         size: State.size,
         mode: State.mode,
         board: State.board,
@@ -1039,23 +1034,18 @@ window.forceAutosave = () => {
         clues: State.clues || {},
         timerVal: State.timerVal,
         isWon: State.isWon,
-        
-        // Toggles & Rules
         antiKnight: State.antiKnight,
         antiKing: State.antiKing,
         jigsawMode: State.jigsawMode,
         suguruMode: State.suguruMode,
         fogMode: State.fogMode,
         showOuterClues: State.showOuterClues,
-        
-        // Fog of War Maps
         fogMap: State.fogMap,
         fogRevealed: State.fogRevealed,
         fogLinks: State.fogLinks || {},
         fogTriggers: State.fogTriggers || {}
     };
     
-    // Grab the custom title
     const titleEl = document.getElementById('puzzle-title');
     if (titleEl) sessionData.title = titleEl.innerText;
 
@@ -1063,23 +1053,23 @@ window.forceAutosave = () => {
 };
 
 window.triggerAutosave = () => {
+    // Debounce to prevent rapid-fire saving while dragging variant lines
     if (window.autoSaveTimeout) clearTimeout(window.autoSaveTimeout);
     window.autoSaveTimeout = setTimeout(window.forceAutosave, 500); 
 };
 
-window.addEventListener('beforeunload', () => {
-    window.forceAutosave();
-});
+// Guarantee a save if they rapidly close the tab
+window.addEventListener('beforeunload', () => window.forceAutosave());
 
 // --- THE MASTER HOOK ---
 const originalUpdateUI = Renderer.updateUI;
 Renderer.updateUI = () => {
     if (originalUpdateUI) originalUpdateUI();
-    window.triggerAutosave(); 
+    window.triggerAutosave(); // Automatically save after ANY visual change
 };
 window.updateUI = Renderer.updateUI; 
 
-// --- LOAD THE SAVE ON STARTUP ---
+// --- STATE REHYDRATOR ---
 window.loadAutosave = () => {
     const saved = localStorage.getItem('sudoku_autosave');
     if (!saved) return false;
@@ -1087,30 +1077,24 @@ window.loadAutosave = () => {
     try {
         const data = JSON.parse(saved);
         
-        // 1. Rehydrate Core State
-        State.size = data.size;
-        State.mode = data.mode;
+        State.size = data.size || 9;
+        State.mode = data.mode || 'create';
         State.board = data.board;
         State.variants = data.variants || [];
         State.clues = data.clues || {};
         State.timerVal = data.timerVal || 0;
         State.isWon = data.isWon || false;
-        
-        // 2. Rehydrate Rules
         State.antiKnight = data.antiKnight || false;
         State.antiKing = data.antiKing || false;
         State.jigsawMode = data.jigsawMode || false;
         State.suguruMode = data.suguruMode || false;
         State.fogMode = data.fogMode || false;
         State.showOuterClues = data.showOuterClues || false;
-        
-        // 3. Rehydrate Fog Memory
         State.fogMap = data.fogMap || Array(data.size * data.size).fill(false);
         State.fogRevealed = data.fogRevealed || Array(data.size * data.size).fill(false);
         State.fogLinks = data.fogLinks || {};
         State.fogTriggers = data.fogTriggers || {};
         
-        // 4. Physically Sync UI Switches
         const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
         setCheck('toggle-anti-knight', State.antiKnight);
         setCheck('toggle-anti-king', State.antiKing);
@@ -1127,7 +1111,6 @@ window.loadAutosave = () => {
             }
         }
         
-        // 5. Force UI to physically open panels based on restored state
         if (State.jigsawMode || State.suguruMode) {
             const regionToolBtn = document.getElementById('tool-region');
             const resetRegionsBtn = document.getElementById('btn-reset-regions'); 
@@ -1137,12 +1120,10 @@ window.loadAutosave = () => {
         
         if (typeof window.toggleFogMode === 'function') window.toggleFogMode();
         
-        // 6. Reload Grid DOM & SVGs
         if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
         if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
         if (typeof Renderer.updateUI === 'function') Renderer.updateUI();
         
-        // 7. Restore timer and layout based on Create vs Solve mode
         const m = State.mode;
         document.getElementById('modeCreate').classList.toggle('active', m === 'create');
         document.getElementById('modeSolve').classList.toggle('active', m === 'solve');
@@ -1164,26 +1145,4 @@ window.loadAutosave = () => {
         console.error("Failed to load autosave", e);
         return false;
     }
-};
-
-// --- STARTUP INTERCEPTOR ---
-const advancedOriginalOnLoad = window.onload;
-
-window.onload = (e) => {
-    // 1. Classic script runs (and wipes the board), but the Shield blocks the save!
-    if (advancedOriginalOnLoad) advancedOriginalOnLoad(e);
-    
-    // 2. Wait for the DOM, load the *real* save over the blank board
-    setTimeout(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const puzzleString = urlParams.get('puzzle');
-        
-        if (!puzzleString) {
-            window.loadAutosave();
-        }
-        
-        // --- NEW: Drop the Safety Shield so playing the game triggers saves again! ---
-        window.isBooting = false; 
-        
-    }, 50);
 };
