@@ -826,11 +826,12 @@ const originalSetGridSize = window.setGridSize;
 
 window.setGridSize = (s) => {
     // 1. Check if there is currently any data that would be lost
-    const hasNumbers = State.board.some(c => c.val !== 0);
-    const hasVariants = State.variants.length > 0;
+    const hasNumbers = State.board && State.board.some(c => c.val !== 0);
+    const hasVariants = State.variants && State.variants.length > 0;
+    const hasFog = State.fogMap && State.fogMap.some(f => f === true); // Did they paint any fog?
 
-    if (hasNumbers || hasVariants) {
-        if (!confirm("Changing grid size will clear your current board and variant rules. Continue?")) {
+    if (hasNumbers || hasVariants || hasFog) {
+        if (!confirm("Changing grid size will clear your current board, variant rules, and fog data. Continue?")) {
             return; // Abort if the user clicks 'Cancel'
         }
     }
@@ -841,10 +842,19 @@ window.setGridSize = (s) => {
     window.AdvancedState.variantRedoStack = [];
 
     // 3. Run the original classic grid swap logic
-    originalSetGridSize(s);
+    if (originalSetGridSize) originalSetGridSize(s);
     
-    // 4. Force the SVG layer to clear its visuals
-    renderSVGLayer();
+    // --- 4. NEW: WIPE & RESIZE FOG DATA ---
+    // Mathematically scale the new arrays to the new board size (e.g., 6x6 = 36, 9x9 = 81)
+    State.fogMap = Array(s * s).fill(false);
+    State.fogRevealed = Array(s * s).fill(false);
+    State.fogLinks = {};
+    State.fogTriggers = {};
+    window.AdvancedState.fogLinkSource = null;
+
+    // 5. Force the UI to clear its visuals
+    if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
+    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
 };
 
 // --- JIGSAW GENERATOR SAFETY INTERCEPTOR ---
