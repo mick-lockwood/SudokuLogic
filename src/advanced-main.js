@@ -1000,8 +1000,12 @@ window.updateDynamicTitle = () => {
 // =====================================================================
 
 window.autoSaveTimeout = null;
+window.isBooting = true; // <-- NEW: The Safety Shield!
 
 window.forceAutosave = () => {
+    // --- NEW: Block all saves while the classic engine is booting! ---
+    if (window.isBooting) return; 
+
     // Failsafe: Don't save empty/broken states
     if (!State.board || State.board.length === 0) return;
 
@@ -1038,26 +1042,20 @@ window.forceAutosave = () => {
 };
 
 window.triggerAutosave = () => {
-    // Debounce: Wait 500ms after the user stops acting before saving.
-    // This prevents writing to the hard drive 60 times a second while dragging lines!
     if (window.autoSaveTimeout) clearTimeout(window.autoSaveTimeout);
     window.autoSaveTimeout = setTimeout(window.forceAutosave, 500); 
 };
 
-// Guarantee a perfect save if they rapidly close the browser tab or refresh
 window.addEventListener('beforeunload', () => {
     window.forceAutosave();
 });
 
 // --- THE MASTER HOOK ---
-// Because Renderer.updateUI fires after every single meaningful action,
-// wrapping it creates a completely bulletproof, invisible save trigger!
 const originalUpdateUI = Renderer.updateUI;
 Renderer.updateUI = () => {
     if (originalUpdateUI) originalUpdateUI();
-    window.triggerAutosave(); // <-- Sneak the save in behind the scenes
+    window.triggerAutosave(); 
 };
-// Overwrite the global window reference just in case
 window.updateUI = Renderer.updateUI; 
 
 // --- LOAD THE SAVE ON STARTUP ---
@@ -1132,8 +1130,10 @@ window.loadAutosave = () => {
         document.getElementById('timer').style.display = m === 'create' ? 'none' : 'block';
         document.getElementById('pause-btn').style.display = m === 'create' ? 'none' : 'block';
         
+        const autoFillBtn = document.getElementById('btn-autofill-pencils');
+        if (autoFillBtn) autoFillBtn.style.display = (m === 'solve') ? 'inline' : 'none';
+        
         if (m === 'solve' && !State.isWon) {
-            // Kickstart the timer with the restored time value
             if (typeof window.startTimer === 'function') window.startTimer();
         }
         
@@ -1146,21 +1146,23 @@ window.loadAutosave = () => {
 };
 
 // --- STARTUP INTERCEPTOR ---
-// We intercept the final page load to inject the save safely
 const advancedOriginalOnLoad = window.onload;
 
 window.onload = (e) => {
-    // 1. Run the classic startup script first
+    // 1. Classic script runs (and wipes the board), but the Shield blocks the save!
     if (advancedOriginalOnLoad) advancedOriginalOnLoad(e);
     
-    // 2. Wait a fraction of a second to ensure the DOM and URL parsers are fully finished
+    // 2. Wait for the DOM, load the *real* save over the blank board
     setTimeout(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const puzzleString = urlParams.get('puzzle');
         
-        // ONLY inject the autosave if they are NOT trying to load a shared puzzle link!
         if (!puzzleString) {
             window.loadAutosave();
         }
+        
+        // --- NEW: Drop the Safety Shield so playing the game triggers saves again! ---
+        window.isBooting = false; 
+        
     }, 50);
 };
