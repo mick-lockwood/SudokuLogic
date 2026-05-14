@@ -116,7 +116,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
     }
 
     // --- 3. VARIANT LINE DRAWING ---
-    else if ['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(tool)) {
+    else if (['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(tool)) {
         handleLineDrawing(index, isDragging);
     } 
         
