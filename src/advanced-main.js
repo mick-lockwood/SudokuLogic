@@ -31,7 +31,7 @@ window.AdvancedState = {
 // --- TOOL MANAGER ---
 window.setTool = (tool) => {
     window.AdvancedState.activeTool = tool;
-    window.AdvancedState.fogLinkSource = null;
+    window.AdvancedState.fogLinkSource = null; // Clears active linker selection when changing tools
     
     // 1. Strip ALL active classes from ALL variant buttons
     document.querySelectorAll('.variant-tool-btn').forEach(btn => {
@@ -43,12 +43,11 @@ window.setTool = (tool) => {
     if (activeBtn) {
         if (tool === 'pointer') {
             activeBtn.classList.add('active-tool-pointer');
-        } else if (tool === 'edit' || tool === 'region') {
-            activeBtn.classList.add('active-tool-edit');
+        } else if (tool === 'edit' || tool === 'region' || tool === 'fog' || tool === 'fog-link') {
+            activeBtn.classList.add('active-tool-edit'); // Added fog tools to the blue styling!
         } else if (tool === 'eraser') {
             activeBtn.classList.add('active-tool-eraser');
         } else {
-            // Catch-all: Thermos, Whispers, and any future variants become purple
             activeBtn.classList.add('active-tool-variant');
         }
     }
@@ -58,8 +57,9 @@ window.setTool = (tool) => {
         State.selected = [];
     }
     
-    // 4. FORCE UI UPDATE EVERY TIME
-    // This MUST be outside the 'if' statement so it runs when switching back to the pointer!
+    // 4. FORCE VISUALS TO UPDATE
+    if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer(); // <-- THE FIX: Shows/hides arrows!
+    
     if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
         Renderer.updateUI();
     } else if (typeof window.updateUI === 'function') {
@@ -99,17 +99,21 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
             } else if (window.AdvancedState.fogLinkSource === index) {
                 window.AdvancedState.fogLinkSource = null;
             } else {
-                const source = window.AdvancedState.fogLinkSource;
+                // Force String dictionary keys so links never get lost!
+                const sourceKey = String(window.AdvancedState.fogLinkSource);
                 if (!State.fogLinks) State.fogLinks = {};
-                if (!State.fogLinks[source]) State.fogLinks[source] = [];
+                if (!State.fogLinks[sourceKey]) State.fogLinks[sourceKey] = [];
                 
-                const targetIdx = State.fogLinks[source].indexOf(index);
+                const targetIdx = State.fogLinks[sourceKey].indexOf(index);
                 if (targetIdx > -1) {
-                    State.fogLinks[source].splice(targetIdx, 1); 
+                    State.fogLinks[sourceKey].splice(targetIdx, 1); 
                 } else {
-                    State.fogLinks[source].push(index); 
+                    State.fogLinks[sourceKey].push(index); 
                 }
             }
+            
+            // CRUCIAL FIX: Force the arrows to draw and the highlights to update immediately!
+            if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer(); 
             if (typeof window.updateUI === 'function') window.updateUI();
         }
         return;
@@ -277,17 +281,18 @@ window.handleInput = (val) => {
         if (originalHandleInput) originalHandleInput(val);
         
         // --- 3. FOG HYBRID REVEAL LOGIC ---
-        // Checks if the number we just entered perfectly matches the solution
         if (State.mode === 'solve' && State.fogMode && !State.pencil && val !== 0) {
             if (primary !== null && State.solution && State.solution[primary] === val) {
                 
-                // Initialize fallback arrays if missing
                 if (!State.fogLinks) State.fogLinks = {};
                 if (!State.fogRevealed) State.fogRevealed = Array(State.size * State.size).fill(false);
 
+                // Force primary to a string so dictionary lookups always work
+                const primaryKey = String(primary);
+
                 // HYBRID LOGIC: Did the setter manually link this cell?
-                if (State.fogLinks[primary] && State.fogLinks[primary].length > 0) {
-                    State.fogLinks[primary].forEach(targetIdx => {
+                if (State.fogLinks[primaryKey] && State.fogLinks[primaryKey].length > 0) {
+                    State.fogLinks[primaryKey].forEach(targetIdx => {
                         State.fogRevealed[targetIdx] = true;
                     });
                 } else {
@@ -311,6 +316,7 @@ window.handleInput = (val) => {
         }
     }
 };
+
 // --- GLOBAL RULE TOGGLES ---
 window.toggleAntiKnight = () => {
     State.antiKnight = document.getElementById('toggle-anti-knight').checked;
