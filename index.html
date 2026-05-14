@@ -128,6 +128,18 @@
                 <div id="status-label" style="font-size: 13px; font-weight: 800; text-transform: uppercase; min-height: 1.5em;">Enter Digits...</div>
                 
                 <div style="display: flex; gap: 20px; font-size: 12px;">
+                    
+                <div id="create-mode-actions" style="display: flex; flex-direction: column; gap: 5px;">
+                    <button class="btn btn-secondary" onclick="handleClearAllCreate()">Reset Puzzle (Wipe All)</button>
+                    <button class="btn btn-secondary" onclick="handleClearDigitsCreate()">Clear Digits Only</button>
+                </div>
+                
+                <div id="solve-mode-actions" style="display: none; flex-direction: column; gap: 5px;">
+                    <button class="btn btn-secondary" onclick="handleResetSolve()">Reset Puzzle (Restart)</button>
+                    <button class="btn btn-secondary" onclick="handleClearUserInputs()">Clear User Inputs</button>
+                    <button class="btn btn-secondary" onclick="handleClearPencils()">Clear Pencils Only</button>
+                </div>
+                    
                     <a href="#" style="color: var(--danger); text-decoration: none; font-weight: 600;" onclick="handleClearBoard()">Reset Puzzle</a>
                     <a href="#" class="util-link" onclick="clearUserInputs()">Clear User Inputs</a>
                     <a href="#" id="clean-pencils-link" class="util-link" style="display:none;" onclick="cleanAllPencils()">Clear Pencils Only</a>
