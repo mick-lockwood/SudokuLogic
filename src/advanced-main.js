@@ -257,12 +257,13 @@ window.toggleOuterClues = () => {
 const originalHandleInput = window.handleInput;
 
 window.handleInput = (val) => {
-    // Grab the selected cell BEFORE the original handler potentially moves the cursor
+    // Grab the active cell BEFORE the original handler can clear it!
     const primary = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
     
     // --- 1. OUTER CLUE MULTI-DIGIT LOGIC ---
     if (typeof primary === 'string' && primary.startsWith('clue')) {
         if (!State.clues) State.clues = {};
+        
         if (val === 0 || val === '0') {
             State.clues[primary] = ""; 
         } else {
@@ -275,51 +276,48 @@ window.handleInput = (val) => {
         }
         if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
     } 
+    
     // --- 2. INNER CELL LOGIC ---
     else {
-        // Run standard logic first so the board updates
+        // Run the standard 1-9 logic first
         if (originalHandleInput) originalHandleInput(val);
         
         // --- 3. FOG HYBRID REVEAL LOGIC ---
-        if (State.mode === 'solve' && State.fogMode && !State.pencil) {
-            if (primary !== null && State.board[primary].val !== 0) {
+        if (State.mode === 'solve' && State.fogMode && !State.pencil && val != 0) {
+            
+            // THE FIX: Check the keystroke against the answer key using loose (==) equality
+            if (primary !== null && State.solution && val == State.solution[primary]) {
                 
-                // THE BUG FIX: Use loosely equal (==) because keyboard input passes '1' (String) 
-                // while State.solution holds 1 (Integer). Strict (===) was failing silently!
-                const matchesSolution = State.solution && (State.board[primary].val == State.solution[primary]);
-                
-                if (matchesSolution) {
-                    if (!State.fogRevealed) State.fogRevealed = Array(State.size * State.size).fill(false);
-                    if (!State.fogLinks) State.fogLinks = {};
+                if (!State.fogRevealed) State.fogRevealed = Array(State.size * State.size).fill(false);
+                if (!State.fogLinks) State.fogLinks = {};
 
-                    const primaryKey = String(primary);
+                const primaryKey = String(primary);
 
-                    // HYBRID LOGIC: Did the setter manually link this cell?
-                    if (State.fogLinks[primaryKey] && State.fogLinks[primaryKey].length > 0) {
-                        State.fogLinks[primaryKey].forEach(targetIdx => {
-                            State.fogRevealed[targetIdx] = true;
-                        });
-                    } else {
-                        // NO: Fallback to the organic 3x3 proximity reveal
-                        const r = Math.floor(primary / State.size);
-                        const c = primary % State.size;
-                        for (let i = -1; i <= 1; i++) {
-                            for (let j = -1; j <= 1; j++) {
-                                const nr = r + i, nc = c + j;
-                                if (nr >= 0 && nr < State.size && nc >= 0 && nc < State.size) {
-                                    State.fogRevealed[nr * State.size + nc] = true;
-                                }
+                // HYBRID LOGIC: Did the setter manually link this cell?
+                if (State.fogLinks[primaryKey] && State.fogLinks[primaryKey].length > 0) {
+                    State.fogLinks[primaryKey].forEach(targetIdx => {
+                        State.fogRevealed[targetIdx] = true;
+                    });
+                } else {
+                    // NO: Fallback to the organic 3x3 proximity reveal
+                    const r = Math.floor(primary / State.size);
+                    const c = primary % State.size;
+                    for (let i = -1; i <= 1; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            const nr = r + i, nc = c + j;
+                            if (nr >= 0 && nr < State.size && nc >= 0 && nc < State.size) {
+                                State.fogRevealed[nr * State.size + nc] = true;
                             }
                         }
                     }
-                    
-                    // Guarantee the current cell is revealed
-                    State.fogRevealed[primary] = true; 
-                    
-                    // Push back the clouds!
-                    if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
-                        Renderer.updateUI();
-                    }
+                }
+                
+                // Guarantee the current cell is revealed
+                State.fogRevealed[primary] = true; 
+                
+                // Force UI to wipe away the fog!
+                if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
+                    Renderer.updateUI();
                 }
             }
         }
@@ -749,13 +747,13 @@ const originalSetAppMode = window.setAppMode;
 
 window.setAppMode = (m) => {
     // --- NEW: FOG PLAYTEST RESET ---
-    // If entering Solve Mode, wipe the revealed memory so the fog fully covers the board again
+    // Wipe the revealed memory so the fog fully covers the board again for testing
     if (m === 'solve') {
         State.fogRevealed = Array(State.size * State.size).fill(false);
     }
     
     // Run the classic mode switching logic first
-    originalSetAppMode(m);
+    if (originalSetAppMode) originalSetAppMode(m);
     
     // Hide or show the Variant Tools panel based on the mode
     const variantPanel = document.getElementById('variant-tools-panel');
@@ -763,8 +761,14 @@ window.setAppMode = (m) => {
         variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
     }
     
-    // Always default back to the Number Input tool when switching modes
+    // Force default tool to drop the linker
     window.setTool('pointer');
+    
+    // THE FIX: Absolute wipe of the SVG layer to destroy phantom arrows
+    const svg = document.getElementById('svg-layer');
+    if (svg) svg.innerHTML = '';
+    if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
+    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
 };
 
 // --- GRID SIZE INTERCEPTOR ---
