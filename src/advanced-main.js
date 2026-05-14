@@ -657,12 +657,14 @@ window.renderSVGLayer = function renderSVGLayer() {
     const grid = document.getElementById('grid');
     if (!svg || !grid) return;
 
-    // --- THE FIX: SNAP SVG SIZE TO GRID SIZE ---
-    // This ensures the coordinate systems of the grid and SVG are identical
-    svg.setAttribute('width', grid.offsetWidth);
-    svg.setAttribute('height', grid.offsetHeight);
-    svg.style.width = grid.offsetWidth + 'px';
-    svg.style.height = grid.offsetHeight + 'px';
+    // --- THE FIX: PIXEL-PERFECT SYNC ---
+    // This forces the SVG coordinate system to match the grid exactly.
+    const width = grid.offsetWidth;
+    const height = grid.offsetHeight;
+    svg.setAttribute('width', width);
+    svg.setAttribute('height', height);
+    svg.style.width = width + 'px';
+    svg.style.height = height + 'px';
 
     svg.innerHTML = ''; 
     
