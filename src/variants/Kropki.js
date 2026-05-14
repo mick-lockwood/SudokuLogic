@@ -24,12 +24,16 @@ export function kropkiConflict(variant, arr, idx, val, isFlatArray = false) {
     return false;
 }
 
+// src/variants/Kropki.js
+
 export function drawKropki(variant, svgElement) {
     if (variant.cells.length < 2) return;
     
     // Find the exact midpoint between the two connected cells
     const pt1 = getCellCenter(variant.cells[0]);
     const pt2 = getCellCenter(variant.cells[1]);
+    
+    // Find the mathematical midpoint
     const midX = (pt1.x + pt2.x) / 2;
     const midY = (pt1.y + pt2.y) / 2;
 
@@ -37,16 +41,17 @@ export function drawKropki(variant, svgElement) {
     circle.classList.add('kropki-dot');
     circle.setAttribute("cx", midX);
     circle.setAttribute("cy", midY);
-    circle.setAttribute("r", "8"); // Size of the dot
+    circle.setAttribute("r", "8"); // Standard size for the dot
     circle.setAttribute("stroke-width", "2");
 
+    // Styling based on dot type
     if (variant.type === 'kropki-white') {
-        circle.setAttribute("fill", "#ffffff");
+        circle.setAttribute("fill", "#ffffff"); // White for consecutive values
         circle.setAttribute("stroke", "#1e293b"); // Dark border
     } else if (variant.type === 'kropki-black') {
-        circle.setAttribute("fill", "#1e293b"); // Dark fill
-        // Give it a white border in dark mode so it doesn't vanish
-        circle.setAttribute("stroke", State.darkMode ? "#ffffff" : "#1e293b"); 
+        circle.setAttribute("fill", "#1e293b"); // Dark fill for 1:2 ratio
+        // Ensure visibility in dark mode with a white border
+        circle.setAttribute("stroke", State.darkMode ? "#ffffff" : "#1e293b");
     }
     
     svgElement.appendChild(circle);
