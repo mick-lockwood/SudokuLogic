@@ -291,6 +291,16 @@ window.checkAdvancedWin = () => {
         if (!hasErrors) {
             State.isWon = true;
             
+            // --- THE FIX: STRIP ALL HIGHLIGHTS ---
+            // Empty the selection memory and force a UI refresh so the crosshairs vanish!
+            State.selected = [];
+            if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
+                Renderer.updateUI();
+            } else if (typeof window.updateUI === 'function') {
+                window.updateUI();
+            }
+            // ------------------------------------
+            
             // Show the Win Overlay
             const winOverlay = document.getElementById('win-overlay');
             if (winOverlay) winOverlay.style.display = 'flex';
