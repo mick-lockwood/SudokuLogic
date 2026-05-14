@@ -652,7 +652,16 @@ window.addEventListener('pointerup', () => {
 // --- GENERALIZED SVG RENDERER ---
 window.renderSVGLayer = function renderSVGLayer() {
     const svg = document.getElementById('svg-layer');
-    if (!svg) return;
+    const grid = document.getElementById('grid');
+    if (!svg || !grid) return;
+
+    // --- THE FIX: SNAP SVG SIZE TO GRID SIZE ---
+    // This ensures the coordinate systems of the grid and SVG are identical
+    svg.setAttribute('width', grid.offsetWidth);
+    svg.setAttribute('height', grid.offsetHeight);
+    svg.style.width = grid.offsetWidth + 'px';
+    svg.style.height = grid.offsetHeight + 'px';
+
     svg.innerHTML = ''; 
     
     State.variants.forEach(drawVariantLine); 
