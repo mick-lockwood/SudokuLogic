@@ -79,34 +79,65 @@ const originalHandleCellSelection = window.handleCellSelection;
 
 window.handleCellSelection = (index, isMulti, isDragging) => {
     const isClueCell = typeof index === 'string';
+    const tool = window.AdvancedState.activeTool;
 
-    if (['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(window.AdvancedState.activeTool)) {
+    // --- 1. FOG PAINTER LOGIC ---
+    if (tool === 'fog' && State.mode === 'create') {
+        if (!isClueCell) { 
+            if (!isDragging) window.AdvancedState.paintFogValue = !State.fogMap[index];
+            State.fogMap[index] = window.AdvancedState.paintFogValue;
+            if (typeof window.updateUI === 'function') window.updateUI();
+        }
+        return; 
+    }
+    
+    // --- 2. FOG LINKER LOGIC ---
+    else if (tool === 'fog-link' && State.mode === 'create') {
+        if (!isClueCell && !isDragging) {
+            if (window.AdvancedState.fogLinkSource == null) {
+                window.AdvancedState.fogLinkSource = index;
+            } else if (window.AdvancedState.fogLinkSource === index) {
+                window.AdvancedState.fogLinkSource = null;
+            } else {
+                const source = window.AdvancedState.fogLinkSource;
+                if (!State.fogLinks) State.fogLinks = {};
+                if (!State.fogLinks[source]) State.fogLinks[source] = [];
+                
+                const targetIdx = State.fogLinks[source].indexOf(index);
+                if (targetIdx > -1) {
+                    State.fogLinks[source].splice(targetIdx, 1); 
+                } else {
+                    State.fogLinks[source].push(index); 
+                }
+            }
+            if (typeof window.updateUI === 'function') window.updateUI();
+        }
+        return;
+    }
+
+    // --- 3. VARIANT LINE DRAWING ---
+    else if ['thermo', 'whisper','killer', 'kropki-white', 'kropki-black'].includes(tool)) {
         handleLineDrawing(index, isDragging);
     } 
         
-    // --- NEW: REGION PAINTER LOGIC ---
-    else if (window.AdvancedState.activeTool === 'region') {
-        if (!isClueCell) { // Prevent painting outer perimeter clues
+    // --- 4. REGION PAINTER LOGIC ---
+    else if (tool === 'region') {
+        if (!isClueCell) { 
             if (!isDragging) {
-                // Clicking a new cell starts a brand new region!
                 window.AdvancedState.currentRegionId = `jigsaw-${Date.now()}`;
                 State.board[index].region = window.AdvancedState.currentRegionId;
             } else if (window.AdvancedState.currentRegionId) {
-                // Dragging continues applying the same region ID
                 State.board[index].region = window.AdvancedState.currentRegionId;
             }
-            
-            // We must force a grid re-render so the thick borders update instantly
             if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
             Renderer.updateUI(); 
         }
     }
         
-    // --- EDIT LOGIC ---
-    else if (window.AdvancedState.activeTool === 'edit') {
+    // --- 5. EDIT LOGIC ---
+    else if (tool === 'edit') {
         if (!isDragging) {
             const variantToEdit = State.variants.find(v => v.cells.includes(index));
-            
             if (variantToEdit && variantToEdit.type === 'killer') {
                 setTimeout(() => {
                     const sumInput = prompt("Enter new target sum for this cage:", variantToEdit.sum);
@@ -123,10 +154,9 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
             }
         }
     } 
-    // --------------------
         
-    // --- ERASER LOGIC ---
-    else if (window.AdvancedState.activeTool === 'eraser') {
+    // --- 6. ERASER LOGIC ---
+    else if (tool === 'eraser') {
         if (!isDragging) {
             const originalLength = State.variants.length;
             const newVariants = State.variants.filter(v => !v.cells.includes(index));
@@ -138,9 +168,8 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
             }
         }
     }
-    // --------------------
+    // --- DEFAULT: NUMBER INPUT ---
     else {
-        // This will now handle both regular cell selection AND our new clue selection
         originalHandleCellSelection(index, isMulti, isDragging);
     }
 };
