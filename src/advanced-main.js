@@ -11,6 +11,8 @@ import { drawWhisper } from './variants/Whisper.js';
 import { drawKiller } from './variants/Killer.js';
 import { drawKropki } from './variants/Kropki.js';
 
+window.isWiping = false;
+
 // --- AUTO-RESIZE SVGS ---
 window.addEventListener('resize', () => {
     if (typeof window.renderSVGLayer === 'function') {
@@ -1086,12 +1088,11 @@ window.handleClearPencils = () => {
 };
 
 window.hardResetApp = () => {
-    if (confirm("Are you absolutely sure?\n\nThis will permanently delete your autosave and restore all default app settings. This cannot be undone.")) {
-        // Clear the specific autosave key
+    if (confirm("Are you absolutely sure?\n\nThis will permanently delete your autosave and restore all default settings.")) {
+        window.isWiping = true; // <-- This blocks the autosave from re-firing!
         localStorage.removeItem('sudoku_autosave');
         
-        // Force a hard redirect to the home page URL without any parameters
-        // This is more aggressive than .reload() and ensures a fresh start
+        // Force a redirect to the clean URL (strips any ?puzzle= params too)
         window.location.href = window.location.origin + window.location.pathname;
     }
 };
@@ -1103,7 +1104,9 @@ window.hardResetApp = () => {
 window.autoSaveTimeout = null;
 
 window.forceAutosave = () => {
-    // Failsafe: Don't save empty/broken states
+    // BLOCK the save if we are wiping or the engine is still booting
+    if (window.isWiping || window.isBootingForAutosave) return; 
+
     if (!State.board || State.board.length === 0) return;
 
     const sessionData = {
