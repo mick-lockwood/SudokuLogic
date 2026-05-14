@@ -139,7 +139,7 @@ export function updateUI() {
             } else if (showSeen && (r === selR || c === selC || data.region === selRegion)) {
                 el.classList.add('highlight');
                 tint = State.darkMode ? "rgba(56, 189, 248, 0.15)" : "rgba(52, 152, 219, 0.1)"; 
-            } else if (selVal !== 0 && data.val === selVal) {
+            } else if (showMatch && selVal !== 0 && data.val === selVal) {
                 el.classList.add('match');
                 tint = State.darkMode ? "rgba(74, 222, 128, 0.4)" : "rgba(46, 204, 113, 0.3)"; 
             }
