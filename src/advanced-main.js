@@ -274,6 +274,40 @@ window.toggleOuterClues = () => {
     if (typeof window.updateUI === 'function') window.updateUI();
 };
 
+// --- UNIVERSAL WIN CHECKER ---
+window.checkAdvancedWin = () => {
+    // Only check for a win if we are actually playing the game
+    if (State.mode !== 'solve' || State.isWon) return;
+
+    // 1. Is the board completely full?
+    const isFull = State.board.every(cell => cell.val !== 0);
+    if (!isFull) return;
+
+    // 2. Wait a split second for the UI to finish rendering, then look for ANY red error text
+    // Because Renderer.js checks every variant rule, this automatically validates Jigsaw, Suguru, Kropki, etc!
+    setTimeout(() => {
+        const hasErrors = document.querySelector('.error') !== null;
+        
+        if (!hasErrors) {
+            State.isWon = true;
+            
+            // Show the Win Overlay
+            const winOverlay = document.getElementById('win-overlay');
+            if (winOverlay) winOverlay.style.display = 'flex';
+            
+            // Fire the Confetti!
+            if (typeof Renderer !== 'undefined' && Renderer.fireConfetti) {
+                Renderer.fireConfetti();
+            } else if (typeof window.fireConfetti === 'function') {
+                window.fireConfetti();
+            }
+            
+            // Stop the classic timer if it exists
+            if (typeof window.stopTimer === 'function') window.stopTimer();
+        }
+    }, 50);
+};
+
 // --- MASTER INPUT HIJACKER (Multi-Digit + Fog Reveal) ---
 const originalHandleInput = window.handleInput;
 
@@ -354,6 +388,8 @@ window.handleInput = (val) => {
         if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
             Renderer.updateUI();
         }
+        
+        window.checkAdvancedWin();
     }
 };
 
