@@ -1076,12 +1076,14 @@ window.handleClearPencils = () => {
     if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
 };
 
-// 6. NUCLEAR CACHE WIPE (Deep Clean)
 window.hardResetApp = () => {
     if (confirm("Are you absolutely sure?\n\nThis will permanently delete your autosave and restore all default app settings. This cannot be undone.")) {
+        // Clear the specific autosave key
         localStorage.removeItem('sudoku_autosave');
-        // THE FIX: Force a deep reload that strips cached URLs
-        window.location.href = window.location.pathname; 
+        
+        // Force a hard redirect to the home page URL without any parameters
+        // This is more aggressive than .reload() and ensures a fresh start
+        window.location.href = window.location.origin + window.location.pathname;
     }
 };
 
