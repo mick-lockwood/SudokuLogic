@@ -273,7 +273,8 @@ window.handleInput = (val) => {
                 State.clues[primary] = current + val.toString();
             }
         }
-        if (typeof window.updateUI === 'function') window.updateUI();
+        // THE FIX: Point to Renderer.updateUI
+        if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
     } 
     
     // --- 2. INNER CELL LOGIC ---
@@ -312,7 +313,11 @@ window.handleInput = (val) => {
                 
                 // Guarantee the current cell is revealed
                 State.fogRevealed[primary] = true; 
-                if (typeof window.updateUI === 'function') window.updateUI();
+                
+                // THE FIX: Tell the Renderer to push back the clouds!
+                if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
+                    Renderer.updateUI();
+                }
             }
         }
     }
@@ -577,9 +582,7 @@ window.renderSVGLayer = function renderSVGLayer() {
     }
     
     // --- NEW: FOG LINK VISUALIZER ---
-    // Draws pink dashed arrows to show the exact chain of reveals!
     if (State.mode === 'create' && window.AdvancedState.activeTool === 'fog-link' && State.fogLinks) {
-        // Create an arrowhead marker
         let defs = svg.querySelector('defs');
         if (!defs) {
             defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
@@ -592,10 +595,12 @@ window.renderSVGLayer = function renderSVGLayer() {
         Object.keys(State.fogLinks).forEach(sourceIdx => {
             const s = parseInt(sourceIdx);
             if (isNaN(s)) return;
-            const sourcePos = window.getCellCenter(s);
+            
+            // THE FIX: Tell the app to use the Renderer to find the cell coordinates!
+            const sourcePos = Renderer.getCellCenter(s); 
             
             State.fogLinks[sourceIdx].forEach(targetIdx => {
-                const targetPos = window.getCellCenter(targetIdx);
+                const targetPos = Renderer.getCellCenter(targetIdx);
                 
                 // Draw arrow from Source to Target
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -603,7 +608,7 @@ window.renderSVGLayer = function renderSVGLayer() {
                 line.setAttribute("y1", sourcePos.y);
                 line.setAttribute("x2", targetPos.x);
                 line.setAttribute("y2", targetPos.y);
-                line.setAttribute("stroke", "#ec4899"); // Pink
+                line.setAttribute("stroke", "#ec4899"); 
                 line.setAttribute("stroke-width", "3");
                 line.setAttribute("stroke-dasharray", "5,5");
                 line.setAttribute("marker-end", "url(#fog-arrow)");
