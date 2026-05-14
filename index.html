@@ -131,6 +131,7 @@
                     <a href="#" style="color: var(--danger); text-decoration: none; font-weight: 600;" onclick="handleClearBoard()">Reset Puzzle</a>
                     <a href="#" class="util-link" onclick="clearUserInputs()">Clear User Inputs</a>
                     <a href="#" id="clean-pencils-link" class="util-link" style="display:none;" onclick="cleanAllPencils()">Clear Pencils Only</a>
+                    <a href="#" class="util-link" onclick="autoFillPencils()">Auto-Fill Pencils</a>
                 </div>
             </div>
 
@@ -185,6 +186,8 @@
                 <h3>Visibility</h3>
                 <label class="switch-label">Highlight Cells Seen <input type="checkbox" id="toggle-seen" checked onchange="updateUI()"></label>
                 <label class="switch-label">Highlight Matching Digits <input type="checkbox" id="toggle-match" checked onchange="updateUI()"></label>
+                <label class="switch-label">Show Error Alerts <input type="checkbox" id="toggle-errors" checked onchange="updateUI()"></label>
+                <label class="switch-label">Show Timer <input type="checkbox" id="toggle-timer" checked onchange="toggleTimerVis()"></label>
             </div>
             
             <div class="tool-section" style="margin: 0; width: 100%;">
