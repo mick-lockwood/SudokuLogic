@@ -845,8 +845,25 @@ window.setAppMode = (m) => {
 
 // --- GRID SIZE INTERCEPTOR ---
 const originalSetGridSize = window.setGridSize;
+window.isBootingForAutosave = true; // Engage the boot shield
 
 window.setGridSize = (s) => {
+    // --- NEW: THE AUTOSAVE BOOTLOADER ---
+    // Catch the classic engine right as it tries to build the default blank board!
+    if (window.isBootingForAutosave) {
+        window.isBootingForAutosave = false; // Drop the shield instantly
+        
+        // If they are loading a shared URL puzzle, ignore the autosave!
+        if (!new URLSearchParams(window.location.search).get('puzzle')) {
+            if (localStorage.getItem('sudoku_autosave')) {
+                window.loadAutosave();
+                return; // Abort the classic grid wipe entirely!
+            }
+        }
+    }
+    // ------------------------------------
+
+    // 1. Check if there is currently any data that would be lost
     const hasNumbers = State.board && State.board.some(c => c.val !== 0);
     const hasVariants = State.variants && State.variants.length > 0;
     const hasFog = State.fogMap && State.fogMap.some(f => f === true); 
@@ -857,18 +874,22 @@ window.setGridSize = (s) => {
         }
     }
 
+    // 2. Clear variants data before the swap
     State.variants = [];
     window.AdvancedState.variantUndoStack = [];
     window.AdvancedState.variantRedoStack = [];
 
+    // 3. Run the original classic grid swap logic
     if (originalSetGridSize) originalSetGridSize(s);
     
+    // 4. Wipe & resize fog data
     State.fogMap = Array(s * s).fill(false);
     State.fogRevealed = Array(s * s).fill(false);
     State.fogLinks = {};
     State.fogTriggers = {};
     window.AdvancedState.fogLinkSource = null;
 
+    // 5. Force the UI to clear its visuals
     if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
     if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
 };
