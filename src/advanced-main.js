@@ -284,16 +284,20 @@ window.checkAdvancedWin = () => {
     if (!isFull) return;
 
     // 2. Wait a split second for the UI to finish rendering, then look for ANY red error text
-    // Because Renderer.js checks every variant rule, this automatically validates Jigsaw, Suguru, Kropki, etc!
     setTimeout(() => {
         const hasErrors = document.querySelector('.error') !== null;
         
         if (!hasErrors) {
             State.isWon = true;
             
-            // --- THE FIX: STRIP ALL HIGHLIGHTS ---
-            // Empty the selection memory and force a UI refresh so the crosshairs vanish!
-            State.selected = [];
+            // --- THE FIX: PRESERVE ARRAY REFERENCE ---
+            // Using .length = 0 empties the array without destroying its memory link!
+            State.selected.length = 0; 
+            
+            // Force the pointer tool so drawing tools drop
+            window.AdvancedState.activeTool = 'pointer';
+
+            // Force UI to refresh and wipe the crosshairs
             if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
                 Renderer.updateUI();
             } else if (typeof window.updateUI === 'function') {
