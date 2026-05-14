@@ -168,10 +168,13 @@ export function updateUI() {
             if (data.val !== 0) {
                 el.innerHTML = `<span style="position: relative; z-index: 20;">${data.val}</span>`;
                 el.classList.add(data.given ? 'given' : 'user');
+                // Check if errors are turned on!
                 if (showErrors && hasConflict(maskedBoard, i, data.val)) el.classList.add('error');
+                
             } else if (State.mode === 'create' && State.showGhost && State.solution && State.solution[i]) {
                 const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(30, 41, 59, 0.2)";
                 el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-style: italic;">${State.solution[i]}</span>`;
+                
             } else if (data.notes.length > 0) {
                 const pGrid = document.createElement('div');
                 pGrid.className = 'pencil-grid';
@@ -181,12 +184,14 @@ export function updateUI() {
                     nDiv.className = 'pencil-num';
                     if (data.notes.includes(n)) {
                         nDiv.innerHTML = `<span style="position: relative; z-index: 20;">${n}</span>`;
-                        if (showErrors && hasConflict(maskedBoard, i, data.val)) el.classList.add('error');
+                        // Apply the showErrors check to pencil marks too!
+                        if (showErrors && hasConflict(maskedBoard, i, n)) nDiv.classList.add('error');
                     }
                     pGrid.appendChild(nDiv);
                 }
                 el.appendChild(pGrid);
             } else if (isRegionTool) {
+                
                 // --- NEW: DYNAMIC REGION TEXT OVERLAY ---
                 const count = cellRegionCounts[i]; 
                 const textStr = State.suguruMode ? count : `${count}/${State.size}`;
