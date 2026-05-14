@@ -221,6 +221,35 @@ window.clearVariantGraphics = () => {
     Renderer.updateUI(); 
 };
 
+// --- AUTOFILL PENCIL MARKS ---
+window.autoFillPencils = () => {
+    if (State.isWon || State.paused) return;
+    saveState();
+    
+    State.board.forEach((cell, i) => {
+        if (cell.val === 0) {
+            cell.notes = []; // Clear existing so we don't duplicate
+            for (let n = 1; n <= State.size; n++) {
+                // Only pencil it in if it doesn't break a rule!
+                if (!hasConflict(State.board, i, n)) {
+                    cell.notes.push(n);
+                }
+            }
+        }
+    });
+    
+    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+};
+
+// --- TOGGLE TIMER ---
+window.toggleTimerVis = () => {
+    const isVisible = document.getElementById('toggle-timer').checked;
+    const timerEl = document.getElementById('timer');
+    if (timerEl) {
+        timerEl.style.visibility = isVisible ? 'visible' : 'hidden';
+    }
+};
+
 // --- PERIMETER RULE SYNCING ---
 window.togglePerimeterRule = () => {
     const isAnyRuleChecked = 
