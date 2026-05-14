@@ -138,6 +138,18 @@ export function updateUI() {
             let highlightBase = data.color || (State.darkMode ? "#1e293b" : "white");
             el.style.background = `linear-gradient(${tint}, ${tint}), ${highlightBase}`;
 
+            // --- NEW: FOG RENDERING ---
+            const isFogged = State.fogMode && State.fogMap && State.fogMap[i];
+            const isRevealed = State.mode === 'solve' && State.fogRevealed && State.fogRevealed[i];
+
+            if (State.mode === 'solve' && isFogged && !isRevealed) {
+                // PURE FOG: Hides everything underneath
+                const fogColor = State.darkMode ? '#0f172a' : '#94a3b8';
+                el.innerHTML = `<div style="position: absolute; inset: -1px; background: ${fogColor}; z-index: 100; display: flex; align-items: center; justify-content: center; font-size: 20px; opacity: 0.98;">☁️</div>`;
+                return; // Skips rendering numbers!
+            }
+            // --------------------------
+
             if (data.val !== 0) {
                 el.innerHTML = `<span style="position: relative; z-index: 20;">${data.val}</span>`;
                 el.classList.add(data.given ? 'given' : 'user');
@@ -165,6 +177,30 @@ export function updateUI() {
                 const textStr = State.suguruMode ? count : `${count}/${State.size}`;
                 const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(30, 41, 59, 0.3)";
                 el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-size: 13px; font-weight: 800;">${textStr}</span>`;
+            }
+            
+            // --- NEW: CREATE MODE VISUALS ---
+            const isFogLinkTool = typeof window !== 'undefined' && window.AdvancedState && window.AdvancedState.activeTool === 'fog-link';
+            const fogSource = isFogLinkTool ? window.AdvancedState.fogLinkSource : null;
+            const fogTargets = (isFogLinkTool && fogSource !== null && State.fogLinks[fogSource]) ? State.fogLinks[fogSource] : [];
+
+            if (State.mode === 'create') {
+                if (isFogged) {
+                    // Translucent overlay so you can see where fog is
+                    const fogColor = State.darkMode ? '#0f172a' : '#cbd5e1';
+                    el.innerHTML += `<div style="position: absolute; inset: 0; background: ${fogColor}; opacity: 0.6; z-index: 40; pointer-events: none;"></div>`;
+                }
+                
+                // Highlight the Linker Source (Purple) and Targets (Pink)
+                if (isFogLinkTool) {
+                    if (i === fogSource) {
+                        el.style.boxShadow = `inset 0 0 0 3px #a855f7`;
+                        el.innerHTML += `<div style="position: absolute; inset: 0; background: rgba(168, 85, 247, 0.3); z-index: 45; pointer-events: none;"></div>`;
+                    } else if (fogTargets.includes(i)) {
+                        el.style.boxShadow = `inset 0 0 0 3px #ec4899`;
+                        el.innerHTML += `<div style="position: absolute; inset: 0; background: rgba(236, 72, 153, 0.3); z-index: 45; pointer-events: none;"></div>`;
+                    }
+                }
             }
         });
     } catch (e) {
@@ -518,7 +554,8 @@ export function updateGameRules() {
     const list = document.getElementById('game-rules-list');
     if (!panel || !list) return;
 
-    if (State.mode !== 'solve') {
+    // Fixed: Hide it in create mode, show it in solve mode!
+    if (State.mode === 'create') {
         panel.style.display = 'none';
         return;
     }
@@ -538,6 +575,7 @@ export function updateGameRules() {
     }
 
     // 2. Global Modifiers
+    if (State.fogMode) rules.push(GameRules.fog()); // <-- ADDED THIS FOG RULE!
     if (State.antiKnight) rules.push(GameRules.antiKnight());
     if (State.antiKing && !State.suguruMode) rules.push(GameRules.antiKing());
 
