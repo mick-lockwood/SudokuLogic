@@ -40,6 +40,7 @@ export function updateUI() {
     const selRegion = isBoardCell && State.board[primaryActive] ? State.board[primaryActive].region : null;
     const showSeen = document.getElementById('toggle-seen')?.checked ?? true;
     const showMatch = document.getElementById('toggle-match')?.checked ?? true;
+    const showErrors = document.getElementById('toggle-errors')?.checked ?? true;
 
     // --- NEW: JIGSAW PAINTER MATH (CONTIGUOUS FLOOD FILL) ---
     const isRegionTool = typeof window !== 'undefined' && window.AdvancedState && window.AdvancedState.activeTool === 'region';
@@ -167,7 +168,7 @@ export function updateUI() {
             if (data.val !== 0) {
                 el.innerHTML = `<span style="position: relative; z-index: 20;">${data.val}</span>`;
                 el.classList.add(data.given ? 'given' : 'user');
-                if (hasConflict(maskedBoard, i, data.val)) el.classList.add('error');
+                if (showErrors && hasConflict(maskedBoard, i, data.val)) el.classList.add('error');
             } else if (State.mode === 'create' && State.showGhost && State.solution && State.solution[i]) {
                 const ghostColor = State.darkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(30, 41, 59, 0.2)";
                 el.innerHTML = `<span style="position: relative; z-index: 20; color: ${ghostColor}; font-style: italic;">${State.solution[i]}</span>`;
@@ -180,7 +181,7 @@ export function updateUI() {
                     nDiv.className = 'pencil-num';
                     if (data.notes.includes(n)) {
                         nDiv.innerHTML = `<span style="position: relative; z-index: 20;">${n}</span>`;
-                        if (hasConflict(maskedBoard, i, n)) nDiv.classList.add('error');
+                        if (showErrors && hasConflict(maskedBoard, i, data.val)) el.classList.add('error');
                     }
                     pGrid.appendChild(nDiv);
                 }
