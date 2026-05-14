@@ -221,13 +221,16 @@ window.clearVariantGraphics = () => {
     Renderer.updateUI(); 
 };
 
-// --- AUTOFILL PENCIL MARKS ---
+// --- UTILITY: AUTO-FILL PENCILS ---
 window.autoFillPencils = () => {
     if (State.isWon || State.paused) return;
     saveState();
     
     State.board.forEach((cell, i) => {
-        if (cell.val === 0) {
+        // Prevent auto-filling inside active fog clouds!
+        const isHiddenFog = State.mode === 'solve' && State.fogMode && State.fogMap[i] && !State.fogRevealed[i];
+
+        if (cell.val === 0 && !isHiddenFog) {
             cell.notes = []; // Clear existing so we don't duplicate
             for (let n = 1; n <= State.size; n++) {
                 // Only pencil it in if it doesn't break a rule!
