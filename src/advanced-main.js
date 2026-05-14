@@ -1106,6 +1106,8 @@ window.forceAutosave = () => {
     
     const titleEl = document.getElementById('puzzle-title');
     if (titleEl) sessionData.title = titleEl.innerText;
+    
+    sessionData.isCustomTitle = window.isCustomTitle;
 
     localStorage.setItem('sudoku_autosave', JSON.stringify(sessionData));
 };
@@ -1173,12 +1175,18 @@ window.loadAutosave = () => {
         setCheck('rule-frames', data.ruleFrames || false);
         setCheck('rule-rooms', data.ruleRooms || false);
         
-        if (data.title) {
+        // --- THE FIX: Restore the boolean state first! ---
+        window.isCustomTitle = data.isCustomTitle || false;
+        
+        if (data.title && window.isCustomTitle) {
+            // Only force the text if the user actually typed it manually
             const titleEl = document.getElementById('puzzle-title');
             if (titleEl) {
                 titleEl.innerText = data.title;
-                window.isCustomTitle = true; 
             }
+        } else {
+            // Otherwise, let the auto-generator rebuild it based on the loaded variants!
+            if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
         }
         
         // --- 2. RESTORE THEME VISUALS ---
