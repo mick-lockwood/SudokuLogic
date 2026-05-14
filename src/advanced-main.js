@@ -55,8 +55,8 @@ window.setTool = (tool) => {
     
     if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer(); 
     
-    if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
-        Renderer.updateUI();
+    if (typeof Renderer !== 'undefined' && window.updateUI) {
+        window.updateUI();
     } else if (typeof window.updateUI === 'function') {
         window.updateUI();
     }
@@ -66,7 +66,7 @@ window.clearVariantGraphics = () => {
     if (!confirm("Clear all drawn variant lines?")) return;
     State.variants = [];
     renderSVGLayer();
-    Renderer.updateUI();
+    window.updateUI();
 };
 
 // --- INPUT HIJACKER ---
@@ -81,7 +81,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
         if (!isClueCell) { 
             if (!isDragging) window.AdvancedState.paintFogValue = !State.fogMap[index];
             State.fogMap[index] = window.AdvancedState.paintFogValue;
-            if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI(); 
+            if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI(); 
         }
         return; 
     }
@@ -91,7 +91,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
         if (!isClueCell && !isDragging) {
             if (window.AdvancedState.fogLinkSource == null) {
                 window.AdvancedState.fogLinkSource = index;
-                if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+                if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
                 
                 setTimeout(() => {
                     if (!State.fogTriggers) State.fogTriggers = {};
@@ -111,7 +111,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                 
             } else if (window.AdvancedState.fogLinkSource === index) {
                 window.AdvancedState.fogLinkSource = null; 
-                if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+                if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
             } else {
                 const sourceKey = String(window.AdvancedState.fogLinkSource);
                 if (!State.fogLinks) State.fogLinks = {};
@@ -124,7 +124,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                     State.fogLinks[sourceKey].push(index); 
                 }
                 if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer(); 
-                if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+                if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
             }
         }
         return;
@@ -145,7 +145,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                 State.board[index].region = window.AdvancedState.currentRegionId;
             }
             if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
-            if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI(); 
+            if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI(); 
         }
     }
         
@@ -162,7 +162,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                             window.saveVariantState(); 
                             variantToEdit.sum = sumVal; 
                             renderSVGLayer();
-                            if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+                            if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
                         }
                     }
                 }, 10);
@@ -179,7 +179,7 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
                 window.saveVariantState(); 
                 State.variants = newVariants;
                 renderSVGLayer();
-                if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+                if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
             }
         }
     }
@@ -200,7 +200,7 @@ window.undoVariant = () => {
         window.AdvancedState.variantRedoStack.push(JSON.stringify(State.variants));
         State.variants = JSON.parse(window.AdvancedState.variantUndoStack.pop());
         renderSVGLayer();
-        Renderer.updateUI();
+        window.updateUI();
     }
 };
 
@@ -209,7 +209,7 @@ window.redoVariant = () => {
         window.AdvancedState.variantUndoStack.push(JSON.stringify(State.variants));
         State.variants = JSON.parse(window.AdvancedState.variantRedoStack.pop());
         renderSVGLayer();
-        Renderer.updateUI();
+        window.updateUI();
     }
 };
 
@@ -218,7 +218,7 @@ window.clearVariantGraphics = () => {
     window.saveVariantState();
     State.variants = [];
     renderSVGLayer();
-    Renderer.updateUI(); 
+    window.updateUI(); 
 };
 
 // --- UTILITY: AUTO-FILL PENCILS ---
@@ -241,7 +241,7 @@ window.autoFillPencils = () => {
         }
     });
     
-    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+    if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
 };
 
 // --- TOGGLE TIMER ---
@@ -307,7 +307,7 @@ window.handleInput = (val) => {
             const current = State.clues[primary] || "";
             State.clues[primary] = (current.length >= 2) ? val.toString() : current + val.toString();
         }
-        if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+        if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
         return; 
     } 
 
@@ -370,8 +370,8 @@ window.handleInput = (val) => {
     });
     
     // 5. RENDER UI
-    if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
-        Renderer.updateUI();
+    if (typeof Renderer !== 'undefined' && window.updateUI) {
+        window.updateUI();
     }
     
     // 6. CHECK WIN 
@@ -400,7 +400,7 @@ window.checkAdvancedWin = () => {
             State.selected.length = 0; 
             window.AdvancedState.activeTool = 'pointer';
 
-            if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+            if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
             
             // Handle the Timer properly
             if (State.timerInt) clearInterval(State.timerInt);
@@ -466,7 +466,7 @@ window.clearFogData = () => {
     window.AdvancedState.fogLinkSource = null;
 
     if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
-    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+    if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
 };
 
 // --- GRID MODIFICATION TOGGLES ---
@@ -499,7 +499,7 @@ window.resetRegions = () => {
 
     if (typeof Renderer !== 'undefined' && Renderer.renderGrid) {
         Renderer.renderGrid();
-        Renderer.updateUI();
+        window.updateUI();
     }
 };
 
@@ -594,7 +594,7 @@ window.addEventListener('pointerup', () => {
         
         if (typeof Renderer !== 'undefined' && Renderer.renderGrid) {
             Renderer.renderGrid();
-            Renderer.updateUI();
+            window.updateUI();
         }
     }
     
@@ -617,7 +617,7 @@ window.addEventListener('pointerup', () => {
                         });
                     }
                     window.AdvancedState.currentLine = [];
-                    Renderer.updateUI(); 
+                    window.updateUI(); 
                     renderSVGLayer();
                 }, 10);
                 return; 
@@ -632,7 +632,7 @@ window.addEventListener('pointerup', () => {
                         cells: [line[i], line[i + 1]]
                     });
                 }
-                Renderer.updateUI(); 
+                window.updateUI(); 
                 
             } else if (window.AdvancedState.currentLine.length > 1) {
                 window.saveVariantState(); 
@@ -640,7 +640,7 @@ window.addEventListener('pointerup', () => {
                     type: tool,
                     cells: [...window.AdvancedState.currentLine]
                 });
-                Renderer.updateUI(); 
+                window.updateUI(); 
             }
         }
         
@@ -839,7 +839,7 @@ window.setAppMode = (m) => {
         const svg = document.getElementById('svg-layer');
         if (svg) svg.innerHTML = '';
         if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
-        if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+        if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
     }, 15);
 };
 
@@ -891,7 +891,7 @@ window.setGridSize = (s) => {
 
     // 5. Force the UI to clear its visuals
     if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
-    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+    if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
 };
 
 // --- JIGSAW GENERATOR SAFETY INTERCEPTOR ---
@@ -1062,12 +1062,15 @@ window.triggerAutosave = () => {
 window.addEventListener('beforeunload', () => window.forceAutosave());
 
 // --- THE MASTER HOOK ---
-const originalUpdateUI = Renderer.updateUI;
-Renderer.updateUI = () => {
+// THE FIX: We wrap the global window function, bypassing the locked ES6 module entirely!
+const originalUpdateUI = window.updateUI;
+
+window.updateUI = () => {
     if (originalUpdateUI) originalUpdateUI();
-    window.triggerAutosave(); // Automatically save after ANY visual change
+    if (typeof window.triggerAutosave === 'function') window.triggerAutosave(); 
 };
-window.updateUI = Renderer.updateUI; 
+
+window.updateUI = window.updateUI; 
 
 // --- STATE REHYDRATOR ---
 window.loadAutosave = () => {
@@ -1122,7 +1125,7 @@ window.loadAutosave = () => {
         
         if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
         if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
-        if (typeof Renderer.updateUI === 'function') Renderer.updateUI();
+        if (typeof window.updateUI === 'function') window.updateUI();
         
         const m = State.mode;
         document.getElementById('modeCreate').classList.toggle('active', m === 'create');
