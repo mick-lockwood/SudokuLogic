@@ -9,7 +9,19 @@
 </head>
 
 <body class="dark-mode">
-  
+    
+    <script>
+        try {
+            const saved = localStorage.getItem('sudoku_autosave');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.darkMode === false) {
+                    document.body.classList.remove('dark-mode');
+                }
+            }
+        } catch(e) {}
+    </script>
+    
     <div id="mobile-overlay" onclick="closeMobileMenu()"></div>
   
     <div id="mobile-toolbar">
