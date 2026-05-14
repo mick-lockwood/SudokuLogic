@@ -562,14 +562,51 @@ window.renderSVGLayer = function renderSVGLayer() {
     State.variants.forEach(drawVariantLine); 
     
     // Draw the active line being dragged
-    if (window.AdvancedState.currentLine.length > 0) {
+    if (window.AdvancedState.currentLine && window.AdvancedState.currentLine.length > 0) {
         drawVariantLine({
             type: window.AdvancedState.activeTool,
             cells: window.AdvancedState.currentLine
         });
     }
     
-    // Update the title every time the SVG layer redraws! ---
+    // --- NEW: FOG LINK VISUALIZER ---
+    // Draws pink dashed arrows to show the exact chain of reveals!
+    if (State.mode === 'create' && window.AdvancedState.activeTool === 'fog-link' && State.fogLinks) {
+        // Create an arrowhead marker
+        let defs = svg.querySelector('defs');
+        if (!defs) {
+            defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+            svg.appendChild(defs);
+        }
+        if (!document.getElementById('fog-arrow')) {
+            defs.innerHTML += `<marker id="fog-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#ec4899" /></marker>`;
+        }
+
+        Object.keys(State.fogLinks).forEach(sourceIdx => {
+            const s = parseInt(sourceIdx);
+            if (isNaN(s)) return;
+            const sourcePos = window.getCellCenter(s);
+            
+            State.fogLinks[sourceIdx].forEach(targetIdx => {
+                const targetPos = window.getCellCenter(targetIdx);
+                
+                // Draw arrow from Source to Target
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", sourcePos.x);
+                line.setAttribute("y1", sourcePos.y);
+                line.setAttribute("x2", targetPos.x);
+                line.setAttribute("y2", targetPos.y);
+                line.setAttribute("stroke", "#ec4899"); // Pink
+                line.setAttribute("stroke-width", "3");
+                line.setAttribute("stroke-dasharray", "5,5");
+                line.setAttribute("marker-end", "url(#fog-arrow)");
+                svg.appendChild(line);
+            });
+        });
+    }
+    // ---------------------------------
+
+    // Update the title every time the SVG layer redraws!
     if (typeof window.updateDynamicTitle === 'function') {
         window.updateDynamicTitle();
     }
