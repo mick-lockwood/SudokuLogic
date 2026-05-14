@@ -1016,6 +1016,48 @@ window.updateDynamicTitle = () => {
     }
 };
 
+// --- MASTER RESET CONTROLS ---
+
+// 1. Override the classic Reset Board link to wipe variants & fog in Create Mode
+window.handleClearBoard = () => {
+    if (State.mode === 'create') {
+        if (!confirm("Wipe the entire board? This will delete all digits, variants, clues, and fog.")) return;
+        
+        // Wipe everything
+        State.board.forEach(c => { c.val = 0; c.given = false; c.notes = []; c.color = null; });
+        State.variants = [];
+        State.fogMap = Array(State.size * State.size).fill(false);
+        State.fogRevealed = Array(State.size * State.size).fill(false);
+        State.fogLinks = {};
+        State.fogTriggers = {};
+        State.clues = {};
+        window.AdvancedState.fogLinkSource = null;
+        window.AdvancedState.variantUndoStack = [];
+        window.AdvancedState.variantRedoStack = [];
+        
+        // Un-lock the title
+        window.isCustomTitle = false; 
+        
+        if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
+        if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+        if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
+        
+    } else {
+        // In Solve Mode, just reset the user's progress
+        if (!confirm("Restart puzzle? This will clear all your inputs and pencil marks.")) return;
+        State.board.forEach(c => { if(!c.given) { c.val = 0; c.notes = []; c.color = null; } });
+        if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+    }
+};
+
+// 2. The Nuclear Cache Wipe
+window.hardResetApp = () => {
+    if (confirm("Are you absolutely sure?\n\nThis will permanently delete your autosave and restore all default app settings. This cannot be undone.")) {
+        localStorage.removeItem('sudoku_autosave');
+        window.location.reload();
+    }
+};
+
 // =====================================================================
 // --- AUTOSAVE SYSTEM (SESSION PERSISTENCE) ---
 // =====================================================================
