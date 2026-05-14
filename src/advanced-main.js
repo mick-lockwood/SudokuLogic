@@ -257,70 +257,66 @@ window.toggleOuterClues = () => {
 const originalHandleInput = window.handleInput;
 
 window.handleInput = (val) => {
-    // Grab the active cell BEFORE the original handler can clear it!
     const primary = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
     
     // --- 1. OUTER CLUE MULTI-DIGIT LOGIC ---
     if (typeof primary === 'string' && primary.startsWith('clue')) {
         if (!State.clues) State.clues = {};
-        
         if (val === 0 || val === '0') {
             State.clues[primary] = ""; 
         } else {
             const current = State.clues[primary] || "";
-            if (current.length >= 2) {
-                State.clues[primary] = val.toString(); 
-            } else {
-                State.clues[primary] = current + val.toString();
-            }
+            State.clues[primary] = (current.length >= 2) ? val.toString() : current + val.toString();
         }
         if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+        return; // Stop here!
     } 
     
-    // --- 2. INNER CELL LOGIC ---
-    else {
-        // Run the standard 1-9 logic first
-        if (originalHandleInput) originalHandleInput(val);
+    // --- 2. FOG HYBRID REVEAL LOGIC (RUNS FIRST!) ---
+    // We run this BEFORE the classic input to guarantee it fires
+    if (State.mode === 'solve' && State.fogMode && !State.pencil && val != 0 && primary !== null) {
         
-        // --- 3. FOG HYBRID REVEAL LOGIC ---
-        if (State.mode === 'solve' && State.fogMode && !State.pencil && val != 0) {
+        // Loose equality (==) ensures keystrokes match internal math perfectly
+        if (State.solution && val == State.solution[primary]) {
             
-            // THE FIX: Check the keystroke against the answer key using loose (==) equality
-            if (primary !== null && State.solution && val == State.solution[primary]) {
-                
-                if (!State.fogRevealed) State.fogRevealed = Array(State.size * State.size).fill(false);
-                if (!State.fogLinks) State.fogLinks = {};
+            if (!State.fogRevealed) State.fogRevealed = Array(State.size * State.size).fill(false);
+            if (!State.fogLinks) State.fogLinks = {};
 
-                const primaryKey = String(primary);
+            const primaryKey = String(primary);
 
-                // HYBRID LOGIC: Did the setter manually link this cell?
-                if (State.fogLinks[primaryKey] && State.fogLinks[primaryKey].length > 0) {
-                    State.fogLinks[primaryKey].forEach(targetIdx => {
-                        State.fogRevealed[targetIdx] = true;
-                    });
-                } else {
-                    // NO: Fallback to the organic 3x3 proximity reveal
-                    const r = Math.floor(primary / State.size);
-                    const c = primary % State.size;
-                    for (let i = -1; i <= 1; i++) {
-                        for (let j = -1; j <= 1; j++) {
-                            const nr = r + i, nc = c + j;
-                            if (nr >= 0 && nr < State.size && nc >= 0 && nc < State.size) {
-                                State.fogRevealed[nr * State.size + nc] = true;
-                            }
+            // HYBRID LOGIC: Did the setter manually link this cell?
+            if (State.fogLinks[primaryKey] && State.fogLinks[primaryKey].length > 0) {
+                State.fogLinks[primaryKey].forEach(targetIdx => {
+                    State.fogRevealed[targetIdx] = true;
+                });
+            } else {
+                // NO: Fallback to the organic 3x3 proximity reveal
+                const r = Math.floor(primary / State.size);
+                const c = primary % State.size;
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const nr = r + i, nc = c + j;
+                        if (nr >= 0 && nr < State.size && nc >= 0 && nc < State.size) {
+                            State.fogRevealed[nr * State.size + nc] = true;
                         }
                     }
                 }
-                
-                // Guarantee the current cell is revealed
-                State.fogRevealed[primary] = true; 
-                
-                // Force UI to wipe away the fog!
-                if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
-                    Renderer.updateUI();
-                }
             }
+            
+            // Guarantee the current cell is revealed
+            State.fogRevealed[primary] = true; 
         }
+    }
+    
+    // --- 3. CLASSIC INNER CELL LOGIC ---
+    // Run the standard 1-9 logic safely
+    try {
+        if (originalHandleInput) originalHandleInput(val);
+    } catch(e) { console.error("Classic Input Error:", e); }
+    
+    // --- 4. FORCE UI UPDATE ---
+    if (typeof Renderer !== 'undefined' && Renderer.updateUI) {
+        Renderer.updateUI();
     }
 };
 
@@ -746,29 +742,31 @@ window.addEventListener('keydown', (e) => {
 const originalSetAppMode = window.setAppMode;
 
 window.setAppMode = (m) => {
-    // --- NEW: FOG PLAYTEST RESET ---
-    // Wipe the revealed memory so the fog fully covers the board again for testing
+    // --- FOG PLAYTEST RESET ---
     if (m === 'solve') {
         State.fogRevealed = Array(State.size * State.size).fill(false);
     }
     
-    // Run the classic mode switching logic first
-    if (originalSetAppMode) originalSetAppMode(m);
+    // Run classic mode switch safely
+    try {
+        if (originalSetAppMode) originalSetAppMode(m);
+    } catch(e) { console.error("Classic Engine Error:", e); }
     
-    // Hide or show the Variant Tools panel based on the mode
+    // Hide Variant Tools in solve mode
     const variantPanel = document.getElementById('variant-tools-panel');
-    if (variantPanel) {
-        variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
-    }
+    if (variantPanel) variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
     
-    // Force default tool to drop the linker
+    // Drop the linker tool
     window.setTool('pointer');
     
-    // THE FIX: Absolute wipe of the SVG layer to destroy phantom arrows
-    const svg = document.getElementById('svg-layer');
-    if (svg) svg.innerHTML = '';
-    if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
-    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+    // --- THE FIX: DELAYED ABSOLUTE WIPE ---
+    // Guarantees the SVG layer is scrubbed clean AFTER the classic engine finishes loading!
+    setTimeout(() => {
+        const svg = document.getElementById('svg-layer');
+        if (svg) svg.innerHTML = '';
+        if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
+        if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+    }, 15);
 };
 
 // --- GRID SIZE INTERCEPTOR ---
