@@ -184,8 +184,11 @@ export function updateUI() {
                     nDiv.className = 'pencil-num';
                     if (data.notes.includes(n)) {
                         nDiv.innerHTML = `<span style="position: relative; z-index: 20;">${n}</span>`;
-                        // Apply the showErrors check to pencil marks too!
-                        if (showErrors && hasConflict(maskedBoard, i, n)) nDiv.classList.add('error');
+                        // THE FIX: Force the color change directly so it doesn't rely on CSS
+                        if (showErrors && hasConflict(maskedBoard, i, n)) {
+                            nDiv.classList.add('error');
+                            nDiv.style.color = "var(--danger)"; 
+                        }
                     }
                     pGrid.appendChild(nDiv);
                 }
