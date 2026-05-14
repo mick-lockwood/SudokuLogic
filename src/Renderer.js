@@ -145,7 +145,12 @@ export function updateUI() {
             if (State.mode === 'solve' && isFogged && !isRevealed) {
                 // PURE FOG: Hides everything underneath
                 const fogColor = State.darkMode ? '#0f172a' : '#94a3b8';
-                el.innerHTML = `<div style="position: absolute; inset: -1px; background: ${fogColor}; z-index: 100; display: flex; align-items: center; justify-content: center; font-size: 20px; opacity: 0.98;">☁️</div>`;
+                
+                // Highlight the fog cloud if the user has clicked it!
+                const isSelectedFog = State.selected.includes(i);
+                const focusStyle = isSelectedFog ? `box-shadow: inset 0 0 0 2px #38bdf8, inset 0 0 15px rgba(56,189,248,0.4);` : '';
+
+                el.innerHTML = `<div style="position: absolute; inset: -1px; background: ${fogColor}; ${focusStyle} z-index: 100; display: flex; align-items: center; justify-content: center; font-size: 20px; opacity: 0.98; transition: all 0.2s;">☁️</div>`;
                 return; // Skips rendering numbers!
             }
             // --------------------------
