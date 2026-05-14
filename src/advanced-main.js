@@ -748,6 +748,12 @@ window.addEventListener('keydown', (e) => {
 const originalSetAppMode = window.setAppMode;
 
 window.setAppMode = (m) => {
+    // --- NEW: FOG PLAYTEST RESET ---
+    // If entering Solve Mode, wipe the revealed memory so the fog fully covers the board again
+    if (m === 'solve') {
+        State.fogRevealed = Array(State.size * State.size).fill(false);
+    }
+    
     // Run the classic mode switching logic first
     originalSetAppMode(m);
     
