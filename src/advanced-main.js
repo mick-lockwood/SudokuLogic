@@ -994,3 +994,173 @@ window.updateDynamicTitle = () => {
         }
     }
 };
+
+// =====================================================================
+// --- AUTOSAVE SYSTEM (SESSION PERSISTENCE) ---
+// =====================================================================
+
+window.autoSaveTimeout = null;
+
+window.forceAutosave = () => {
+    // Failsafe: Don't save empty/broken states
+    if (!State.board || State.board.length === 0) return;
+
+    const sessionData = {
+        // Core Data
+        size: State.size,
+        mode: State.mode,
+        board: State.board,
+        variants: State.variants,
+        clues: State.clues || {},
+        timerVal: State.timerVal,
+        isWon: State.isWon,
+        
+        // Toggles & Rules
+        antiKnight: State.antiKnight,
+        antiKing: State.antiKing,
+        jigsawMode: State.jigsawMode,
+        suguruMode: State.suguruMode,
+        fogMode: State.fogMode,
+        showOuterClues: State.showOuterClues,
+        
+        // Fog of War Maps
+        fogMap: State.fogMap,
+        fogRevealed: State.fogRevealed,
+        fogLinks: State.fogLinks || {},
+        fogTriggers: State.fogTriggers || {}
+    };
+    
+    // Grab the custom title
+    const titleEl = document.getElementById('puzzle-title');
+    if (titleEl) sessionData.title = titleEl.innerText;
+
+    localStorage.setItem('sudoku_autosave', JSON.stringify(sessionData));
+};
+
+window.triggerAutosave = () => {
+    // Debounce: Wait 500ms after the user stops acting before saving.
+    // This prevents writing to the hard drive 60 times a second while dragging lines!
+    if (window.autoSaveTimeout) clearTimeout(window.autoSaveTimeout);
+    window.autoSaveTimeout = setTimeout(window.forceAutosave, 500); 
+};
+
+// Guarantee a perfect save if they rapidly close the browser tab or refresh
+window.addEventListener('beforeunload', () => {
+    window.forceAutosave();
+});
+
+// --- THE MASTER HOOK ---
+// Because Renderer.updateUI fires after every single meaningful action,
+// wrapping it creates a completely bulletproof, invisible save trigger!
+const originalUpdateUI = Renderer.updateUI;
+Renderer.updateUI = () => {
+    if (originalUpdateUI) originalUpdateUI();
+    window.triggerAutosave(); // <-- Sneak the save in behind the scenes
+};
+// Overwrite the global window reference just in case
+window.updateUI = Renderer.updateUI; 
+
+// --- LOAD THE SAVE ON STARTUP ---
+window.loadAutosave = () => {
+    const saved = localStorage.getItem('sudoku_autosave');
+    if (!saved) return false;
+    
+    try {
+        const data = JSON.parse(saved);
+        
+        // 1. Rehydrate Core State
+        State.size = data.size;
+        State.mode = data.mode;
+        State.board = data.board;
+        State.variants = data.variants || [];
+        State.clues = data.clues || {};
+        State.timerVal = data.timerVal || 0;
+        State.isWon = data.isWon || false;
+        
+        // 2. Rehydrate Rules
+        State.antiKnight = data.antiKnight || false;
+        State.antiKing = data.antiKing || false;
+        State.jigsawMode = data.jigsawMode || false;
+        State.suguruMode = data.suguruMode || false;
+        State.fogMode = data.fogMode || false;
+        State.showOuterClues = data.showOuterClues || false;
+        
+        // 3. Rehydrate Fog Memory
+        State.fogMap = data.fogMap || Array(data.size * data.size).fill(false);
+        State.fogRevealed = data.fogRevealed || Array(data.size * data.size).fill(false);
+        State.fogLinks = data.fogLinks || {};
+        State.fogTriggers = data.fogTriggers || {};
+        
+        // 4. Physically Sync UI Switches
+        const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+        setCheck('toggle-anti-knight', State.antiKnight);
+        setCheck('toggle-anti-king', State.antiKing);
+        setCheck('toggle-jigsaw', State.jigsawMode);
+        setCheck('toggle-suguru', State.suguruMode);
+        setCheck('toggle-fog', State.fogMode);
+        setCheck('toggle-outer-clues', State.showOuterClues);
+        
+        if (data.title) {
+            const titleEl = document.getElementById('puzzle-title');
+            if (titleEl) {
+                titleEl.innerText = data.title;
+                window.isCustomTitle = true; 
+            }
+        }
+        
+        // 5. Force UI to physically open panels based on restored state
+        if (State.jigsawMode || State.suguruMode) {
+            const regionToolBtn = document.getElementById('tool-region');
+            const resetRegionsBtn = document.getElementById('btn-reset-regions'); 
+            if (regionToolBtn) regionToolBtn.style.display = 'block';
+            if (resetRegionsBtn) resetRegionsBtn.style.display = 'block'; 
+        }
+        
+        if (typeof window.toggleFogMode === 'function') window.toggleFogMode();
+        
+        // 6. Reload Grid DOM & SVGs
+        if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
+        if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
+        if (typeof Renderer.updateUI === 'function') Renderer.updateUI();
+        
+        // 7. Restore timer and layout based on Create vs Solve mode
+        const m = State.mode;
+        document.getElementById('modeCreate').classList.toggle('active', m === 'create');
+        document.getElementById('modeSolve').classList.toggle('active', m === 'solve');
+        document.getElementById('gen-controls').style.display = m === 'create' ? 'grid' : 'none';
+        document.getElementById('size-selector').style.display = m === 'create' ? 'flex' : 'none';
+        document.getElementById('timer').style.display = m === 'create' ? 'none' : 'block';
+        document.getElementById('pause-btn').style.display = m === 'create' ? 'none' : 'block';
+        
+        if (m === 'solve' && !State.isWon) {
+            // Kickstart the timer with the restored time value
+            if (typeof window.startTimer === 'function') window.startTimer();
+        }
+        
+        console.log("Autosave restored successfully!");
+        return true;
+    } catch(e) {
+        console.error("Failed to load autosave", e);
+        return false;
+    }
+};
+
+// --- STARTUP INTERCEPTOR ---
+// We intercept the final page load to inject the save safely
+const advancedOriginalOnLoad = window.onload;
+
+window.onload = (e) => {
+    // 1. Run the classic startup script first
+    if (advancedOriginalOnLoad) advancedOriginalOnLoad(e);
+    
+    // 2. Wait a fraction of a second to ensure the DOM and URL parsers are fully finished
+    setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const puzzleString = urlParams.get('puzzle');
+        
+        // ONLY inject the autosave if they are NOT trying to load a shared puzzle link!
+        if (!puzzleString) {
+            window.loadAutosave();
+        }
+    }, 50);
+};
