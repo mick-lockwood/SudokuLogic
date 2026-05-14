@@ -248,21 +248,20 @@ window.toggleOuterClues = () => {
     if (typeof window.updateUI === 'function') window.updateUI();
 };
 
-// --- MULTI-DIGIT INPUT HIJACKER ---
-// Allows typing "4" then "5" to make "45" in the outer cells
+// --- MASTER INPUT HIJACKER (Multi-Digit + Fog Reveal) ---
 const originalHandleInput = window.handleInput;
+
 window.handleInput = (val) => {
     const primary = State.selected.length > 0 ? State.selected[State.selected.length - 1] : null;
     
-    // Check if the user is currently focused on an outer clue cell
+    // --- 1. OUTER CLUE MULTI-DIGIT LOGIC ---
     if (typeof primary === 'string' && primary.startsWith('clue')) {
         if (!State.clues) State.clues = {};
         
         if (val === 0) {
-            State.clues[primary] = ""; // Erase on pressing 0 or Delete
+            State.clues[primary] = ""; 
         } else {
             const current = State.clues[primary] || "";
-            // If it's already 2 digits long, start over. Otherwise, append the number!
             if (current.length >= 2) {
                 State.clues[primary] = val.toString(); 
             } else {
@@ -270,12 +269,48 @@ window.handleInput = (val) => {
             }
         }
         if (typeof window.updateUI === 'function') window.updateUI();
-    } else {
-        // If it's a normal inner cell, run the standard 1-9 logic
+    } 
+    
+    // --- 2. INNER CELL LOGIC ---
+    else {
+        // Run the standard 1-9 logic first
         if (originalHandleInput) originalHandleInput(val);
+        
+        // --- 3. FOG HYBRID REVEAL LOGIC ---
+        // Checks if the number we just entered perfectly matches the solution
+        if (State.mode === 'solve' && State.fogMode && !State.pencil && val !== 0) {
+            if (primary !== null && State.solution && State.solution[primary] === val) {
+                
+                // Initialize fallback arrays if missing
+                if (!State.fogLinks) State.fogLinks = {};
+                if (!State.fogRevealed) State.fogRevealed = Array(State.size * State.size).fill(false);
+
+                // HYBRID LOGIC: Did the setter manually link this cell?
+                if (State.fogLinks[primary] && State.fogLinks[primary].length > 0) {
+                    State.fogLinks[primary].forEach(targetIdx => {
+                        State.fogRevealed[targetIdx] = true;
+                    });
+                } else {
+                    // NO: Fallback to the organic 3x3 proximity reveal
+                    const r = Math.floor(primary / State.size);
+                    const c = primary % State.size;
+                    for (let i = -1; i <= 1; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            const nr = r + i, nc = c + j;
+                            if (nr >= 0 && nr < State.size && nc >= 0 && nc < State.size) {
+                                State.fogRevealed[nr * State.size + nc] = true;
+                            }
+                        }
+                    }
+                }
+                
+                // Guarantee the current cell is revealed
+                State.fogRevealed[primary] = true; 
+                if (typeof window.updateUI === 'function') window.updateUI();
+            }
+        }
     }
 };
-
 // --- GLOBAL RULE TOGGLES ---
 window.toggleAntiKnight = () => {
     State.antiKnight = document.getElementById('toggle-anti-knight').checked;
