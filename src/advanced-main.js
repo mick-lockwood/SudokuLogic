@@ -841,9 +841,14 @@ window.addEventListener('keydown', (e) => {
 const originalSetAppMode = window.setAppMode;
 
 window.setAppMode = (m) => {
-    // --- FOG PLAYTEST RESET ---
+    // --- FOG & WIN PLAYTEST RESET ---
+    State.isWon = false; // <-- NEW: Resets the win state!
     if (m === 'solve') {
         State.fogRevealed = Array(State.size * State.size).fill(false);
+        // Hide the win overlay just in case it was left open
+        const winOverlay = document.getElementById('win-overlay');
+        if (winOverlay) winOverlay.style.display = 'none';
+        if (typeof Renderer !== 'undefined' && Renderer.stopConfetti) Renderer.stopConfetti();
     }
     
     // Run classic mode switch safely
