@@ -829,6 +829,10 @@ window.setAppMode = (m) => {
     const variantPanel = document.getElementById('variant-tools-panel');
     if (variantPanel) variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
     
+    // --- THE FIX: Hide/Show the Auto-Fill button ---
+    const autoFillBtn = document.getElementById('btn-autofill-pencils');
+    if (autoFillBtn) autoFillBtn.style.display = (m === 'solve') ? 'inline' : 'none';
+    
     window.setTool('pointer');
     
     setTimeout(() => {
