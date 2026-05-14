@@ -3,7 +3,7 @@ import './classic-main.js';
 import { State, saveState } from './GameState.js';
 import * as Renderer from './Renderer.js';
 import { Tooltips } from './TooltipDictionary.js';
-import { resetGenSafety, cleanPencilsAfterMove } from './SudokuLogic.js';
+import { resetGenSafety, cleanPencilsAfterMove, hasConflict } from './SudokuLogic.js';
 
 // import variant rules
 import { drawThermo } from './variants/Thermo.js';
