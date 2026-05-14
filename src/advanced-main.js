@@ -1027,6 +1027,7 @@ window.forceAutosave = () => {
     if (!State.board || State.board.length === 0) return;
 
     const sessionData = {
+        // Core Data
         size: State.size,
         mode: State.mode,
         board: State.board,
@@ -1034,16 +1035,31 @@ window.forceAutosave = () => {
         clues: State.clues || {},
         timerVal: State.timerVal,
         isWon: State.isWon,
+        darkMode: State.darkMode, // <-- ADDED: Theme State
+        
+        // Toggles & Rules
         antiKnight: State.antiKnight,
         antiKing: State.antiKing,
         jigsawMode: State.jigsawMode,
         suguruMode: State.suguruMode,
         fogMode: State.fogMode,
         showOuterClues: State.showOuterClues,
+        
+        // Fog Data
         fogMap: State.fogMap,
         fogRevealed: State.fogRevealed,
         fogLinks: State.fogLinks || {},
-        fogTriggers: State.fogTriggers || {}
+        fogTriggers: State.fogTriggers || {},
+
+        // --- ADDED: UI & Visibility Toggles ---
+        visSeen: document.getElementById('toggle-seen')?.checked ?? true,
+        visMatch: document.getElementById('toggle-match')?.checked ?? true,
+        visErrors: document.getElementById('toggle-errors')?.checked ?? true,
+        visTimer: document.getElementById('toggle-timer')?.checked ?? true,
+        ruleSandwich: document.getElementById('rule-sandwich')?.checked ?? false,
+        ruleSkyscraper: document.getElementById('rule-skyscraper')?.checked ?? false,
+        ruleFrames: document.getElementById('rule-frames')?.checked ?? false,
+        ruleRooms: document.getElementById('rule-rooms')?.checked ?? false
     };
     
     const titleEl = document.getElementById('puzzle-title');
@@ -1053,24 +1069,18 @@ window.forceAutosave = () => {
 };
 
 window.triggerAutosave = () => {
-    // Debounce to prevent rapid-fire saving while dragging variant lines
     if (window.autoSaveTimeout) clearTimeout(window.autoSaveTimeout);
     window.autoSaveTimeout = setTimeout(window.forceAutosave, 500); 
 };
 
-// Guarantee a save if they rapidly close the tab
 window.addEventListener('beforeunload', () => window.forceAutosave());
 
 // --- THE MASTER HOOK ---
-// THE FIX: We wrap the global window function, bypassing the locked ES6 module entirely!
 const originalUpdateUI = window.updateUI;
-
 window.updateUI = () => {
     if (originalUpdateUI) originalUpdateUI();
     if (typeof window.triggerAutosave === 'function') window.triggerAutosave(); 
 };
-
-window.updateUI = window.updateUI; 
 
 // --- STATE REHYDRATOR ---
 window.loadAutosave = () => {
@@ -1087,24 +1097,39 @@ window.loadAutosave = () => {
         State.clues = data.clues || {};
         State.timerVal = data.timerVal || 0;
         State.isWon = data.isWon || false;
+        State.darkMode = data.darkMode !== undefined ? data.darkMode : true;
+        
         State.antiKnight = data.antiKnight || false;
         State.antiKing = data.antiKing || false;
         State.jigsawMode = data.jigsawMode || false;
         State.suguruMode = data.suguruMode || false;
         State.fogMode = data.fogMode || false;
         State.showOuterClues = data.showOuterClues || false;
+        
         State.fogMap = data.fogMap || Array(data.size * data.size).fill(false);
         State.fogRevealed = data.fogRevealed || Array(data.size * data.size).fill(false);
         State.fogLinks = data.fogLinks || {};
         State.fogTriggers = data.fogTriggers || {};
         
+        // --- 1. RESTORE ALL CHECKBOXES ---
         const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+        
         setCheck('toggle-anti-knight', State.antiKnight);
         setCheck('toggle-anti-king', State.antiKing);
         setCheck('toggle-jigsaw', State.jigsawMode);
         setCheck('toggle-suguru', State.suguruMode);
         setCheck('toggle-fog', State.fogMode);
         setCheck('toggle-outer-clues', State.showOuterClues);
+        
+        setCheck('toggle-seen', data.visSeen !== undefined ? data.visSeen : true);
+        setCheck('toggle-match', data.visMatch !== undefined ? data.visMatch : true);
+        setCheck('toggle-errors', data.visErrors !== undefined ? data.visErrors : true);
+        setCheck('toggle-timer', data.visTimer !== undefined ? data.visTimer : true);
+        
+        setCheck('rule-sandwich', data.ruleSandwich || false);
+        setCheck('rule-skyscraper', data.ruleSkyscraper || false);
+        setCheck('rule-frames', data.ruleFrames || false);
+        setCheck('rule-rooms', data.ruleRooms || false);
         
         if (data.title) {
             const titleEl = document.getElementById('puzzle-title');
@@ -1114,6 +1139,19 @@ window.loadAutosave = () => {
             }
         }
         
+        // --- 2. RESTORE THEME VISUALS ---
+        document.body.classList.toggle('dark-mode', State.darkMode);
+        document.querySelectorAll('.btn-theme').forEach(btn => {
+            btn.innerText = State.darkMode ? "Toggle Light Mode" : "Toggle Dark Mode";
+        });
+        
+        // --- 3. RESTORE 6x6 / 9x9 BUTTON STATE ---
+        const size6Btn = document.getElementById('size6');
+        const size9Btn = document.getElementById('size9');
+        if (size6Btn) size6Btn.className = (State.size === 6) ? 'active' : '';
+        if (size9Btn) size9Btn.className = (State.size === 9) ? 'active' : '';
+        
+        // --- 4. RELOAD GRID ---
         if (State.jigsawMode || State.suguruMode) {
             const regionToolBtn = document.getElementById('tool-region');
             const resetRegionsBtn = document.getElementById('btn-reset-regions'); 
@@ -1122,11 +1160,11 @@ window.loadAutosave = () => {
         }
         
         if (typeof window.toggleFogMode === 'function') window.toggleFogMode();
-        
         if (typeof Renderer.renderGrid === 'function') Renderer.renderGrid();
         if (typeof window.renderSVGLayer === 'function') window.renderSVGLayer();
-        if (typeof window.updateUI === 'function') window.updateUI();
+        if (typeof Renderer.updateUI === 'function') Renderer.updateUI();
         
+        // --- 5. RESTORE CREATE / SOLVE LAYOUT ---
         const m = State.mode;
         document.getElementById('modeCreate').classList.toggle('active', m === 'create');
         document.getElementById('modeSolve').classList.toggle('active', m === 'solve');
@@ -1135,14 +1173,21 @@ window.loadAutosave = () => {
         document.getElementById('timer').style.display = m === 'create' ? 'none' : 'block';
         document.getElementById('pause-btn').style.display = m === 'create' ? 'none' : 'block';
         
+        // Force the Variant Tools panel to obey the mode!
+        const variantPanel = document.getElementById('variant-tools-panel');
+        if (variantPanel) variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
+        
         const autoFillBtn = document.getElementById('btn-autofill-pencils');
         if (autoFillBtn) autoFillBtn.style.display = (m === 'solve') ? 'inline' : 'none';
+        
+        const timerEl = document.getElementById('timer');
+        if (timerEl) timerEl.style.visibility = (data.visTimer !== false) ? 'visible' : 'hidden';
         
         if (m === 'solve' && !State.isWon) {
             if (typeof window.startTimer === 'function') window.startTimer();
         }
         
-        console.log("Autosave restored successfully!");
+        console.log("Autosave restored seamlessly!");
         return true;
     } catch(e) {
         console.error("Failed to load autosave", e);
