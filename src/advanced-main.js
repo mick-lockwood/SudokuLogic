@@ -1373,11 +1373,22 @@ window.loadAutosave = () => {
         document.getElementById('timer').style.display = m === 'create' ? 'none' : 'block';
         document.getElementById('pause-btn').style.display = m === 'create' ? 'none' : 'block';
         
-        // Force the Variant Tools panel to obey the mode!
+        // Force the Variant Tools panel to obey the mode
         const variantPanel = document.getElementById('variant-tools-panel');
         if (variantPanel) variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
         
-        // --- THE FIX: HIDE THEM ON PAGE REFRESH ---
+        // --- THE MISSING REFRESH LOGIC ---
+        // Force the Create wrappers and status text to hide if booting into Solve mode
+        const statusLabel = document.getElementById('status-label');
+        if (statusLabel) statusLabel.style.display = (m === 'create') ? 'block' : 'none';
+
+        const createActions = document.getElementById('create-mode-actions');
+        const solveActions = document.getElementById('solve-mode-actions');
+        if (createActions) createActions.style.display = (m === 'create') ? 'flex' : 'none';
+        if (solveActions) solveActions.style.display = (m === 'solve') ? 'flex' : 'none';
+        // ---------------------------------
+        
+        // Force Torus toggles to obey the mode
         const autoFillBtn = document.getElementById('btn-autofill-pencils');
         const cleanPencilsLink = document.getElementById('clean-pencils-link');
         const clearInputsLink = document.getElementById('clear-inputs-link');
@@ -1385,7 +1396,6 @@ window.loadAutosave = () => {
         if (autoFillBtn) autoFillBtn.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
         if (cleanPencilsLink) cleanPencilsLink.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
         if (clearInputsLink) clearInputsLink.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
-        // ------------------------------------------
         
         const timerEl = document.getElementById('timer');
         if (timerEl) timerEl.style.visibility = (data.visTimer !== false) ? 'visible' : 'hidden';
