@@ -4,6 +4,7 @@ import { State, saveState } from './GameState.js';
 import * as Renderer from './Renderer.js';
 import { Tooltips } from './TooltipDictionary.js';
 import { resetGenSafety, cleanPencilsAfterMove, hasConflict } from './SudokuLogic.js';
+import { renderShiftArrows } from './ShiftEngine.js';
 
 // import variant rules
 import { drawThermo } from './variants/Thermo.js';
@@ -1288,7 +1289,8 @@ window.addEventListener('beforeunload', () => window.forceAutosave());
 const originalUpdateUI = window.updateUI;
 window.updateUI = () => {
     if (originalUpdateUI) originalUpdateUI();
-    if (typeof window.triggerAutosave === 'function') window.triggerAutosave(); 
+    if (typeof window.triggerAutosave === 'function') window.triggerAutosave();
+    if (typeof renderShiftArrows === 'function') renderShiftArrows();
 };
 
 // --- STATE REHYDRATOR ---
