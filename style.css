@@ -720,6 +720,8 @@ body.dark-mode #return-win-btn {
 }
 
 /* --- TORUS BOARD TILES --- */
+
+/* 1. Add pointer-events to the tile */
 .torus-tile {
     position: absolute;
     width: var(--cell-size);
@@ -734,8 +736,7 @@ body.dark-mode #return-win-btn {
     color: var(--text-main);
     user-select: none;
     touch-action: none;
-    
-    /* Hardware acceleration for buttery smooth swiping */
+    pointer-events: auto;
     will-change: transform;
     
     /* Simulate the classic grid borders */
@@ -755,6 +756,10 @@ body.dark-mode .torus-tile.given { color: #38bdf8; font-weight: 800; }
 
 .torus-tile.error { color: var(--danger) !important; }
 body.dark-mode .torus-tile.error { color: #fb923c !important; }
+
+/* 2. Hides inner cells but leaves clues visible! */
+#grid.torus-active .cell { 
+    visibility: hidden;
 
 /* --- VARIANT TOOL BUTTONS --- */
 .variant-tool-btn {
