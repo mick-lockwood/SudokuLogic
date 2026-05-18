@@ -667,15 +667,18 @@ window.addEventListener('pointerup', () => {
 window.toggleShiftMode = () => {
     State.shiftMode = document.getElementById('toggle-shift').checked;
     const lockBtn = document.getElementById('tool-lock');
+    const scrambleBtn = document.getElementById('btn-scramble-torus'); // Grab the button
     
     if (State.shiftMode) {
         if (lockBtn) lockBtn.style.display = 'block';
+        if (scrambleBtn) scrambleBtn.style.display = 'block'; // Show it
         document.getElementById('toggle-jigsaw').checked = false;
         document.getElementById('toggle-suguru').checked = false;
         State.jigsawMode = false; State.suguruMode = false;
         if (typeof updateRegionPainterState === 'function') updateRegionPainterState();
     } else {
         if (lockBtn) lockBtn.style.display = 'none';
+        if (scrambleBtn) scrambleBtn.style.display = 'none'; // Hide it
         if (window.AdvancedState.activeTool === 'lock') window.setTool('pointer');
     }
     
