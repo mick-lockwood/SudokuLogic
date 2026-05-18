@@ -912,15 +912,17 @@ window.setAppMode = (m) => {
     const variantPanel = document.getElementById('variant-tools-panel');
     if (variantPanel) variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
     
+    // --- THE FIX: KEEP AUTO-FILL HIDDEN IF TORUS IS ON ---
     const autoFillBtn = document.getElementById('btn-autofill-pencils');
-    if (autoFillBtn) autoFillBtn.style.display = (m === 'solve') ? 'inline' : 'none';
+    if (autoFillBtn) {
+        autoFillBtn.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
+    }
+    // -----------------------------------------------------
     
-    // --- NEW: TOGGLE THE ACTION MENUS ---
     const createActions = document.getElementById('create-mode-actions');
     const solveActions = document.getElementById('solve-mode-actions');
     if (createActions) createActions.style.display = (m === 'create') ? 'flex' : 'none';
     if (solveActions) solveActions.style.display = (m === 'solve') ? 'flex' : 'none';
-    // ------------------------------------
     
     window.setTool('pointer');
     
