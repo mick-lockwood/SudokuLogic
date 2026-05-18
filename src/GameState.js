@@ -1,7 +1,5 @@
 // src/GameState.js
 
-
-
 export const State = {
     size: 9, bW: 3, bH: 3,
     mode: 'create', 
@@ -79,6 +77,7 @@ export function initBoardState(sizeParam) {
     State.showOuterClues = false;
     State.lockedMap = Array(sizeParam * sizeParam).fill(false);
     State.shiftMode = false;
+    torusScrambleStart: null,
 }
 
 export function saveState(isUndoAction = false) {
