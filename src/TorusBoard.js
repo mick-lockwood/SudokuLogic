@@ -16,7 +16,7 @@ export const renderTorusBoard = () => {
     const container = document.getElementById('torus-grid');
     if (!container || !State.shiftMode) return;
 
-    // THE FIX: Measure a real cell to get pixel-perfect responsiveness on mobile!
+    // Grab the actual cell size from the classic grid for perfect alignment
     const sampleCell = document.querySelector('.cell');
     window.TorusState.cellSize = sampleCell ? sampleCell.offsetWidth : 52;
     const cs = window.TorusState.cellSize;
@@ -59,6 +59,26 @@ export const renderTorusBoard = () => {
                 tile.innerHTML += `<div style="position: absolute; top: 2px; right: 4px; font-size: 10px; opacity: 0.5;">🔒</div>`;
             }
 
+            // --- THE FIX: ATTACH CLASSIC SUDOKU LISTENERS ---
+            // This allows the tiles to accept number inputs, locks, and variant drawings!
+            tile.addEventListener('pointerdown', (e) => {
+                if (State.paused || State.isWon) return;
+                e.target.releasePointerCapture(e.pointerId); 
+                if (typeof window.handleCellSelection === 'function') {
+                    window.handleCellSelection(idx, e.ctrlKey || e.metaKey, false);
+                }
+            });
+
+            tile.addEventListener('pointerenter', (e) => {
+                if (State.paused || State.isWon) return;
+                if (e.buttons === 1 && typeof window.handleCellSelection === 'function') { 
+                    window.handleCellSelection(idx, true, true); 
+                }
+            });
+
+            tile.addEventListener('contextmenu', (e) => e.preventDefault());
+            // --------------------------------------------------
+
             container.appendChild(tile);
         }
     }
@@ -78,10 +98,9 @@ const getDragElements = (axis, index) => {
 // Creates a visual clone of a tile to wrap around the edges
 const createGhost = (originalEl, axis, direction, cs) => {
     const ghost = originalEl.cloneNode(true);
-    ghost.id = ''; // remove ID so we don't duplicate
-    ghost.style.zIndex = '15'; // Keep ghosts slightly under the main dragging row
+    ghost.id = ''; 
+    ghost.style.zIndex = '15'; 
     
-    // Position the ghost on the opposite side of the board
     const currentLeft = parseFloat(originalEl.style.left);
     const currentTop = parseFloat(originalEl.style.top);
     
@@ -97,6 +116,11 @@ const createGhost = (originalEl, axis, direction, cs) => {
 
 document.addEventListener('pointerdown', (e) => {
     if (!State.shiftMode || State.paused || State.isWon) return;
+    
+    // --- THE FIX: DISABLE SLIDING IN CREATE MODE ---
+    if (State.mode === 'create') return;
+    // ----------------------------------------------
+    
     const target = e.target.closest('.torus-tile');
     if (!target) return;
 
@@ -140,12 +164,11 @@ document.addEventListener('pointermove', (e) => {
     }
 
     const cs = drag.cellSize;
-    const threshold = cs; // Must drag exactly 1 cell width to trigger a snap
+    const threshold = cs; 
 
-    // 2. Generate Ghosts on the fly based on drag direction
+    // 2. Generate Ghosts on the fly
     if (drag.ghosts.length === 0) {
         const dir = (drag.axis === 'row' ? deltaX : deltaY) > 0 ? 1 : -1;
-        // Clone the whole row/col and place it on the opposite side
         drag.elements.forEach(el => drag.ghosts.push(createGhost(el, drag.axis, dir, cs)));
     }
 
@@ -154,19 +177,17 @@ document.addEventListener('pointermove', (e) => {
         drag.elements.forEach(el => el.style.transform = `translateX(${deltaX}px)`);
         drag.ghosts.forEach(el => el.style.transform = `translateX(${deltaX}px)`);
 
-        // Array Snap!
         if (Math.abs(deltaX) >= threshold) {
             const dir = deltaX > 0 ? 1 : -1;
             
-            // Clean up old visuals
             drag.elements.forEach(el => { el.style.transform = 'translate(0, 0)'; el.style.zIndex = ''; });
             drag.ghosts.forEach(ghost => ghost.remove());
             drag.ghosts = [];
 
-            shiftRow(drag.r, dir); // Shift the actual array math
+            shiftRow(drag.r, dir); 
             
-            drag.startX += (dir * threshold); // Reset origin point
-            drag.elements = getDragElements('row', drag.r); // Grab the newly rendered tiles
+            drag.startX += (dir * threshold); 
+            drag.elements = getDragElements('row', drag.r); 
             drag.elements.forEach(el => { el.style.zIndex = '20'; el.style.transform = `translateX(${e.clientX - drag.startX}px)`; });
         }
     } else {
