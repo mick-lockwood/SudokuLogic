@@ -18,6 +18,8 @@ export const State = {
     showOuterClues: false,
     jigsawMode: false,
     suguruMode: false,
+    shiftMode: false,
+    lockedMap: Array(81).fill(false),
 
     fogMode: false,
     fogMap: Array(81).fill(false),
@@ -75,6 +77,8 @@ export function initBoardState(sizeParam) {
     State.showGhost = false;
     State.antiKnight = false;
     State.showOuterClues = false;
+    State.lockedMap = Array(sizeParam * sizeParam).fill(false);
+    State.shiftMode = false;
 }
 
 export function saveState(isUndoAction = false) {
