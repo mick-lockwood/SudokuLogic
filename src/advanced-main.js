@@ -906,18 +906,22 @@ window.setAppMode = (m) => {
     }
     
     try {
+        // The classic engine runs here and unhides the pencil buttons...
         if (originalSetAppMode) originalSetAppMode(m);
     } catch(e) { console.error("Classic Engine Error:", e); }
     
     const variantPanel = document.getElementById('variant-tools-panel');
     if (variantPanel) variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
     
-    // --- THE FIX: KEEP AUTO-FILL HIDDEN IF TORUS IS ON ---
+    // --- THE FIX: AGGRESSIVELY OVERRIDE THE CLASSIC ENGINE ---
     const autoFillBtn = document.getElementById('btn-autofill-pencils');
-    if (autoFillBtn) {
-        autoFillBtn.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
-    }
-    // -----------------------------------------------------
+    const cleanPencilsLink = document.getElementById('clean-pencils-link');
+    const clearInputsLink = document.getElementById('clear-inputs-link');
+    
+    if (autoFillBtn) autoFillBtn.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
+    if (cleanPencilsLink) cleanPencilsLink.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
+    if (clearInputsLink) clearInputsLink.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
+    // ----------------------------------------------------------
     
     const createActions = document.getElementById('create-mode-actions');
     const solveActions = document.getElementById('solve-mode-actions');
