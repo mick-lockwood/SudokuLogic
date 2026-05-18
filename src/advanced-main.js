@@ -150,6 +150,15 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
             if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI(); 
         }
     }
+
+        // --- NEW: LOCK PAINTER LOGIC ---
+    else if (tool === 'lock' && State.mode === 'create') {
+        if (!isClueCell && !isDragging) {
+            State.lockedMap[index] = !State.lockedMap[index];
+            if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
+        }
+        return;
+    }
         
     // --- 5. EDIT LOGIC ---
     else if (tool === 'edit') {
@@ -651,6 +660,117 @@ window.addEventListener('pointerup', () => {
     }
 });
 
+// =====================================================================
+// --- SHIFT MODE (TORUS) ENGINE ---
+// =====================================================================
+
+window.toggleShiftMode = () => {
+    State.shiftMode = document.getElementById('toggle-shift').checked;
+    const lockBtn = document.getElementById('tool-lock');
+    
+    if (State.shiftMode) {
+        if (lockBtn) lockBtn.style.display = 'block';
+        // Auto-disable Jigsaw/Suguru as they conflict with row shifting
+        document.getElementById('toggle-jigsaw').checked = false;
+        document.getElementById('toggle-suguru').checked = false;
+        State.jigsawMode = false; State.suguruMode = false;
+        if (typeof window.updateRegionPainterState === 'function') window.updateRegionPainterState();
+    } else {
+        if (lockBtn) lockBtn.style.display = 'none';
+        if (window.AdvancedState.activeTool === 'lock') window.setTool('pointer');
+    }
+    
+    if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
+    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+};
+
+// --- ARRAY SHIFTING MATH ---
+// dir: 1 (Right/Down), -1 (Left/Up)
+window.shiftRow = (r, dir) => {
+    if (State.paused || State.isWon) return;
+    
+    // Check for locks: If ANY cell in this row is locked, the whole row refuses to move!
+    for (let c = 0; c < State.size; c++) {
+        if (State.lockedMap[r * State.size + c]) return; 
+    }
+
+    saveState();
+    let rowVals = [], rowGiven = [], rowNotes = [], rowColor = [];
+    
+    // Extract
+    for (let c = 0; c < State.size; c++) {
+        let idx = r * State.size + c;
+        rowVals.push(State.board[idx].val);
+        rowGiven.push(State.board[idx].given);
+        rowNotes.push(State.board[idx].notes);
+        rowColor.push(State.board[idx].color);
+    }
+    
+    // Shift Arrays
+    if (dir === 1) { 
+        rowVals.unshift(rowVals.pop());
+        rowGiven.unshift(rowGiven.pop());
+        rowNotes.unshift(rowNotes.pop());
+        rowColor.unshift(rowColor.pop());
+    } else { 
+        rowVals.push(rowVals.shift());
+        rowGiven.push(rowGiven.shift());
+        rowNotes.push(rowNotes.shift());
+        rowColor.push(rowColor.shift());
+    }
+    
+    // Inject
+    for (let c = 0; c < State.size; c++) {
+        let idx = r * State.size + c;
+        State.board[idx].val = rowVals[c];
+        State.board[idx].given = rowGiven[c];
+        State.board[idx].notes = rowNotes[c];
+        State.board[idx].color = rowColor[c];
+    }
+    
+    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+    window.checkAdvancedWin();
+};
+
+window.shiftCol = (c, dir) => {
+    if (State.paused || State.isWon) return;
+    
+    // Check for locks: If ANY cell in this column is locked, the column refuses to move!
+    for (let r = 0; r < State.size; r++) {
+        if (State.lockedMap[r * State.size + c]) return; 
+    }
+
+    saveState();
+    let colVals = [], colGiven = [], colNotes = [], colColor = [];
+    
+    for (let r = 0; r < State.size; r++) {
+        let idx = r * State.size + c;
+        colVals.push(State.board[idx].val);
+        colGiven.push(State.board[idx].given);
+        colNotes.push(State.board[idx].notes);
+        colColor.push(State.board[idx].color);
+    }
+    
+    if (dir === 1) { 
+        colVals.unshift(colVals.pop()); colGiven.unshift(colGiven.pop());
+        colNotes.unshift(colNotes.pop()); colColor.unshift(colColor.pop());
+    } else { 
+        colVals.push(colVals.shift()); colGiven.push(colGiven.shift());
+        colNotes.push(colNotes.shift()); colColor.push(colColor.shift());
+    }
+    
+    for (let r = 0; r < State.size; r++) {
+        let idx = r * State.size + c;
+        State.board[idx].val = colVals[r];
+        State.board[idx].given = colGiven[r];
+        State.board[idx].notes = colNotes[r];
+        State.board[idx].color = colColor[r];
+    }
+    
+    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+    window.checkAdvancedWin();
+};
+
 // --- GENERALIZED SVG RENDERER ---
 window.renderSVGLayer = function renderSVGLayer() {
     const svg = document.getElementById('svg-layer');
@@ -1120,7 +1240,9 @@ window.forceAutosave = () => {
         clues: State.clues || {},
         timerVal: State.timerVal,
         isWon: State.isWon,
-        darkMode: State.darkMode, // <-- ADDED: Theme State
+        darkMode: State.darkMode,
+        shiftMode: State.shiftMode,
+        lockedMap: State.lockedMap,
         
         // Toggles & Rules
         antiKnight: State.antiKnight,
@@ -1197,6 +1319,9 @@ window.loadAutosave = () => {
         State.fogRevealed = data.fogRevealed || Array(data.size * data.size).fill(false);
         State.fogLinks = data.fogLinks || {};
         State.fogTriggers = data.fogTriggers || {};
+
+        State.shiftMode = data.shiftMode || false;
+        State.lockedMap = data.lockedMap || Array(data.size * data.size).fill(false);
         
         // --- 1. RESTORE ALL CHECKBOXES ---
         const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
@@ -1207,6 +1332,9 @@ window.loadAutosave = () => {
         setCheck('toggle-suguru', State.suguruMode);
         setCheck('toggle-fog', State.fogMode);
         setCheck('toggle-outer-clues', State.showOuterClues);
+        
+        setCheck('toggle-shift', State.shiftMode);
+        if (typeof window.toggleShiftMode === 'function') window.toggleShiftMode();
         
         setCheck('toggle-seen', data.visSeen !== undefined ? data.visSeen : true);
         setCheck('toggle-match', data.visMatch !== undefined ? data.visMatch : true);
