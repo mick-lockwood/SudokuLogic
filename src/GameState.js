@@ -18,6 +18,7 @@ export const State = {
     suguruMode: false,
     shiftMode: false,
     lockedMap: Array(81).fill(false),
+    torusScrambleStart: null,
 
     fogMode: false,
     fogMap: Array(81).fill(false),
@@ -77,7 +78,6 @@ export function initBoardState(sizeParam) {
     State.showOuterClues = false;
     State.lockedMap = Array(sizeParam * sizeParam).fill(false);
     State.shiftMode = false;
-    torusScrambleStart: null,
 }
 
 export function saveState(isUndoAction = false) {
