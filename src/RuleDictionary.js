@@ -21,5 +21,7 @@ export const GameRules = {
     sandwich: () => "<b>Sandwich:</b> Clues outside the grid show the sum of digits sandwiched between the 1 and 9 in that row/column.",
     skyscraper: () => "<b>Skyscrapers:</b> Clues outside show how many digits (buildings) are visible, where higher digits block lower ones.",
     frames: () => "<b>Frames:</b> Clues outside show the sum of the first 3 digits in that row/column.",
-    rooms: () => "<b>Numbered Rooms:</b> Clues outside indicate the digit located at the Nth cell, where N is the first digit in that direction."
+    rooms: () => "<b>Numbered Rooms:</b> Clues outside indicate the digit located at the Nth cell, where N is the first digit in that direction.",
+    fog: () => "<b>Fog of War:</b> The board is partially hidden. Placing correct digits reveal cells chosen by the setter.",
+    torus: () => "<b>Torus Mode:</b> Drag rows and columns to align the digits to satisfy other games rules."
 };
