@@ -666,9 +666,9 @@ window.addEventListener('pointerup', () => {
 // =====================================================================
 window.toggleShiftMode = () => {
     State.shiftMode = document.getElementById('toggle-shift').checked;
-    
     const lockBtn = document.getElementById('tool-lock');
     const scrambleBtn = document.getElementById('btn-scramble-torus');
+    
     const labelSeen = document.getElementById('toggle-seen')?.closest('label');
     const labelMatch = document.getElementById('toggle-match')?.closest('label');
     
@@ -683,6 +683,7 @@ window.toggleShiftMode = () => {
     if (State.shiftMode) {
         if (lockBtn) lockBtn.style.display = 'block';
         if (scrambleBtn) scrambleBtn.style.display = 'block';
+        
         if (labelSeen) labelSeen.style.display = 'none'; 
         if (labelMatch) labelMatch.style.display = 'none'; 
         
@@ -710,7 +711,6 @@ window.toggleShiftMode = () => {
         // Restore Classic Actions
         if (clearInputsLink) clearInputsLink.style.display = 'inline';
         if (cleanPencilsLink) cleanPencilsLink.style.display = 'inline';
-        // Auto-fill relies on Solve Mode, so we let setAppMode handle it!
         if (autoFillBtn && State.mode === 'solve') autoFillBtn.style.display = 'inline';
         
         if (classicGrid) classicGrid.style.visibility = 'visible'; 
