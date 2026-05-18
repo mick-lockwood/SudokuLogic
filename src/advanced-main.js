@@ -1377,8 +1377,15 @@ window.loadAutosave = () => {
         const variantPanel = document.getElementById('variant-tools-panel');
         if (variantPanel) variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
         
+        // --- THE FIX: HIDE THEM ON PAGE REFRESH ---
         const autoFillBtn = document.getElementById('btn-autofill-pencils');
+        const cleanPencilsLink = document.getElementById('clean-pencils-link');
+        const clearInputsLink = document.getElementById('clear-inputs-link');
+        
         if (autoFillBtn) autoFillBtn.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
+        if (cleanPencilsLink) cleanPencilsLink.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
+        if (clearInputsLink) clearInputsLink.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
+        // ------------------------------------------
         
         const timerEl = document.getElementById('timer');
         if (timerEl) timerEl.style.visibility = (data.visTimer !== false) ? 'visible' : 'hidden';
