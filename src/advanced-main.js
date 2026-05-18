@@ -674,28 +674,25 @@ window.toggleShiftMode = () => {
     const torusGrid = document.getElementById('torus-grid');
     
     if (State.shiftMode) {
-        // Activate Torus UI
         if (lockBtn) lockBtn.style.display = 'block';
         if (scrambleBtn) scrambleBtn.style.display = 'block';
         
-        // Hide Classic, Show Torus
-        if (classicGrid) classicGrid.style.display = 'none';
+        // THE FIX: Use visibility so the wrapper doesn't collapse to 0px!
+        if (classicGrid) classicGrid.style.visibility = 'hidden'; 
         if (torusGrid) torusGrid.style.display = 'block';
         
-        // Disable incompatible modes
         document.getElementById('toggle-jigsaw').checked = false;
         document.getElementById('toggle-suguru').checked = false;
         State.jigsawMode = false; State.suguruMode = false;
         if (typeof updateRegionPainterState === 'function') updateRegionPainterState();
         
     } else {
-        // Return to Classic UI
         if (lockBtn) lockBtn.style.display = 'none';
         if (scrambleBtn) scrambleBtn.style.display = 'none';
         if (window.AdvancedState.activeTool === 'lock') window.setTool('pointer');
         
-        // Hide Torus, Show Classic
-        if (classicGrid) classicGrid.style.display = 'grid';
+        // THE FIX: Restore visibility
+        if (classicGrid) classicGrid.style.visibility = 'visible'; 
         if (torusGrid) torusGrid.style.display = 'none';
     }
     
