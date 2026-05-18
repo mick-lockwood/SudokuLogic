@@ -82,8 +82,9 @@
                     <button id="tool-fog-link" class="variant-tool-btn" style="display: none;" onclick="setTool('fog-link')">🔗 Fog Linker</button>
                     <button id="btn-clear-fog" class="variant-action-btn danger" style="display: none; margin-top: 5px;" onclick="clearFogData()">Clear All Fog</button>
                     
-                    <label class="switch-label">Shift Mode (Torus) <input type="checkbox" id="toggle-shift" onchange="toggleShiftMode()"></label>
-                    <button id="tool-lock" class="variant-tool-btn" style="display: none;" onclick="setTool('lock')">🔒 Lock/Unlock Cell</button>
+                    <label class="switch-label">Torus Mode <input type="checkbox" id="toggle-shift" onchange="toggleShiftMode()"></label>
+                    <button id="btn-scramble-torus" class="variant-action-btn active" style="display: none; margin-top: 8px; width: 100%; background: #9b59b6; color: white;" onclick="generateTorusPuzzle()">🎲 Generate Torus</button>
+                    <button id="tool-lock" class="variant-tool-btn" style="display: none; margin-top: 8px;" onclick="setTool('lock')">🔒 Lock/Unlock Cell</button>
                     
                     <label class="switch-label">Show Perimeter Cells <input type="checkbox" id="toggle-outer-clues" onchange="toggleOuterClues()"></label>
                     
