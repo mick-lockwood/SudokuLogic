@@ -21,8 +21,14 @@ export const renderTorusBoard = () => {
     window.TorusState.cellSize = sampleCell ? sampleCell.offsetWidth : 52;
     const cs = window.TorusState.cellSize;
 
-    // --- GRAB THE TOGGLE STATUS ---
     const showErrors = document.getElementById('toggle-errors')?.checked ?? true;
+
+    // --- THE ALIGNMENT FIX ---
+    // Calculate the 5px wrapper padding + the perimeter clue offset
+    const paddingOffset = 5; 
+    const perimeterOffset = State.showOuterClues ? cs : 0;
+    const totalOffset = paddingOffset + perimeterOffset;
+    // -------------------------
 
     container.innerHTML = '';
 
@@ -35,8 +41,10 @@ export const renderTorusBoard = () => {
             tile.className = 'torus-tile';
             tile.id = `torus-tile-${idx}`;
             
-            tile.style.top = `${r * cs}px`;
-            tile.style.left = `${c * cs}px`;
+            // --- APPLY THE EXACT OFFSET TO THE TILES ---
+            tile.style.top = `${(r * cs) + totalOffset}px`;
+            tile.style.left = `${(c * cs) + totalOffset}px`;
+            // -------------------------------------------
 
             if (c % State.bW === State.bW - 1 && c !== State.size - 1) tile.classList.add('thick-right');
             if (r % State.bH === State.bH - 1 && r !== State.size - 1) tile.classList.add('thick-bottom');
