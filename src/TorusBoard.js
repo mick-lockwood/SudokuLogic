@@ -17,84 +17,88 @@ export const renderTorusBoard = () => {
     const container = document.getElementById('torus-grid');
     if (!container || !State.shiftMode) return;
 
+    // We still need the raw cell size for the drag/swipe threshold physics
     const sampleCell = document.querySelector('.cell');
     window.TorusState.cellSize = sampleCell ? sampleCell.offsetWidth : 52;
-    const cs = window.TorusState.cellSize;
 
     const showErrors = document.getElementById('toggle-errors')?.checked ?? true;
 
-    // --- THE ALIGNMENT FIX ---
-    // Calculate the 5px wrapper padding + the perimeter clue offset
-    const paddingOffset = 5; 
-    const perimeterOffset = State.showOuterClues ? cs : 0;
-    const totalOffset = paddingOffset + perimeterOffset;
-    // -------------------------
-
     container.innerHTML = '';
 
-    for (let r = 0; r < State.size; r++) {
-        for (let c = 0; c < State.size; c++) {
-            const idx = r * State.size + c;
-            const cellData = State.board[idx];
+    for (let i = 0; i < State.size * State.size; i++) {
+        const r = Math.floor(i / State.size);
+        const c = i % State.size;
+        const cellData = State.board[i];
 
-            const tile = document.createElement('div');
-            tile.className = 'torus-tile';
-            tile.id = `torus-tile-${idx}`;
-            
-            // --- APPLY THE EXACT OFFSET TO THE TILES ---
-            tile.style.top = `${(r * cs) + totalOffset}px`;
-            tile.style.left = `${(c * cs) + totalOffset}px`;
-            // -------------------------------------------
-
-            if (c % State.bW === State.bW - 1 && c !== State.size - 1) tile.classList.add('thick-right');
-            if (r % State.bH === State.bH - 1 && r !== State.size - 1) tile.classList.add('thick-bottom');
-            if (c === 0) tile.classList.add('thick-left');
-            if (r === 0) tile.classList.add('thick-top');
-
-            if (cellData.given) tile.classList.add('given');
-            else if (cellData.val !== 0) tile.classList.add('user');
-
-            // --- THE FIX: RENDER THE ERRORS ---
-            if (cellData.val !== 0) {
-                tile.innerText = cellData.val;
-                if (showErrors && hasConflict(State.board, idx, cellData.val)) {
-                    tile.classList.add('error');
-                }
-            }
-            // ----------------------------------
-
-            if (cellData.color) {
-                const tint = State.darkMode ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)';
-                const base = cellData.color;
-                tile.style.background = `linear-gradient(${tint}, ${tint}), ${base}`;
-            }
-            if (State.lockedMap && State.lockedMap[idx]) {
-                tile.style.boxShadow = `inset 0 0 0 3px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(0,0,0,0.5)`;
-                tile.innerHTML += `<div style="position: absolute; top: 2px; right: 4px; font-size: 10px; opacity: 0.5;">🔒</div>`;
-            }
-
-            // --- THE FIX: ATTACH CLASSIC SUDOKU LISTENERS ---
-            // This allows the tiles to accept number inputs, locks, and variant drawings!
-            tile.addEventListener('pointerdown', (e) => {
-                if (State.paused || State.isWon) return;
-                e.target.releasePointerCapture(e.pointerId); 
-                if (typeof window.handleCellSelection === 'function') {
-                    window.handleCellSelection(idx, e.ctrlKey || e.metaKey, false);
-                }
-            });
-
-            tile.addEventListener('pointerenter', (e) => {
-                if (State.paused || State.isWon) return;
-                if (e.buttons === 1 && typeof window.handleCellSelection === 'function') { 
-                    window.handleCellSelection(idx, true, true); 
-                }
-            });
-
-            tile.addEventListener('contextmenu', (e) => e.preventDefault());
-            // --------------------------------------------------
-
-            container.appendChild(tile);
+        const tile = document.createElement('div');
+        tile.className = 'torus-tile';
+        tile.id = `torus-tile-${i}`;
+        
+        // --- THE MAGNETIC ALIGNMENT FIX ---
+        // Tiles instantly snap to the exact coordinates of the classic grid, 
+        // completely eliminating alignment bugs when perimeter clues or 6x6 are toggled!
+        const classicCell = document.getElementById(`cell-${i}`);
+        if (classicCell) {
+            tile.style.top = `${classicCell.offsetTop}px`;
+            tile.style.left = `${classicCell.offsetLeft}px`;
+            tile.style.width = `${classicCell.offsetWidth}px`;
+            tile.style.height = `${classicCell.offsetHeight}px`;
         }
+        // ----------------------------------
+
+        if (c % State.bW === State.bW - 1 && c !== State.size - 1) tile.classList.add('thick-right');
+        if (r % State.bH === State.bH - 1 && r !== State.size - 1) tile.classList.add('thick-bottom');
+        if (c === 0) tile.classList.add('thick-left');
+        if (r === 0) tile.classList.add('thick-top');
+
+        if (cellData.given) tile.classList.add('given');
+        else if (cellData.val !== 0) tile.classList.add('user');
+
+        if (cellData.val !== 0) {
+            tile.innerText = cellData.val;
+            if (showErrors && hasConflict(State.board, i, cellData.val)) {
+                tile.classList.add('error');
+            }
+        }
+
+        // Restore Tile Selection Highlights
+        let tint = "transparent";
+        if (State.selected.includes(i)) {
+            tint = State.darkMode ? "rgba(56, 189, 248, 0.5)" : "rgba(52, 152, 219, 0.4)"; 
+            const selBorder = State.darkMode ? "#74b9ff" : "#3498db";
+            tile.style.boxShadow = `inset 0 0 0 2px ${selBorder}`;
+        }
+        
+        if (cellData.color) {
+            const base = cellData.color;
+            tile.style.background = `linear-gradient(${tint}, ${tint}), ${base}`;
+        } else {
+            tile.style.background = `linear-gradient(${tint}, ${tint}), var(--card-bg)`;
+        }
+
+        if (State.lockedMap && State.lockedMap[i]) {
+            tile.style.boxShadow = `inset 0 0 0 3px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(0,0,0,0.5)`;
+            tile.innerHTML += `<div style="position: absolute; top: 2px; right: 4px; font-size: 10px; opacity: 0.5; pointer-events: none;">🔒</div>`;
+        }
+
+        tile.addEventListener('pointerdown', (e) => {
+            if (State.paused || State.isWon) return;
+            e.target.releasePointerCapture(e.pointerId); 
+            if (typeof window.handleCellSelection === 'function') {
+                window.handleCellSelection(i, e.ctrlKey || e.metaKey, false);
+            }
+        });
+
+        tile.addEventListener('pointerenter', (e) => {
+            if (State.paused || State.isWon) return;
+            if (e.buttons === 1 && typeof window.handleCellSelection === 'function') { 
+                window.handleCellSelection(i, true, true); 
+            }
+        });
+
+        tile.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        container.appendChild(tile);
     }
 };
 
