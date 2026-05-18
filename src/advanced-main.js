@@ -669,7 +669,10 @@ window.toggleShiftMode = () => {
     const lockBtn = document.getElementById('tool-lock');
     const scrambleBtn = document.getElementById('btn-scramble-torus');
     
-    // --- THE ARCHITECTURAL SWAPPER ---
+    // --- THE FIX: GRAB THE VISIBILITY LABELS ---
+    const labelSeen = document.getElementById('toggle-seen')?.closest('label');
+    const labelMatch = document.getElementById('toggle-match')?.closest('label');
+    
     const classicGrid = document.getElementById('grid');
     const torusGrid = document.getElementById('torus-grid');
     
@@ -677,7 +680,10 @@ window.toggleShiftMode = () => {
         if (lockBtn) lockBtn.style.display = 'block';
         if (scrambleBtn) scrambleBtn.style.display = 'block';
         
-        // THE FIX: Use visibility so the wrapper doesn't collapse to 0px!
+        // Hide the classic highlights
+        if (labelSeen) labelSeen.style.display = 'none'; 
+        if (labelMatch) labelMatch.style.display = 'none'; 
+        
         if (classicGrid) classicGrid.style.visibility = 'hidden'; 
         if (torusGrid) torusGrid.style.display = 'block';
         
@@ -691,7 +697,10 @@ window.toggleShiftMode = () => {
         if (scrambleBtn) scrambleBtn.style.display = 'none';
         if (window.AdvancedState.activeTool === 'lock') window.setTool('pointer');
         
-        // THE FIX: Restore visibility
+        // Restore the classic highlights
+        if (labelSeen) labelSeen.style.display = 'flex'; 
+        if (labelMatch) labelMatch.style.display = 'flex'; 
+        
         if (classicGrid) classicGrid.style.visibility = 'visible'; 
         if (torusGrid) torusGrid.style.display = 'none';
     }
