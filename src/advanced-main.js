@@ -672,22 +672,34 @@ window.toggleShiftMode = () => {
     const labelSeen = document.getElementById('toggle-seen')?.closest('label');
     const labelMatch = document.getElementById('toggle-match')?.closest('label');
     
-    // --- THE NEW BUTTON TARGETS ---
     const clearInputsLink = document.getElementById('clear-inputs-link');
     const cleanPencilsLink = document.getElementById('clean-pencils-link');
     const autoFillBtn = document.getElementById('btn-autofill-pencils');
     
     const classicGrid = document.getElementById('grid');
     const torusGrid = document.getElementById('torus-grid');
+
+    // --- THE FIX: GRAB CONFLICTING TOGGLES ---
+    const fogToggle = document.getElementById('toggle-fog');
+    const jigsawToggle = document.getElementById('toggle-jigsaw');
+    const suguruToggle = document.getElementById('toggle-suguru');
     
     if (State.shiftMode) {
+        // Uncheck and physically disable the checkboxes!
+        if (fogToggle) { fogToggle.checked = false; fogToggle.disabled = true; }
+        if (jigsawToggle) { jigsawToggle.checked = false; jigsawToggle.disabled = true; }
+        if (suguruToggle) { suguruToggle.checked = false; suguruToggle.disabled = true; }
+        
+        // Let their native functions securely hide their side-bar tools
+        if (typeof window.toggleFogMode === 'function') window.toggleFogMode();
+        if (typeof updateRegionPainterState === 'function') updateRegionPainterState();
+        
         if (lockBtn) lockBtn.style.display = 'block';
         if (scrambleBtn) scrambleBtn.style.display = 'block';
         
         if (labelSeen) labelSeen.style.display = 'none'; 
         if (labelMatch) labelMatch.style.display = 'none'; 
         
-        // Hide Classic Actions
         if (clearInputsLink) clearInputsLink.style.display = 'none';
         if (cleanPencilsLink) cleanPencilsLink.style.display = 'none';
         if (autoFillBtn) autoFillBtn.style.display = 'none';
@@ -695,12 +707,12 @@ window.toggleShiftMode = () => {
         if (classicGrid) classicGrid.style.visibility = 'hidden'; 
         if (torusGrid) torusGrid.style.display = 'block';
         
-        document.getElementById('toggle-jigsaw').checked = false;
-        document.getElementById('toggle-suguru').checked = false;
-        State.jigsawMode = false; State.suguruMode = false;
-        if (typeof updateRegionPainterState === 'function') updateRegionPainterState();
-        
     } else {
+        // Re-enable the checkboxes so the user can play them again
+        if (fogToggle) fogToggle.disabled = false;
+        if (jigsawToggle) jigsawToggle.disabled = false;
+        if (suguruToggle) suguruToggle.disabled = false;
+
         if (lockBtn) lockBtn.style.display = 'none';
         if (scrambleBtn) scrambleBtn.style.display = 'none';
         if (window.AdvancedState.activeTool === 'lock') window.setTool('pointer');
@@ -708,7 +720,6 @@ window.toggleShiftMode = () => {
         if (labelSeen) labelSeen.style.display = 'flex'; 
         if (labelMatch) labelMatch.style.display = 'flex'; 
         
-        // Restore Classic Actions
         if (clearInputsLink) clearInputsLink.style.display = 'inline';
         if (cleanPencilsLink) cleanPencilsLink.style.display = 'inline';
         if (autoFillBtn && State.mode === 'solve') autoFillBtn.style.display = 'inline';
@@ -974,6 +985,14 @@ window.setGridSize = (s) => {
     window.AdvancedState.variantUndoStack = [];
     window.AdvancedState.variantRedoStack = [];
 
+    // --- THE FIX: SAFELY ABORT TORUS MODE BEFORE RESIZING ---
+    const shiftToggle = document.getElementById('toggle-shift');
+    if (shiftToggle && shiftToggle.checked) {
+        shiftToggle.checked = false;
+        window.toggleShiftMode(); // Turn it off completely to avoid ghost math crashes
+    }
+    // --------------------------------------------------------
+
     // 3. Run the original classic grid swap logic
     if (originalSetGridSize) originalSetGridSize(s);
     
@@ -1081,33 +1100,40 @@ setTimeout(() => {
 window.updateDynamicTitle = () => {
     if (window.isCustomTitle || State.isPlayOnly) return;
 
-    const activeTypes = new Set();
+    // --- THE FIX: SPLIT PREFIXES FROM CORE MODES ---
+    const prefixTypes = new Set();
+    const coreTypes = new Set();
     
     if (State.variants) {
         State.variants.forEach(v => {
-            if (v.type === 'thermo') activeTypes.add('Thermo');
-            if (v.type === 'whisper') activeTypes.add('German Whisper');
-            if (v.type === 'killer') activeTypes.add('Killer');
-            if (v.type.startsWith('kropki')) activeTypes.add('Kropki');
+            if (v.type === 'thermo') prefixTypes.add('Thermo');
+            if (v.type === 'whisper') prefixTypes.add('German Whisper');
+            if (v.type === 'killer') prefixTypes.add('Killer');
+            if (v.type.startsWith('kropki')) prefixTypes.add('Kropki');
         });
     }
     
-    if (State.jigsawMode) activeTypes.add('Jigsaw');
-    if (State.suguruMode) activeTypes.add('Suguru');
-    if (State.antiKnight) activeTypes.add('Anti-Knight');
-    if (State.antiKing) activeTypes.add('Anti-King');
-    if (document.getElementById('rule-sandwich')?.checked) activeTypes.add('Sandwich');
-    if (document.getElementById('rule-skyscraper')?.checked) activeTypes.add('Skyscraper');
-    if (document.getElementById('rule-frames')?.checked) activeTypes.add('Frames');
-    if (document.getElementById('rule-rooms')?.checked) activeTypes.add('Rooms');
+    if (State.antiKnight) prefixTypes.add('Anti-Knight');
+    if (State.antiKing) prefixTypes.add('Anti-King');
+    if (document.getElementById('rule-sandwich')?.checked) prefixTypes.add('Sandwich');
+    if (document.getElementById('rule-skyscraper')?.checked) prefixTypes.add('Skyscraper');
+    if (document.getElementById('rule-frames')?.checked) prefixTypes.add('Frames');
+    if (document.getElementById('rule-rooms')?.checked) prefixTypes.add('Rooms');
+    
+    // Core modes glue directly next to "Sudoku"
+    if (State.fogMode) coreTypes.add('Fog of War');
+    if (State.shiftMode) coreTypes.add('Torus');
+    if (State.jigsawMode) coreTypes.add('Jigsaw');
+    if (State.suguruMode) coreTypes.add('Suguru');
     
     const titleEl = document.getElementById('puzzle-title');
     if (titleEl) {
-        if (activeTypes.size > 0) {
-            titleEl.innerText = Array.from(activeTypes).join(' ') + ' Sudoku';
-        } else {
-            titleEl.innerText = 'Sudoku Logic'; 
-        }
+        let parts = [];
+        if (prefixTypes.size > 0) parts.push(Array.from(prefixTypes).join(' '));
+        if (coreTypes.size > 0) parts.push(Array.from(coreTypes).join(' '));
+        parts.push('Sudoku');
+        
+        titleEl.innerText = parts.join(' ');
     }
 };
 
