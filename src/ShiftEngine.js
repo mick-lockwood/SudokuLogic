@@ -1,6 +1,8 @@
 // src/ShiftEngine.js
 import { State, saveState } from './GameState.js';
 
+window.AdvancedState = window.AdvancedState || {};
+
 // Setup the internal drag state
 window.AdvancedState.torusDrag = {
     active: false,
