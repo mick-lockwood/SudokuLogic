@@ -148,6 +148,13 @@ export function updateUI() {
             let highlightBase = data.color || (State.darkMode ? "#1e293b" : "white");
             el.style.background = `linear-gradient(${tint}, ${tint}), ${highlightBase}`;
 
+            // --- NEW: RENDER LOCK OVERLAY ---
+            if (State.lockedMap && State.lockedMap[i]) {
+                el.style.boxShadow = `inset 0 0 0 3px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(0,0,0,0.5)`;
+                // Optional: Add a faint padlock icon in the corner
+                el.innerHTML += `<div style="position: absolute; top: 2px; right: 4px; font-size: 10px; opacity: 0.5; pointer-events: none; z-index: 5;">🔒</div>`;
+            }
+
             // --- NEW: FOG RENDERING ---
             const isFogged = State.fogMode && State.fogMap && State.fogMap[i];
             const isRevealed = State.mode === 'solve' && State.fogRevealed && State.fogRevealed[i];
