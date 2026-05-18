@@ -1213,6 +1213,7 @@ window.forceAutosave = () => {
         darkMode: State.darkMode,
         shiftMode: State.shiftMode,
         lockedMap: State.lockedMap,
+        torusScrambleStart: State.torusScrambleStart,
         
         // Toggles & Rules
         antiKnight: State.antiKnight,
@@ -1293,6 +1294,7 @@ window.loadAutosave = () => {
 
         State.shiftMode = data.shiftMode || false;
         State.lockedMap = data.lockedMap || Array(data.size * data.size).fill(false);
+        State.torusScrambleStart = data.torusScrambleStart || null;
         
         // --- 1. RESTORE ALL CHECKBOXES ---
         const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
