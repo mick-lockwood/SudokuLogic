@@ -152,11 +152,11 @@ window.handleCellSelection = (index, isMulti, isDragging) => {
         }
     }
 
-        // --- NEW: LOCK PAINTER LOGIC ---
+    // --- NEW: LOCK PAINTER LOGIC ---
     else if (tool === 'lock' && State.mode === 'create') {
         if (!isClueCell && !isDragging) {
             State.lockedMap[index] = !State.lockedMap[index];
-            if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
+            if (typeof window.updateUI === 'function') window.updateUI();
         }
         return;
     }
@@ -664,25 +664,23 @@ window.addEventListener('pointerup', () => {
 // =====================================================================
 // --- SHIFT MODE (TORUS) ENGINE ---
 // =====================================================================
-
 window.toggleShiftMode = () => {
     State.shiftMode = document.getElementById('toggle-shift').checked;
     const lockBtn = document.getElementById('tool-lock');
     
     if (State.shiftMode) {
         if (lockBtn) lockBtn.style.display = 'block';
-        // Auto-disable Jigsaw/Suguru as they conflict with row shifting
         document.getElementById('toggle-jigsaw').checked = false;
         document.getElementById('toggle-suguru').checked = false;
         State.jigsawMode = false; State.suguruMode = false;
-        if (typeof window.updateRegionPainterState === 'function') window.updateRegionPainterState();
+        if (typeof updateRegionPainterState === 'function') updateRegionPainterState();
     } else {
         if (lockBtn) lockBtn.style.display = 'none';
         if (window.AdvancedState.activeTool === 'lock') window.setTool('pointer');
     }
     
     if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
-    if (typeof Renderer !== 'undefined' && Renderer.updateUI) Renderer.updateUI();
+    if (typeof window.updateUI === 'function') window.updateUI();
 };
 
 // --- ARRAY SHIFTING MATH ---
