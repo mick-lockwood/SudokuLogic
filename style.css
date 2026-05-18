@@ -687,6 +687,36 @@ body.dark-mode #return-win-btn {
     color: var(--text-main);
 }
 
+/* --- SHIFT MODE ARROWS --- */
+.shift-arrow {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    color: white;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: all 0.2s;
+    user-select: none;
+    z-index: 50;
+}
+.shift-arrow:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+.shift-arrow:active {
+    transform: scale(0.9);
+}
+.shift-arrow.locked {
+    background: var(--danger);
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
 /* --- VARIANT TOOL BUTTONS --- */
 .variant-tool-btn {
     font-size: 11px;
