@@ -70,15 +70,20 @@
                     <hr class="tool-divider" style="margin: 10px 0;">
                     
                     <h3 style="margin: 5px 0; color: var(--text-main);">Grid Modifications</h3>  
+                    
+                    <label class="switch-label">Jigsaw Regions <input type="checkbox" id="toggle-jigsaw" onchange="toggleJigsawMode()"></label>
+                    <label class="switch-label">Suguru Regions <input type="checkbox" id="toggle-suguru" onchange="toggleSuguruMode()"></label>y
                     <button id="tool-region" class="variant-tool-btn" style="display: none;" onclick="setTool('region')">Region Painter</button>
                     <button id="btn-reset-regions" class="variant-action-btn danger" style="display: none; margin-bottom: 8px;" onclick="resetRegions()">Reset Regions</button>
-                    <label class="switch-label">Jigsaw Regions <input type="checkbox" id="toggle-jigsaw" onchange="toggleJigsawMode()"></label>
-                    <label class="switch-label">Suguru Regions <input type="checkbox" id="toggle-suguru" onchange="toggleSuguruMode()"></label>
                     
+                    
+                    <label class="switch-label">Fog of War <input type="checkbox" id="toggle-fog" onchange="toggleFogMode()"></label>
                     <button id="tool-fog" class="variant-tool-btn" style="display: none;" onclick="setTool('fog')">☁️ Paint Fog</button>
                     <button id="tool-fog-link" class="variant-tool-btn" style="display: none;" onclick="setTool('fog-link')">🔗 Fog Linker</button>
                     <button id="btn-clear-fog" class="variant-action-btn danger" style="display: none; margin-top: 5px;" onclick="clearFogData()">Clear All Fog</button>
-                    <label class="switch-label">Fog of War <input type="checkbox" id="toggle-fog" onchange="toggleFogMode()"></label>
+                    
+                    <label class="switch-label">Shift Mode (Torus) <input type="checkbox" id="toggle-shift" onchange="toggleShiftMode()"></label>
+                    <button id="tool-lock" class="variant-tool-btn" style="display: none;" onclick="setTool('lock')">🔒 Lock/Unlock Cell</button>
                     
                     <label class="switch-label">Show Perimeter Cells <input type="checkbox" id="toggle-outer-clues" onchange="toggleOuterClues()"></label>
                     
