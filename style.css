@@ -760,6 +760,7 @@ body.dark-mode .torus-tile.error { color: #fb923c !important; }
 /* 2. Hides inner cells but leaves clues visible! */
 #grid.torus-active .cell { 
     visibility: hidden;
+}
 
 /* --- VARIANT TOOL BUTTONS --- */
 .variant-tool-btn {
