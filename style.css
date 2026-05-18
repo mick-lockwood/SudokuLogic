@@ -753,6 +753,9 @@ body.dark-mode .torus-tile { color: #f8fafc; }
 .torus-tile.given { color: #64748b; }
 body.dark-mode .torus-tile.given { color: #38bdf8; font-weight: 800; }
 
+.torus-tile.error { color: var(--danger) !important; }
+body.dark-mode .torus-tile.error { color: #fb923c !important; }
+
 /* --- VARIANT TOOL BUTTONS --- */
 .variant-tool-btn {
     font-size: 11px;
