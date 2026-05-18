@@ -83,6 +83,40 @@ Where N = the number of cells in the region.\n
 Identical digits cannot touch anywhere, even diagonally.\n
 Use the Region Painter tool to draw your own grid shapes.\n
 Example: A region with a total of 5 cells must contain the digits 1-5`,
+
+    'toggle-fog': 
+`Cover the board in fog.
+Placing correct digits reveals cells.\n
+Use Paint Fog to apply fog to cells.y\n
+Use Fog Linker to set a source and target.
+When the source cell is solved correctly, 
+the target cell's fog will clear.`,
+    
+    'tool-fog': 
+`Paint fog clouds over specific cells.`,
+    
+    'tool-fog-link': 
+`Link a cell to other fogged cells.\n
+When the source cell is solved correctly, 
+the target cell's fog will clear.`,
+
+    'btn-clear-fog': 
+`Erase all fog and links from the board.`,
+
+    'toggle-shift': 
+`Torus Mode:\n
+Drag rows and columns to to slide them.\n
+Solved by satisfying classic sudoku rules,
+and any other applied variant`,
+    
+    'btn-scramble-torus': 
+`Instantly generates a full board and
+scrambles it by sliding rows and columns.`,
+    
+    'tool-lock': 
+`Lock a cell in place.\n
+Locked cells prevent their entire row
+and column from sliding in Torus Mode.`,
     
     'toggle-outer-clues':
 `Show or hide the perimeter cells around the grid
