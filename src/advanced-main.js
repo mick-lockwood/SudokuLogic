@@ -704,7 +704,7 @@ window.toggleShiftMode = () => {
         if (cleanPencilsLink) cleanPencilsLink.style.display = 'none';
         if (autoFillBtn) autoFillBtn.style.display = 'none';
         
-        if (classicGrid) classicGrid.style.visibility = 'hidden'; 
+        if (classicGrid) classicGrid.classList.add('torus-active'); 
         if (torusGrid) torusGrid.style.display = 'block';
         
     } else {
@@ -724,7 +724,7 @@ window.toggleShiftMode = () => {
         if (cleanPencilsLink) cleanPencilsLink.style.display = 'inline';
         if (autoFillBtn && State.mode === 'solve') autoFillBtn.style.display = 'inline';
         
-        if (classicGrid) classicGrid.style.visibility = 'visible'; 
+        if (classicGrid) classicGrid.classList.remove('torus-active'); 
         if (torusGrid) torusGrid.style.display = 'none';
     }
     
