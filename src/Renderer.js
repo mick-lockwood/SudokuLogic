@@ -605,7 +605,8 @@ export function updateGameRules() {
     }
 
     // 2. Global Modifiers
-    if (State.fogMode) rules.push(GameRules.fog()); // <-- ADDED THIS FOG RULE!
+    if (State.fogMode) rules.push(GameRules.fog());
+    if (State.shiftMode) rules.push(GameRules.torus());
     if (State.antiKnight) rules.push(GameRules.antiKnight());
     if (State.antiKing && !State.suguruMode) rules.push(GameRules.antiKing());
 
