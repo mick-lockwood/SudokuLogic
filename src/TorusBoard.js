@@ -16,10 +16,9 @@ export const renderTorusBoard = () => {
     const container = document.getElementById('torus-grid');
     if (!container || !State.shiftMode) return;
 
-    // Grab the actual cell size from CSS variables
-    const rootStyles = getComputedStyle(document.documentElement);
-    const sizeStr = rootStyles.getPropertyValue('--cell-size').replace('px', '').trim();
-    window.TorusState.cellSize = parseFloat(sizeStr) || 52;
+    // THE FIX: Measure a real cell to get pixel-perfect responsiveness on mobile!
+    const sampleCell = document.querySelector('.cell');
+    window.TorusState.cellSize = sampleCell ? sampleCell.offsetWidth : 52;
     const cs = window.TorusState.cellSize;
 
     container.innerHTML = '';
