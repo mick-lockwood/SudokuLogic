@@ -666,12 +666,16 @@ window.addEventListener('pointerup', () => {
 // =====================================================================
 window.toggleShiftMode = () => {
     State.shiftMode = document.getElementById('toggle-shift').checked;
+    
     const lockBtn = document.getElementById('tool-lock');
     const scrambleBtn = document.getElementById('btn-scramble-torus');
-    
-    // --- THE FIX: GRAB THE VISIBILITY LABELS ---
     const labelSeen = document.getElementById('toggle-seen')?.closest('label');
     const labelMatch = document.getElementById('toggle-match')?.closest('label');
+    
+    // --- THE NEW BUTTON TARGETS ---
+    const clearInputsLink = document.getElementById('clear-inputs-link');
+    const cleanPencilsLink = document.getElementById('clean-pencils-link');
+    const autoFillBtn = document.getElementById('btn-autofill-pencils');
     
     const classicGrid = document.getElementById('grid');
     const torusGrid = document.getElementById('torus-grid');
@@ -679,10 +683,13 @@ window.toggleShiftMode = () => {
     if (State.shiftMode) {
         if (lockBtn) lockBtn.style.display = 'block';
         if (scrambleBtn) scrambleBtn.style.display = 'block';
-        
-        // Hide the classic highlights
         if (labelSeen) labelSeen.style.display = 'none'; 
         if (labelMatch) labelMatch.style.display = 'none'; 
+        
+        // Hide Classic Actions
+        if (clearInputsLink) clearInputsLink.style.display = 'none';
+        if (cleanPencilsLink) cleanPencilsLink.style.display = 'none';
+        if (autoFillBtn) autoFillBtn.style.display = 'none';
         
         if (classicGrid) classicGrid.style.visibility = 'hidden'; 
         if (torusGrid) torusGrid.style.display = 'block';
@@ -697,9 +704,14 @@ window.toggleShiftMode = () => {
         if (scrambleBtn) scrambleBtn.style.display = 'none';
         if (window.AdvancedState.activeTool === 'lock') window.setTool('pointer');
         
-        // Restore the classic highlights
         if (labelSeen) labelSeen.style.display = 'flex'; 
         if (labelMatch) labelMatch.style.display = 'flex'; 
+        
+        // Restore Classic Actions
+        if (clearInputsLink) clearInputsLink.style.display = 'inline';
+        if (cleanPencilsLink) cleanPencilsLink.style.display = 'inline';
+        // Auto-fill relies on Solve Mode, so we let setAppMode handle it!
+        if (autoFillBtn && State.mode === 'solve') autoFillBtn.style.display = 'inline';
         
         if (classicGrid) classicGrid.style.visibility = 'visible'; 
         if (torusGrid) torusGrid.style.display = 'none';
@@ -1123,14 +1135,34 @@ window.handleClearDigitsCreate = () => {
 
 // 3. SOLVE MODE: Full Restart
 window.handleResetSolve = () => {
+    // --- TORUS RESTART LOGIC ---
+    if (State.shiftMode) {
+        if (!confirm("Restart Torus puzzle? This will undo all your shifts and return the board to its initial scrambled state.")) return;
+        
+        if (State.torusScrambleStart) {
+            State.board = JSON.parse(State.torusScrambleStart);
+            State.isWon = false;
+            
+            const winOverlay = document.getElementById('win-overlay');
+            if (winOverlay) winOverlay.style.display = 'none';
+            if (typeof Renderer !== 'undefined' && Renderer.stopConfetti) Renderer.stopConfetti();
+            if (typeof window.updateUI === 'function') window.updateUI();
+        } else {
+            alert("No starting state found. Please click 'Generate Torus' to scramble a new puzzle!");
+        }
+        return;
+    }
+
+    // --- CLASSIC RESTART LOGIC ---
     if (!confirm("Restart puzzle? This will clear your inputs, pencils, and reset the fog.")) return;
     State.board.forEach(c => { if(!c.given) { c.val = 0; c.notes = []; c.color = null; } });
     if (State.fogMode) State.fogRevealed = Array(State.size * State.size).fill(false);
     State.isWon = false;
+    
     const winOverlay = document.getElementById('win-overlay');
     if (winOverlay) winOverlay.style.display = 'none';
     if (typeof Renderer !== 'undefined' && Renderer.stopConfetti) Renderer.stopConfetti();
-    if (typeof Renderer !== 'undefined' && window.updateUI) window.updateUI();
+    if (typeof window.updateUI === 'function') window.updateUI();
 };
 
 // 4. SOLVE MODE: Inputs Only
@@ -1338,7 +1370,7 @@ window.loadAutosave = () => {
         if (variantPanel) variantPanel.style.display = (m === 'create') ? 'flex' : 'none';
         
         const autoFillBtn = document.getElementById('btn-autofill-pencils');
-        if (autoFillBtn) autoFillBtn.style.display = (m === 'solve') ? 'inline' : 'none';
+        if (autoFillBtn) autoFillBtn.style.display = (m === 'solve' && !State.shiftMode) ? 'inline' : 'none';
         
         const timerEl = document.getElementById('timer');
         if (timerEl) timerEl.style.visibility = (data.visTimer !== false) ? 'visible' : 'hidden';
