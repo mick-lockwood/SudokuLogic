@@ -152,7 +152,19 @@ export const renderShiftArrows = () => {
     }
 };
 
-// --- 3. GESTURE TRACKER ---
+// --- 3. GESTURE TRACKER (TREADMILL PHYSICS) ---
+
+const getDragElements = (axis, index) => {
+    const els = [];
+    for (let i = 0; i < State.size; i++) {
+        // Find the 9 cells in the current row or col
+        const idx = axis === 'row' ? (index * State.size + i) : (i * State.size + index);
+        const el = document.getElementById(`cell-${idx}`);
+        if (el) els.push(el);
+    }
+    return els;
+};
+
 window.addEventListener('pointerdown', (e) => {
     if (!State.shiftMode || State.paused || State.isWon) return;
     const target = e.target.closest('.cell');
@@ -167,13 +179,110 @@ window.addEventListener('pointerdown', (e) => {
         startX: e.clientX,
         startY: e.clientY,
         axis: null, 
-        index: idx,
+        elements: null,
         r: Math.floor(idx / State.size),
         c: idx % State.size,
-        accumulatedDelta: 0,
         cellSize: target.offsetWidth
     };
 }, { passive: true });
+
+window.addEventListener('pointermove', (e) => {
+    const drag = window.AdvancedState.torusDrag;
+    if (!drag.active) return;
+
+    const deltaX = e.clientX - drag.startX;
+    const deltaY = e.clientY - drag.startY;
+
+    // 1. Determine the swipe direction
+    if (!drag.axis) {
+        if (Math.abs(deltaX) > 10) {
+            drag.axis = 'row';
+            drag.elements = getDragElements('row', drag.r);
+        } else if (Math.abs(deltaY) > 10) {
+            drag.axis = 'col';
+            drag.elements = getDragElements('col', drag.c);
+        } else {
+            return; 
+        }
+
+        // Abort drag immediately if they are trying to drag a Locked row/col!
+        let isLocked = false;
+        for (let i = 0; i < State.size; i++) {
+            if (drag.axis === 'row' && State.lockedMap[drag.r * State.size + i]) isLocked = true;
+            if (drag.axis === 'col' && State.lockedMap[i * State.size + drag.c]) isLocked = true;
+        }
+        if (isLocked) {
+            drag.active = false;
+            return;
+        }
+
+        // Pop the dragging row/col above the other cells so it glides cleanly over them
+        drag.elements.forEach(el => el.style.zIndex = '20'); 
+    }
+
+    // 2. The Treadmill Physics
+    const threshold = drag.cellSize; 
+
+    if (drag.axis === 'row') {
+        // Physically move the HTML elements 1:1 with the mouse
+        drag.elements.forEach(el => el.style.transform = `translateX(${deltaX}px)`);
+
+        // Did they drag a full cell width?
+        if (Math.abs(deltaX) >= threshold) {
+            const dir = deltaX > 0 ? 1 : -1;
+            
+            // 1. Clear the physical transforms
+            drag.elements.forEach(el => { el.style.transform = 'translate(0, 0)'; el.style.zIndex = ''; });
+            
+            // 2. Fire the Array Math
+            window.shiftRow(drag.r, dir);
+            
+            // 3. Shift the origin point so they can keep dragging infinitely
+            drag.startX += (dir * threshold);
+            
+            // 4. Grab the newly rebuilt elements and re-apply the remaining drag delta
+            drag.elements = getDragElements('row', drag.r);
+            drag.elements.forEach(el => {
+                el.style.zIndex = '20';
+                el.style.transform = `translateX(${e.clientX - drag.startX}px)`;
+            });
+        }
+    } else if (drag.axis === 'col') {
+        drag.elements.forEach(el => el.style.transform = `translateY(${deltaY}px)`);
+
+        if (Math.abs(deltaY) >= threshold) {
+            const dir = deltaY > 0 ? 1 : -1;
+            
+            drag.elements.forEach(el => { el.style.transform = 'translate(0, 0)'; el.style.zIndex = ''; });
+            window.shiftCol(drag.c, dir);
+            drag.startY += (dir * threshold);
+            
+            drag.elements = getDragElements('col', drag.c);
+            drag.elements.forEach(el => {
+                el.style.zIndex = '20';
+                el.style.transform = `translateY(${e.clientY - drag.startY}px)`;
+            });
+        }
+    }
+}, { passive: true });
+
+// 3. The Snap-Back Physics
+// If they let go before crossing the threshold, animate the cells snapping back to the center
+window.addEventListener('pointerup', () => { 
+    const drag = window.AdvancedState.torusDrag;
+    if (drag.active && drag.elements) {
+        drag.elements.forEach(el => {
+            el.style.transition = 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)';
+            el.style.transform = 'translate(0px, 0px)';
+            setTimeout(() => {
+                el.style.transition = '';
+                el.style.zIndex = '';
+            }, 150);
+        });
+    }
+    drag.active = false; 
+});
+window.addEventListener('pointercancel', () => { window.dispatchEvent(new Event('pointerup')); });
 
 window.addEventListener('pointermove', (e) => {
     const drag = window.AdvancedState.torusDrag;
