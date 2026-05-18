@@ -1,6 +1,7 @@
 // src/TorusBoard.js
 import { State } from './GameState.js';
 import { shiftRow, shiftCol } from './ShiftEngine.js';
+import { hasConflict } from './SudokuLogic.js';
 
 window.TorusState = {
     dragActive: false,
@@ -16,10 +17,12 @@ export const renderTorusBoard = () => {
     const container = document.getElementById('torus-grid');
     if (!container || !State.shiftMode) return;
 
-    // Grab the actual cell size from the classic grid for perfect alignment
     const sampleCell = document.querySelector('.cell');
     window.TorusState.cellSize = sampleCell ? sampleCell.offsetWidth : 52;
     const cs = window.TorusState.cellSize;
+
+    // --- GRAB THE TOGGLE STATUS ---
+    const showErrors = document.getElementById('toggle-errors')?.checked ?? true;
 
     container.innerHTML = '';
 
@@ -32,23 +35,26 @@ export const renderTorusBoard = () => {
             tile.className = 'torus-tile';
             tile.id = `torus-tile-${idx}`;
             
-            // Absolute positioning
             tile.style.top = `${r * cs}px`;
             tile.style.left = `${c * cs}px`;
 
-            // Style standard 3x3 boxes
             if (c % State.bW === State.bW - 1 && c !== State.size - 1) tile.classList.add('thick-right');
             if (r % State.bH === State.bH - 1 && r !== State.size - 1) tile.classList.add('thick-bottom');
             if (c === 0) tile.classList.add('thick-left');
             if (r === 0) tile.classList.add('thick-top');
 
-            // Data population
             if (cellData.given) tile.classList.add('given');
             else if (cellData.val !== 0) tile.classList.add('user');
 
-            if (cellData.val !== 0) tile.innerText = cellData.val;
+            // --- THE FIX: RENDER THE ERRORS ---
+            if (cellData.val !== 0) {
+                tile.innerText = cellData.val;
+                if (showErrors && hasConflict(State.board, idx, cellData.val)) {
+                    tile.classList.add('error');
+                }
+            }
+            // ----------------------------------
 
-            // Colors and Locks
             if (cellData.color) {
                 const tint = State.darkMode ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)';
                 const base = cellData.color;
