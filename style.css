@@ -190,7 +190,9 @@ body.dark-mode .switch-label { color: #f8fafc; }
 }
 
 .grid { 
-    display: grid; 
+    display: grid;
+    overflow: hidden;
+    border-radius: 8px;
 }
 
 .cell {
