@@ -143,6 +143,10 @@ window.generateTorusPuzzle = () => {
         
         if (success) successfulShifts++;
     }
+
+    // --- SNAPSHOT THE STARTING STATE ---
+    State.torusScrambleStart = JSON.stringify(State.board);
+    // --------------------------------------------
     
     State.isWon = false;
     State.undoStack = []; 
