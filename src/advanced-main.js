@@ -667,19 +667,36 @@ window.addEventListener('pointerup', () => {
 window.toggleShiftMode = () => {
     State.shiftMode = document.getElementById('toggle-shift').checked;
     const lockBtn = document.getElementById('tool-lock');
-    const scrambleBtn = document.getElementById('btn-scramble-torus'); // Grab the button
+    const scrambleBtn = document.getElementById('btn-scramble-torus');
+    
+    // --- THE ARCHITECTURAL SWAPPER ---
+    const classicGrid = document.getElementById('grid');
+    const torusGrid = document.getElementById('torus-grid');
     
     if (State.shiftMode) {
+        // Activate Torus UI
         if (lockBtn) lockBtn.style.display = 'block';
-        if (scrambleBtn) scrambleBtn.style.display = 'block'; // Show it
+        if (scrambleBtn) scrambleBtn.style.display = 'block';
+        
+        // Hide Classic, Show Torus
+        if (classicGrid) classicGrid.style.display = 'none';
+        if (torusGrid) torusGrid.style.display = 'block';
+        
+        // Disable incompatible modes
         document.getElementById('toggle-jigsaw').checked = false;
         document.getElementById('toggle-suguru').checked = false;
         State.jigsawMode = false; State.suguruMode = false;
         if (typeof updateRegionPainterState === 'function') updateRegionPainterState();
+        
     } else {
+        // Return to Classic UI
         if (lockBtn) lockBtn.style.display = 'none';
-        if (scrambleBtn) scrambleBtn.style.display = 'none'; // Hide it
+        if (scrambleBtn) scrambleBtn.style.display = 'none';
         if (window.AdvancedState.activeTool === 'lock') window.setTool('pointer');
+        
+        // Hide Torus, Show Classic
+        if (classicGrid) classicGrid.style.display = 'grid';
+        if (torusGrid) torusGrid.style.display = 'none';
     }
     
     if (typeof window.updateDynamicTitle === 'function') window.updateDynamicTitle();
