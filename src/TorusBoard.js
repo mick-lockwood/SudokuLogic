@@ -17,11 +17,17 @@ export const renderTorusBoard = () => {
     const container = document.getElementById('torus-grid');
     if (!container || !State.shiftMode) return;
 
-    // We still need the raw cell size for the drag/swipe threshold physics
+    // --- THE SUBPIXEL FIX ---
+    // Use getBoundingClientRect to capture exact decimal values (e.g., 38.412px)
+    // This perfectly syncs the drag-physics threshold on high-DPI mobile screens
     const sampleCell = document.querySelector('.cell');
-    window.TorusState.cellSize = sampleCell ? sampleCell.offsetWidth : 52;
+    window.TorusState.cellSize = sampleCell ? sampleCell.getBoundingClientRect().width : 52;
+    const cs = window.TorusState.cellSize;
 
     const showErrors = document.getElementById('toggle-errors')?.checked ?? true;
+    
+    // Grab the exact float coordinates of the wrapper
+    const containerRect = container.getBoundingClientRect();
 
     container.innerHTML = '';
 
@@ -34,17 +40,18 @@ export const renderTorusBoard = () => {
         tile.className = 'torus-tile';
         tile.id = `torus-tile-${i}`;
         
-        // --- THE MAGNETIC ALIGNMENT FIX ---
-        // Tiles instantly snap to the exact coordinates of the classic grid, 
-        // completely eliminating alignment bugs when perimeter clues or 6x6 are toggled!
+        // --- THE MAGNETIC ALIGNMENT FIX (HIGH PRECISION) ---
+        // Tiles instantly snap to the exact subpixel coordinates of the classic grid.
+        // This eliminates all missing/thick grid lines on mobile and zoomed screens!
         const classicCell = document.getElementById(`cell-${i}`);
         if (classicCell) {
-            tile.style.top = `${classicCell.offsetTop}px`;
-            tile.style.left = `${classicCell.offsetLeft}px`;
-            tile.style.width = `${classicCell.offsetWidth}px`;
-            tile.style.height = `${classicCell.offsetHeight}px`;
+            const rect = classicCell.getBoundingClientRect();
+            tile.style.top = `${rect.top - containerRect.top}px`;
+            tile.style.left = `${rect.left - containerRect.left}px`;
+            tile.style.width = `${rect.width}px`;
+            tile.style.height = `${rect.height}px`;
         }
-        // ----------------------------------
+        // ---------------------------------------------------
 
         if (c % State.bW === State.bW - 1 && c !== State.size - 1) tile.classList.add('thick-right');
         if (r % State.bH === State.bH - 1 && r !== State.size - 1) tile.classList.add('thick-bottom');
