@@ -17,95 +17,136 @@ export const renderTorusBoard = () => {
     const container = document.getElementById('torus-grid');
     if (!container || !State.shiftMode) return;
 
-    // --- THE SUBPIXEL FIX ---
-    // Use getBoundingClientRect to capture exact decimal values (e.g., 38.412px)
-    // This perfectly syncs the drag-physics threshold on high-DPI mobile screens
+    // Use getBoundingClientRect for precise swipe-physics thresholding
     const sampleCell = document.querySelector('.cell');
     window.TorusState.cellSize = sampleCell ? sampleCell.getBoundingClientRect().width : 52;
     const cs = window.TorusState.cellSize;
 
     const showErrors = document.getElementById('toggle-errors')?.checked ?? true;
-    
-    // Grab the exact float coordinates of the wrapper
-    const containerRect = container.getBoundingClientRect();
 
     container.innerHTML = '';
+    
+    // --- THE CSS GRID SUBPIXEL FIX ---
+    // Instead of absolutely positioning tiles with math, we turn the wrapper
+    // into a CSS grid perfectly mirroring the classic grid! The browser will
+    // automatically handle subpixel anti-aliasing flawlessly.
+    container.style.display = 'grid';
+    container.style.gap = '0px';
+    container.style.justifyContent = 'center';
+    container.style.alignContent = 'start'; 
+    container.style.paddingTop = '5px'; // Matches #grid-wrapper's vertical padding
+    
+    const show = State.showOuterClues;
+    container.style.gridTemplateColumns = `repeat(${show ? State.size + 2 : State.size}, var(--cell-size))`;
 
-    for (let i = 0; i < State.size * State.size; i++) {
-        const r = Math.floor(i / State.size);
-        const c = i % State.size;
-        const cellData = State.board[i];
+    const thinGridLine = State.darkMode ? "#475569" : "#1e293b"; 
+    const thickGridLine = State.darkMode ? "#ffffff" : "#1e293b";
 
-        const tile = document.createElement('div');
-        tile.className = 'torus-tile';
-        tile.id = `torus-tile-${i}`;
-        
-        // --- THE MAGNETIC ALIGNMENT FIX (HIGH PRECISION) ---
-        // Tiles instantly snap to the exact subpixel coordinates of the classic grid.
-        // This eliminates all missing/thick grid lines on mobile and zoomed screens!
-        const classicCell = document.getElementById(`cell-${i}`);
-        if (classicCell) {
-            const rect = classicCell.getBoundingClientRect();
-            tile.style.top = `${rect.top - containerRect.top}px`;
-            tile.style.left = `${rect.left - containerRect.left}px`;
-            tile.style.width = `${rect.width}px`;
-            tile.style.height = `${rect.height}px`;
-        }
-        // ---------------------------------------------------
+    const start = show ? -1 : 0;
+    const end = show ? State.size : State.size - 1;
 
-        if (c % State.bW === State.bW - 1 && c !== State.size - 1) tile.classList.add('thick-right');
-        if (r % State.bH === State.bH - 1 && r !== State.size - 1) tile.classList.add('thick-bottom');
-        if (c === 0) tile.classList.add('thick-left');
-        if (r === 0) tile.classList.add('thick-top');
+    for (let r = start; r <= end; r++) {
+        for (let c = start; c <= end; c++) {
+            const isOuter = (r === -1 || r === State.size || c === -1 || c === State.size);
+            
+            if (isOuter) {
+                // Render invisible grid-spacers to match the perimeter cells
+                const spacer = document.createElement('div');
+                spacer.style.width = '100%';
+                spacer.style.height = '100%';
+                spacer.style.pointerEvents = 'none';
+                container.appendChild(spacer);
+            } else {
+                const i = r * State.size + c;
+                const cellData = State.board[i];
 
-        if (cellData.given) tile.classList.add('given');
-        else if (cellData.val !== 0) tile.classList.add('user');
+                const tile = document.createElement('div');
+                tile.className = 'torus-tile';
+                tile.id = `torus-tile-${i}`;
+                
+                // Force Relative Positioning to slot perfectly into the CSS Grid!
+                tile.style.position = 'relative';
+                tile.style.width = '100%';
+                tile.style.height = '100%';
+                tile.style.top = '0';
+                tile.style.left = '0';
 
-        if (cellData.val !== 0) {
-            tile.innerText = cellData.val;
-            if (showErrors && hasConflict(State.board, i, cellData.val)) {
-                tile.classList.add('error');
+                // --- DYNAMIC CSS GRID BORDERS ---
+                tile.style.borderRight = `1px solid ${thinGridLine}`; 
+                tile.style.borderBottom = `1px solid ${thinGridLine}`; 
+                tile.style.borderTop = 'none';
+                tile.style.borderLeft = 'none';
+                
+                const currentRegion = State.board[i].region;
+
+                if (r === 0) tile.style.borderTop = `3px solid ${thickGridLine}`;
+                if (c === 0) tile.style.borderLeft = `3px solid ${thickGridLine}`;
+                
+                if (c < State.size - 1) {
+                    const rightNeighborRegion = State.board[i + 1].region;
+                    if (currentRegion !== rightNeighborRegion) tile.style.borderRight = `3px solid ${thickGridLine}`; 
+                } else {
+                    tile.style.borderRight = `3px solid ${thickGridLine}`; 
+                }
+
+                if (r < State.size - 1) {
+                    const bottomNeighborRegion = State.board[i + State.size].region;
+                    if (currentRegion !== bottomNeighborRegion) tile.style.borderBottom = `3px solid ${thickGridLine}`; 
+                } else {
+                    tile.style.borderBottom = `3px solid ${thickGridLine}`; 
+                }
+                // --------------------------------
+
+                if (cellData.given) tile.classList.add('given');
+                else if (cellData.val !== 0) tile.classList.add('user');
+
+                if (cellData.val !== 0) {
+                    tile.innerText = cellData.val;
+                    if (showErrors && hasConflict(State.board, i, cellData.val)) {
+                        tile.classList.add('error');
+                    }
+                }
+
+                // Restore Tile Selection Highlights
+                let tint = "transparent";
+                if (State.selected.includes(i)) {
+                    tint = State.darkMode ? "rgba(56, 189, 248, 0.5)" : "rgba(52, 152, 219, 0.4)"; 
+                    const selBorder = State.darkMode ? "#74b9ff" : "#3498db";
+                    tile.style.boxShadow = `inset 0 0 0 2px ${selBorder}`;
+                }
+                
+                if (cellData.color) {
+                    const base = cellData.color;
+                    tile.style.background = `linear-gradient(${tint}, ${tint}), ${base}`;
+                } else {
+                    tile.style.background = `linear-gradient(${tint}, ${tint}), var(--card-bg)`;
+                }
+
+                if (State.lockedMap && State.lockedMap[i]) {
+                    tile.style.boxShadow = `inset 0 0 0 3px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(0,0,0,0.5)`;
+                    tile.innerHTML += `<div style="position: absolute; top: 2px; right: 4px; font-size: 10px; opacity: 0.5; pointer-events: none;">🔒</div>`;
+                }
+
+                tile.addEventListener('pointerdown', (e) => {
+                    if (State.paused || State.isWon) return;
+                    e.target.releasePointerCapture(e.pointerId); 
+                    if (typeof window.handleCellSelection === 'function') {
+                        window.handleCellSelection(i, e.ctrlKey || e.metaKey, false);
+                    }
+                });
+
+                tile.addEventListener('pointerenter', (e) => {
+                    if (State.paused || State.isWon) return;
+                    if (e.buttons === 1 && typeof window.handleCellSelection === 'function') { 
+                        window.handleCellSelection(i, true, true); 
+                    }
+                });
+
+                tile.addEventListener('contextmenu', (e) => e.preventDefault());
+
+                container.appendChild(tile);
             }
         }
-
-        // Restore Tile Selection Highlights
-        let tint = "transparent";
-        if (State.selected.includes(i)) {
-            tint = State.darkMode ? "rgba(56, 189, 248, 0.5)" : "rgba(52, 152, 219, 0.4)"; 
-            const selBorder = State.darkMode ? "#74b9ff" : "#3498db";
-            tile.style.boxShadow = `inset 0 0 0 2px ${selBorder}`;
-        }
-        
-        if (cellData.color) {
-            const base = cellData.color;
-            tile.style.background = `linear-gradient(${tint}, ${tint}), ${base}`;
-        } else {
-            tile.style.background = `linear-gradient(${tint}, ${tint}), var(--card-bg)`;
-        }
-
-        if (State.lockedMap && State.lockedMap[i]) {
-            tile.style.boxShadow = `inset 0 0 0 3px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(0,0,0,0.5)`;
-            tile.innerHTML += `<div style="position: absolute; top: 2px; right: 4px; font-size: 10px; opacity: 0.5; pointer-events: none;">🔒</div>`;
-        }
-
-        tile.addEventListener('pointerdown', (e) => {
-            if (State.paused || State.isWon) return;
-            e.target.releasePointerCapture(e.pointerId); 
-            if (typeof window.handleCellSelection === 'function') {
-                window.handleCellSelection(i, e.ctrlKey || e.metaKey, false);
-            }
-        });
-
-        tile.addEventListener('pointerenter', (e) => {
-            if (State.paused || State.isWon) return;
-            if (e.buttons === 1 && typeof window.handleCellSelection === 'function') { 
-                window.handleCellSelection(i, true, true); 
-            }
-        });
-
-        tile.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        container.appendChild(tile);
     }
 };
 
@@ -120,19 +161,29 @@ const getDragElements = (axis, index) => {
     return els;
 };
 
-// Creates a visual clone of a tile to wrap around the edges
 const createGhost = (originalEl, axis, direction, cs) => {
     const ghost = originalEl.cloneNode(true);
     ghost.id = ''; 
     ghost.style.zIndex = '15'; 
     
-    const currentLeft = parseFloat(originalEl.style.left);
-    const currentTop = parseFloat(originalEl.style.top);
+    // CRITICAL: Ghosts must be absolute to animate over the grid edges
+    ghost.style.position = 'absolute';
+    ghost.style.width = `${originalEl.offsetWidth}px`;
+    ghost.style.height = `${originalEl.offsetHeight}px`;
+    
+    // Anchor them precisely to the rendered tracking positions
+    const currentLeft = originalEl.offsetLeft;
+    const currentTop = originalEl.offsetTop;
+    
+    // Force the ghost to jump by exact rendered width/height arrays
+    const jumpSize = originalEl.offsetWidth * State.size;
     
     if (axis === 'row') {
-        ghost.style.left = direction === 1 ? `${currentLeft - (State.size * cs)}px` : `${currentLeft + (State.size * cs)}px`;
+        ghost.style.left = direction === 1 ? `${currentLeft - jumpSize}px` : `${currentLeft + jumpSize}px`;
+        ghost.style.top = `${currentTop}px`;
     } else {
-        ghost.style.top = direction === 1 ? `${currentTop - (State.size * cs)}px` : `${currentTop + (State.size * cs)}px`;
+        ghost.style.top = direction === 1 ? `${currentTop - jumpSize}px` : `${currentTop + jumpSize}px`;
+        ghost.style.left = `${currentLeft}px`;
     }
     
     document.getElementById('torus-grid').appendChild(ghost);
@@ -141,10 +192,7 @@ const createGhost = (originalEl, axis, direction, cs) => {
 
 document.addEventListener('pointerdown', (e) => {
     if (!State.shiftMode || State.paused || State.isWon) return;
-    
-    // --- THE FIX: DISABLE SLIDING IN CREATE MODE ---
     if (State.mode === 'create') return;
-    // ----------------------------------------------
     
     const target = e.target.closest('.torus-tile');
     if (!target) return;
@@ -169,7 +217,6 @@ document.addEventListener('pointermove', (e) => {
     const deltaX = e.clientX - drag.startX;
     const deltaY = e.clientY - drag.startY;
 
-    // 1. Lock into an Axis
     if (!drag.axis) {
         if (Math.abs(deltaX) > 10) {
             drag.axis = 'row'; drag.elements = getDragElements('row', drag.r);
@@ -177,7 +224,6 @@ document.addEventListener('pointermove', (e) => {
             drag.axis = 'col'; drag.elements = getDragElements('col', drag.c);
         } else return; 
 
-        // Abort if locked
         let isLocked = false;
         for (let i = 0; i < State.size; i++) {
             if (drag.axis === 'row' && State.lockedMap[drag.r * State.size + i]) isLocked = true;
@@ -191,13 +237,11 @@ document.addEventListener('pointermove', (e) => {
     const cs = drag.cellSize;
     const threshold = cs; 
 
-    // 2. Generate Ghosts on the fly
     if (drag.ghosts.length === 0) {
         const dir = (drag.axis === 'row' ? deltaX : deltaY) > 0 ? 1 : -1;
         drag.elements.forEach(el => drag.ghosts.push(createGhost(el, drag.axis, dir, cs)));
     }
 
-    // 3. Move Elements & Ghosts
     if (drag.axis === 'row') {
         drag.elements.forEach(el => el.style.transform = `translateX(${deltaX}px)`);
         drag.ghosts.forEach(el => el.style.transform = `translateX(${deltaX}px)`);
@@ -235,7 +279,6 @@ document.addEventListener('pointermove', (e) => {
     }
 }, { passive: true });
 
-// 4. Spring Back Physics
 const endDrag = () => {
     const drag = window.TorusState;
     if (drag.dragActive && drag.elements) {
