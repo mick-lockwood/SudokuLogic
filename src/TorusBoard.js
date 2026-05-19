@@ -38,6 +38,7 @@ export const renderTorusBoard = () => {
     
     const show = State.showOuterClues;
     container.style.gridTemplateColumns = `repeat(${show ? State.size + 2 : State.size}, var(--cell-size))`;
+    container.style.gridTemplateRows = `repeat(${show ? State.size + 2 : State.size}, var(--cell-size))`;
 
     const thinGridLine = State.darkMode ? "#475569" : "#1e293b"; 
     const thickGridLine = State.darkMode ? "#ffffff" : "#1e293b";
